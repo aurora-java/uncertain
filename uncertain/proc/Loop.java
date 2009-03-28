@@ -55,9 +55,13 @@ public class Loop extends Procedure {
      * @see uncertain.proc.Procedure#run(uncertain.proc.ProcedureRunner)
      */
     public void run(ProcedureRunner runner) throws Exception {
-        if(source==null) throw new ConfigurationError("loop: 'source' property must be set");
+        //if(source==null) throw new ConfigurationError("loop: 'source' property must be set");
         CompositeMap context = runner.getContext();
-        Object obj = context.getObject(source);
+        Object obj = null;
+        if(source!=null)
+            obj=context.getObject(source);
+        else
+            obj=context.getChilds();
         if(obj==null){
             if(nullable)
                 return;
