@@ -9,19 +9,21 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import uncertain.composite.CharCaseProcessor;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeMapParser;
 import uncertain.datatype.DataTypeRegistry;
+import uncertain.logging.DefaultLogger;
+import uncertain.logging.ILogger;
+import uncertain.logging.ILoggerProvider;
 
 /**
  * The entry class to perform container/object mapping
  */
 public class OCManager implements IMappingHandle {
     
-    public static final String LOGGING_SPACE = "uncertain.ocm";
+    public static final String LOGGING_TOPIC = "uncertain.ocm";
     
     // Class name -> Class mapping
     HashMap				classMap;
@@ -37,7 +39,8 @@ public class OCManager implements IMappingHandle {
 	LinkedList			listener_list;
 	
 	// logger
-	Logger				logger;
+	ILogger				logger;
+	ILoggerProvider     mLoggerProvider;
     
     // DataTypeRegistry to get type information
     DataTypeRegistry        datatype_home;
@@ -61,7 +64,7 @@ public class OCManager implements IMappingHandle {
 	
 	
 	void createDefaultLogger(){
-	    logger = Logger.getLogger(LOGGING_SPACE);
+	    logger = new DefaultLogger(LOGGING_TOPIC);
 	    logger.setLevel(Level.WARNING);
 	    //logger.info("Logger created: "+LOGGING_SPACE);
 	}
@@ -79,7 +82,7 @@ public class OCManager implements IMappingHandle {
 	 */
 	public OCManager() {
         _init();
-		objectCreator  = new ObjectSpace();
+		objectCreator  = new ObjectRegistryImpl();
 	}
 	
 	public OCManager(IObjectCreator obj_creator)	{
@@ -318,13 +321,13 @@ public class OCManager implements IMappingHandle {
     /**
      * @return Returns the logger.
      */
-    public Logger getLogger() {
+    public ILogger getLogger() {
         return logger;
     }
     /**
      * @param logger The logger to set.
      */
-    public void setLogger(Logger logger) {
+    public void setLogger(ILogger logger) {
         this.logger = logger;
     }
     
@@ -332,8 +335,6 @@ public class OCManager implements IMappingHandle {
     public void handleException(String message, Throwable thr){
         Throwable t;
         for(t = thr; t.getCause()!=null; t=t.getCause());
-        //Throwable t = thr.getCause();
-        //if(t==null) t = thr;
         logger.log(Level.SEVERE, message, t);
     }
     
@@ -381,5 +382,20 @@ public class OCManager implements IMappingHandle {
      */
     public void setDataTypeHome(DataTypeRegistry datatype_home) {
         this.datatype_home = datatype_home;
+    }
+
+    /**
+     * @return the mLoggerProvider
+     */
+    public ILoggerProvider getLoggerProvider() {
+        return mLoggerProvider;
+    }
+
+    /**
+     * @param loggerProvider the mLoggerProvider to set
+     */
+    public void setLoggerProvider(ILoggerProvider loggerProvider) {
+        mLoggerProvider = loggerProvider;
+        logger = loggerProvider.getLogger(LOGGING_TOPIC) ;
     }
 }

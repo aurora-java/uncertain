@@ -16,7 +16,7 @@ import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
 import uncertain.ocm.ClassRegistry;
-import uncertain.ocm.ObjectSpace;
+import uncertain.ocm.IObjectRegistry;
 
 /**
  * Init uncertain engine from servlet config
@@ -44,9 +44,9 @@ public class ServletHelper {
 
 
         uncertainEngine = new UncertainEngine(new File(config_dir), config_file);
-        ObjectSpace os = uncertainEngine.getObjectSpace();
-        os.registerParameter(ServletConfig.class,config);
-        os.registerParameter(ServletContext.class,servletContext);
+        IObjectRegistry os = uncertainEngine.getObjectSpace();
+        os.registerInstance(ServletConfig.class,config);
+        os.registerInstance(ServletContext.class,servletContext);
          //os.registerParameter(HttpServlet.class, this);
          // os.registerParameter(application);
         CompositeLoader loader = uncertainEngine.getCompositeLoader();

@@ -3,14 +3,26 @@
  */
 package uncertain.logging;
 
-import java.util.Map;
+import java.util.logging.Level;
 
 public interface ILogger {
     
-    public void log( Map record );
+    public void log( String message );
     
-    public void fireLogEvent( String event_name, Object[] params );
+    public void log( String message, Object[] parameters );
     
-    public void logException( String msg, Throwable thr );
-
+    public void log( Level level, String message );
+    
+    public void log( Level level, String message, Throwable thrown );
+    
+    public void log( Level level, String message, Object[] parameters );
+    
+    public void info( String message );
+    
+    public void warning( String message );
+    
+    public void severe( String message );
+    
+    public void setLevel( Level level );
+    
 }
