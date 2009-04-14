@@ -12,6 +12,8 @@ import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
 import uncertain.event.Configuration;
 import uncertain.event.RuntimeContext;
+import uncertain.logging.DummyLogger;
+import uncertain.logging.ILogger;
 import uncertain.ocm.OCManager;
 
 /**
@@ -507,6 +509,11 @@ public class ProcedureRunner {
             }
         }        
     }
+    
+    public ILogger getLogger(){
+        ILogger logger = (ILogger)runtime_context.getInstanceOfType(ILogger.class);
+        return logger==null?DummyLogger.getInstance():logger;
+    }
 
     /**
      * @return the trace
@@ -514,7 +521,7 @@ public class ProcedureRunner {
     public boolean isTraceOn() {
         return trace;
     }
-
+    
     /**
      * @param trace the trace to set
      */

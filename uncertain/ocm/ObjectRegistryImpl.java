@@ -3,7 +3,6 @@
  */
 package uncertain.ocm;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,12 +11,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import uncertain.logging.ILogger;
+
 /** Create object by constructor reflection, using instances associated with specific class
  *  as parameter
  *  @author Zhou Fan
  * 
  */
-public class ObjectSpaceImpl implements IObjectCreator {
+public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
     
     public static final String LOGGING_SPACE = "uncertain.objectspace";
     
@@ -40,12 +41,12 @@ public class ObjectSpaceImpl implements IObjectCreator {
     Logger	logger;    
     
     
-    ObjectSpaceImpl	parent = null;
+    ObjectRegistryImpl	parent = null;
     
     /**
      * Default constructor
      */
-    public ObjectSpaceImpl() {
+    public ObjectRegistryImpl() {
         instance_map = new HashMap();
         constructor_map = new HashMap();
         parameter_map = new HashMap();
@@ -58,7 +59,7 @@ public class ObjectSpaceImpl implements IObjectCreator {
      * Creates new ObjectSpace using existing instance as parent 
      * @param p parent ObjectSpace
      */
-    public ObjectSpaceImpl(ObjectSpaceImpl p){
+    public ObjectRegistryImpl(ObjectRegistryImpl p){
         instance_map = new HashMap();
         constructor_map = new HashMap();
         parameter_map = new HashMap();
@@ -69,13 +70,13 @@ public class ObjectSpaceImpl implements IObjectCreator {
     /**
      * @return Returns the parent.
      */
-    public ObjectSpaceImpl getParent() {
+    public ObjectRegistryImpl getParent() {
         return parent;
     }
     /**
      * @param parent The parent ObjectSpace to set.
      */
-    public void setParent(ObjectSpaceImpl parent) {
+    public void setParent(ObjectRegistryImpl parent) {
         this.parent = parent;
         //this.constructor_list_map = parent.constructor_list_map;
     }
@@ -85,10 +86,10 @@ public class ObjectSpaceImpl implements IObjectCreator {
      * @param type class of instance to get
      * @return instance of that type, or null if not registered
      */
-    public Object getParameterOfType(Class type){
+    public Object getInstanceOfType(Class type){
         Object o = instance_map.get(type);
         if(o!=null) return o;
-        if(parent!=null) return parent.getParameterOfType(type);
+        if(parent!=null) return parent.getInstanceOfType(type);
         return null;
     }
     
@@ -97,7 +98,7 @@ public class ObjectSpaceImpl implements IObjectCreator {
      * @param type The type to associate with
      * @param instance of specified type
      */
-    public void registerParamOnce( Class type, Object instance){
+    public void registerInstanceOnce( Class type, Object instance){
         instance_map.put(type,instance);
     } 
 
@@ -107,17 +108,17 @@ public class ObjectSpaceImpl implements IObjectCreator {
      * @param type The type to associate with
      * @param instance of specified type
      */
-    public void registerParameter( Class type, Object instance){
-        registerParamOnce(type,instance);
+    public void registerInstance( Class type, Object instance){
+        registerInstanceOnce(type,instance);
         if(type.isInterface())   return;        
         // associate instance with all super type
         for( Class cls = type.getSuperclass(); cls !=null && !Object.class.equals(cls); cls = cls.getSuperclass()){
-            if(!instance_map.containsKey(cls)) registerParamOnce(cls,instance);
+            if(!instance_map.containsKey(cls)) registerInstanceOnce(cls,instance);
         }
         // associate instance with all implemented type
         Class[] interfaces = type.getInterfaces();
         for(int i=0; i<interfaces.length; i++){
-            if(!instance_map.containsKey(interfaces[i])) registerParamOnce(interfaces[i],instance);
+            if(!instance_map.containsKey(interfaces[i])) registerInstanceOnce(interfaces[i],instance);
         }
     }   
     
@@ -125,8 +126,8 @@ public class ObjectSpaceImpl implements IObjectCreator {
      * Equals to registerParameter(instance.getClass(), instance)
      * @param instance parameter instance to register
      */
-    public void registerParameter(Object instance){
-        registerParameter(instance.getClass(), instance);
+    public void registerInstance(Object instance){
+        registerInstance(instance.getClass(), instance);
     }
     
     ArrayList getConstructorList(Class type){
@@ -169,13 +170,40 @@ public class ObjectSpaceImpl implements IObjectCreator {
             Class[] types=c.getParameterTypes();
             boolean proper = true;
             for(int n=0; n<types.length; n++){
-                if(getParameterOfType(types[n])==null) 
+                if(getInstanceOfType(types[n])==null) 
                     proper = false;
             }
             if(proper) return c;
         }
         return null;
     }
+    
+    public void analysisConstructor( ILogger logger, Class type){
+            ArrayList cList = getConstructorList(type);
+            logger.log(type.getName()+" has "+cList.size()+" constructors");
+            int count=1;
+            for(int i=cList.size()-1; i>=0; i--, count++){
+                Constructor c = (Constructor)cList.get(i);
+                Class[] types=c.getParameterTypes();
+                logger.log("No."+count+" types:");
+                for(int types_count=0; types_count<types.length; types_count++)
+                    logger.log(types[types_count].getName());
+                boolean proper = true;
+                for(int n=0; n<types.length; n++){
+                    if(getInstanceOfType(types[n])==null){ 
+                        proper = false;
+                        logger.log("type "+types[n].getName()+" is missing, so discard");
+                    }else{
+                        logger.log(types[n].getName()+" -> "+getInstanceOfType(types[n]));
+                    }
+                }
+                if(proper) {
+                    logger.log("This constructor is OK:");
+                    return;
+                }
+            }
+            logger.log("Can't find proper constructor");
+        }        
     
     /**
      * Get a proper constructor for specified class
@@ -189,7 +217,7 @@ public class ObjectSpaceImpl implements IObjectCreator {
             if(c!=null) {
                 Class[] types = c.getParameterTypes();
                 Object[] params = new Object[types.length];
-                for(int i=0; i<types.length; i++) params[i] = getParameterOfType(types[i]);
+                for(int i=0; i<types.length; i++) params[i] = getInstanceOfType(types[i]);
                 constructor_map.put(type, c);
                 parameter_map.put(type,params);
                 logger.fine("Constructor for "+type+" set to "+c);

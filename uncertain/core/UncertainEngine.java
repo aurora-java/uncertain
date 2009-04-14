@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,12 +23,19 @@ import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeMapParser;
 import uncertain.event.Configuration;
-import uncertain.init.LoggingConfig;
+import uncertain.event.IContextListener;
+import uncertain.event.RuntimeContext;
+import uncertain.logging.DummyLogger;
+import uncertain.logging.LoggingConfig;
+import uncertain.logging.DefaultLogger;
+import uncertain.logging.ILogger;
+import uncertain.logging.ILoggerProvider;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.IChildContainerAcceptable;
 import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.OCManager;
-import uncertain.ocm.ObjectSpace;
+import uncertain.ocm.IObjectRegistry;
+import uncertain.ocm.ObjectRegistryImpl;
 import uncertain.proc.ParticipantRegistry;
 import uncertain.proc.Procedure;
 import uncertain.proc.ProcedureRunner;
@@ -42,28 +51,31 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public static final String UNCERTAIN_NAMESPACE = "http://engine.uncertain.org/defaultns";
     public static final String UNCERTAIN_LOGGING_SPACE = "uncertain.core";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
+    public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
     
-    CompositeMapParser		compositeParser;
-    CompositeLoader			compositeLoader;
-    OCManager				ocManager;
-    ObjectSpace				objectSpace;
-    ClassRegistry			classRegistry;
-    ParticipantRegistry		participantRegistry;
-    Configuration           config;
-    Logger					logger;
-    CompositeMap            globalContext;
+    CompositeMapParser		mCompositeParser;
+    CompositeLoader			mCompositeLoader = new CompositeLoader(".");
+    OCManager				mOcManager;
+    ObjectRegistryImpl		mObjectRegistry;
+    ClassRegistry			mClassRegistry;
+    ParticipantRegistry		mParticipantRegistry;
+    Configuration           mConfig;
+    CompositeMap            mGlobalContext;
     
-    
-    LinkedList				extra_config = new LinkedList();
-    File					config_dir;    
-    boolean                 is_running = true;
+    Set                     mContextListenerSet;
+    LinkedList				mExtraConfig = new LinkedList();
+    File					mConfigDir;    
+    boolean                 mIsRunning = true;
+
+    // Logging
+    ILogger                 mLogger;    
     
     /* ================== Constructors ======================================= */
     
     public UncertainEngine(InputStream config_stream) throws IOException {
-        compositeParser = OCManager.defaultParser();
+        mCompositeParser = OCManager.defaultParser();
         try{
-	        CompositeMap config = compositeParser.parseStream(config_stream);
+	        CompositeMap config = mCompositeParser.parseStream(config_stream);
 	        initialize(config);
         } catch(SAXException ex){
             throw new IOException(ex.getMessage());
@@ -93,7 +105,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
             CompositeMap config_map = OCManager.defaultParser().parseStream(fis);
             initialize(config_map);
         }catch(SAXException ex){
-            logger.log(Level.SEVERE,"Configuration file syntax error", ex);
+            handleException(ex);
         }        
         finally{
             if(fis!=null) fis.close();
@@ -103,96 +115,111 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     /* ================== Initialize methods ======================================= */    
     
-    void registerGlobalParameters(){
+    private void registerBuiltinInstances(){
         //objectSpace.registerParameter(compositeParser);
-        objectSpace.registerParameter(compositeLoader);
-        objectSpace.registerParameter(ocManager);
-        objectSpace.registerParameter(classRegistry);
-        objectSpace.registerParameter(participantRegistry);
-        //objectSpace.registerParameter(compositeParser);
-        objectSpace.registerParamOnce(UncertainEngine.class,this);
-        objectSpace.registerParameter(Logger.class, logger);
-        //System.out.println(objectSpace.getParameters());
+        mObjectRegistry.registerInstance(mCompositeLoader);
+        mObjectRegistry.registerInstance(mClassRegistry);
+        mObjectRegistry.registerInstance(mParticipantRegistry);
+        mObjectRegistry.registerInstance(mOcManager);           
+        mObjectRegistry.registerInstanceOnce(UncertainEngine.class,this);
+        mObjectRegistry.registerInstanceOnce(IObjectRegistry.class, mObjectRegistry);  
     }
     
-    void setDefaultClassRegistry(){
+    private void setDefaultClassRegistry(){
         
-        classRegistry.registerPackage("uncertain.proc");
-        classRegistry.registerPackage("uncertain.ocm");
-
-        classRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
-        classRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
-        classRegistry.registerClass("class-registry","uncertain.ocm","ClassRegistry");
-        classRegistry.registerClass("package-mapping","uncertain.ocm","PackageMapping");
-        classRegistry.registerClass("class-mapping","uncertain.ocm","ClassMapping");
-        classRegistry.registerClass("feature-attach","uncertain.ocm","FeatureAttach");
-        classRegistry.registerClass("logging-config", "uncertain.init", "LoggingConfig");
-        classRegistry.registerClass("extra-class-registry", "uncertain.init", "ExtraClassRegistry");
-        //classRegistry.attachFeature(null,"class-registry",ExtraClassRegistry.class);
+        mClassRegistry.registerPackage("uncertain.proc");
+        mClassRegistry.registerPackage("uncertain.ocm");
+        mClassRegistry.registerPackage("uncertain.logging");
+        
+        mClassRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
+        mClassRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
+        mClassRegistry.registerClass("class-registry","uncertain.ocm","ClassRegistry");
+        mClassRegistry.registerClass("package-mapping","uncertain.ocm","PackageMapping");
+        mClassRegistry.registerClass("class-mapping","uncertain.ocm","ClassMapping");
+        mClassRegistry.registerClass("feature-attach","uncertain.ocm","FeatureAttach");
+        mClassRegistry.registerClass("extra-class-registry", "uncertain.init", "ExtraClassRegistry");
+        
+        loadInternalRegistry(LoggingConfig.LOGGING_REGISTRY_PATH);
+    }
+    
+    private void loadInternalRegistry( String file_path ){
+        CompositeMap map = loadCompositeMap(file_path);
+        if(map==null) throw new IllegalStateException("Can't load internal resource "+file_path);
+        ClassRegistry reg = (ClassRegistry)mOcManager.createObject(map);
+        this.mClassRegistry.addAll(reg);
     }
     
     protected void bootstrap(){
-        // create bootstrap object instance
-        objectSpace = new ObjectSpace();
-        ocManager = new OCManager(objectSpace);  
-        // ocManager.addListener(new LoggingListener());
-        classRegistry = ocManager.getClassRegistry();
-        setDefaultClassRegistry();
-        participantRegistry = new ParticipantRegistry();    
-        globalContext = new CompositeMap("global");
-    }    
-    
-    void validateConfig(){
-        if(compositeLoader == null){
-            compositeLoader = new CompositeLoader(".");
-            //compositeLoader.setCacheEnabled(true);
-            //System.out.println("Cache enabled");
-        }
-        //compositeLoader.setSupportXInclude(true);
-        if(logger == null){
-            logger = Logger.getLogger(UNCERTAIN_LOGGING_SPACE);
-            //LoggingUtil.setHandleLevels(logger.getParent(), Level.WARNING);
-        }
-    }
-    
-    public void initialize(CompositeMap config){
-        // populate self from config
-        ocManager.populateObject(config,this);
-        validateConfig();
-        logger.info("Uncertain engine startup");
-        // inits CompositeLoader
-        compositeParser = CompositeMapParser.createInstance(
-                compositeLoader,
+        // create internal CompositeMapLoader 
+        mCompositeParser = CompositeMapParser.createInstance(
+                mCompositeLoader,
                 new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
         );
-        compositeLoader.setCompositeParser(compositeParser);
-        // register global parameters into ObjectSpace
-        registerGlobalParameters(); 
+        mCompositeLoader.setCompositeParser(mCompositeParser);
+
+        // create bootstrap object instance
+        mContextListenerSet = new HashSet();
+        mObjectRegistry = new ObjectRegistryImpl();
+        mOcManager = new OCManager(mObjectRegistry);  
+
+        mClassRegistry = mOcManager.getClassRegistry();
+        setDefaultClassRegistry();
+        mParticipantRegistry = new ParticipantRegistry();    
+        mGlobalContext = new CompositeMap("global");
+        registerBuiltinInstances(); 
+        // load internal registry
         
+        
+    } 
+
+    public void initialize(CompositeMap config){
+        // populate self from config
+        mOcManager.populateObject(config,this);
+        checkLogger();
+        mLogger.log("Uncertain engine startup");
         // perform configuration
-        doConfigure(extra_config);
+        doConfigure(mExtraConfig);
+        mIsRunning = true;
         
-        is_running = true;
     }
+    
+    /* ================== logging process ======================================= */
+    
+    protected void checkLogger(){
+        ILoggerProvider logger_provider = (ILoggerProvider)mObjectRegistry.getInstanceOfType(ILoggerProvider.class);
+        if(logger_provider!=null){
+            mLogger = logger_provider.getLogger(UNCERTAIN_LOGGING_TOPIC);
+            mOcManager.setLoggerProvider(logger_provider);
+        }
+        if(mLogger==null)
+            mLogger = new DefaultLogger(UNCERTAIN_LOGGING_TOPIC);        
+    }
+    
+    public void addLoggingConfig( LoggingConfig logging_config ){
+        logging_config.registerTo(mObjectRegistry);
+        mContextListenerSet.add(logging_config);
+    }
+    
+    public ILogger getLogger( String topic ){
+        ILoggerProvider provider = (ILoggerProvider)mObjectRegistry.getInstanceOfType(ILoggerProvider.class);
+        if(provider==null)
+            return DummyLogger.getInstance();
+        else
+            return provider.getLogger(topic);
+    }
+    
+    
     
     /* ================== Configuration components ============================ */
     
     public void addChild(CompositeMap child){
-        extra_config.add(child);
+        mExtraConfig.add(child);
     }
 
     void handleException(Throwable thr){
-        try{
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            PrintWriter pw = new PrintWriter(bos);
-            thr.printStackTrace(pw);
-            pw.close();
-            logger.severe(new String(bos.toByteArray()));
-            bos.close();
-        }catch(IOException ex){
-            
-        }
-    }    
+        mLogger.log(Level.SEVERE, thr.getMessage(), thr);
+    }
+    
     /**
      * 
      * UncertainEngine
@@ -201,40 +228,48 @@ public class UncertainEngine implements IChildContainerAcceptable {
      */
     public void doConfigure(Collection cfg){
         //if(config!=null) 
-        config = createConfig();
+        mConfig = createConfig();
         //logger.info("Attached:"+this.ocManager.getClassRegistry().getFeatures(new ElementIdentifier(null,"class-registry")));
-        config.loadConfigList(cfg);
-        if(config.getParticipantList().size()>0)
-            logger.info("Adding configuration participant "+config.getParticipantList());
+        mConfig.loadConfigList(cfg);
+        if(mConfig.getParticipantList().size()>0)
+            mLogger.log("Adding configuration participant "+mConfig.getParticipantList());
         // regsiter global instances
-        Iterator it = config.getParticipantList().iterator();
+        Iterator it = mConfig.getParticipantList().iterator();
         while(it.hasNext()){
             Object inst = it.next();
             if(inst instanceof IGlobalInstance) 
-                getObjectSpace().registerParameter(inst);
+                getObjectSpace().registerInstance(inst);
+            if(inst instanceof IContextListener)
+                addContextListener((IContextListener)inst);
         }
-        // run init procedure
+        // run  procedure
         Procedure proc = loadProcedure("uncertain.core.EngineInit");
         if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineInit.xml from class loader");
         ProcedureRunner runner = createProcedureRunner(proc);
-        runner.addConfiguration(config);
+        runner.addConfiguration(mConfig);
         runner.run();  
         Throwable thr = runner.getException();
         if(thr!=null){
-            logger.severe("An error happened during initialize process");
+            mLogger.log(Level.SEVERE, "An error happened during initialize process");
             handleException(thr);
         }
+        // update logger instance if new LoggerProvider generated
+        checkLogger();        
     }
     
     public void scanConfigFiles(){
-        if(config_dir!=null)
-            scanConfigFiles(config_dir, DEFAULT_CONFIG_FILE_PATTERN);
-        else
-            scanConfigFiles(new File(compositeLoader.getBaseDir()), DEFAULT_CONFIG_FILE_PATTERN);
+        if(mConfigDir!=null){
+            mLogger.log("Scanning config directory "+mConfigDir);
+            scanConfigFiles(mConfigDir, DEFAULT_CONFIG_FILE_PATTERN);
+        }
+        else{
+            mLogger.log("Scanning config directory "+mCompositeLoader.getBaseDir());
+            scanConfigFiles(new File(mCompositeLoader.getBaseDir()), DEFAULT_CONFIG_FILE_PATTERN);
+        }
     }
     
     public void scanConfigFiles(String pattern){
-        scanConfigFiles(config_dir, pattern);
+        scanConfigFiles(mConfigDir, pattern);
     }
     
     /**
@@ -250,12 +285,13 @@ public class UncertainEngine implements IChildContainerAcceptable {
             LinkedList cfg_list = new LinkedList();
             for(int i=cfg_files.length-1; i>=0; i--){
                 String file_path = cfg_files[i].getPath();
-                logger.info("Loading configuration file "+file_path);
+                mLogger.log("Loading configuration file "+file_path);
                 try{
-                    CompositeMap config_map = compositeLoader.loadByFullFilePath(file_path);
+                    CompositeMap config_map = mCompositeLoader.loadByFullFilePath(file_path);
                     cfg_list.add(config_map);
                 }catch(Throwable thr){
-                    logger.log(Level.SEVERE, "Can't load initialize config file "+file_path, thr);
+                    mLogger.log(Level.SEVERE, "Can't load initialize config file "+file_path);
+                    handleException(thr);
                 }
             }
             if(cfg_list.size()>0)
@@ -266,12 +302,12 @@ public class UncertainEngine implements IChildContainerAcceptable {
     /* ================== factory methods ======================================= */
   
     public Configuration createConfig(){
-        Configuration conf = new Configuration(participantRegistry, ocManager);
+        Configuration conf = new Configuration(mParticipantRegistry, mOcManager);
         return conf;
     }
     
     public Configuration createConfig(CompositeMap cfg){
-        Configuration conf = new Configuration(participantRegistry, ocManager);
+        Configuration conf = new Configuration(mParticipantRegistry, mOcManager);
         conf.loadConfig(cfg);
         return conf;
     }
@@ -280,7 +316,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     {
         try{
 
-	        CompositeMap m = compositeLoader.loadFromClassPath(class_path, false);
+	        CompositeMap m = mCompositeLoader.loadFromClassPath(class_path, false);
 	        return m;
         }catch(Exception ex){
             throw new RuntimeException("Can't load CompositeMap from path "+class_path, ex);
@@ -307,12 +343,13 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public Procedure loadProcedure(String class_path){
         CompositeMap m = loadCompositeMap(class_path);
         if(m==null) return null;
-        Procedure proc = (Procedure)ocManager.createObject(m);
+        Procedure proc = (Procedure)mOcManager.createObject(m);
         return proc;
     }
 
     public ProcedureRunner createProcedureRunner(){
         ProcedureRunner runner = new ProcedureRunner();
+        //initContext(runner.getContext());
         runner.setUncertainEngine(this);
         return runner;        
     }
@@ -321,13 +358,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         if(proc==null) return null;
         ProcedureRunner runner = createProcedureRunner();
         runner.setProcedure(proc);
-        return runner;
-        /*
-        ProcedureRunner runner = new ProcedureRunner(proc);
-        HandleManager handleManager = new HandleManager(participantRegistry);
-        runner.setHandleManager(handleManager);
-        return runner;
-        */
+        return runner;       
     }
     
     public ProcedureRunner createProcedureRunner(String proc_path){
@@ -344,42 +375,47 @@ public class UncertainEngine implements IChildContainerAcceptable {
         else throw new IllegalArgumentException("Can't load " + config_path);
         return runner;
     }
+    
+    public void initContext( CompositeMap context ){
+        //mLogger.log(mContextListenerSet.size()+" listeners");
+        for(Iterator it = mContextListenerSet.iterator(); it.hasNext(); ){
+            IContextListener listener = (IContextListener)it.next();
+            //mLogger.log("invoking init on "+listener);
+            listener.onContextCreate(RuntimeContext.getInstance(context));
+        }
+    }
+    
+    public void destroyContext( CompositeMap context ){
+        for(Iterator it = mContextListenerSet.iterator(); it.hasNext(); ){
+            IContextListener listener = (IContextListener)it.next();
+            listener.onContextDestroy(RuntimeContext.getInstance(context));
+        }        
+    }
 
     /* ================== get/set methods ======================================= */
 
-    /**
-     * Set a java.util.logging.Logger instance for logging
-     */
-    public void setLogger(Logger l){
-        logger = l;
-    }
-    
     public void setConfigDirectory(File dir){
-        config_dir = dir;
+        mConfigDir = dir;
     }
     
     public void addClassRegistry(ClassRegistry reg){
-        classRegistry.addAll(reg);
+        mClassRegistry.addAll(reg);
     }
     
     public void addClassRegistry(ClassRegistry reg, boolean override){
-        classRegistry.addAll(reg, override);
+        mClassRegistry.addAll(reg, override);
     }
     
     public void addDocumentLoader(CompositeLoader loader){
-        if(compositeLoader==null) compositeLoader = loader;
-        else compositeLoader.addExtraLoader(loader);
-    }
-    
-    public void addLoggingConfig(LoggingConfig lc){
-        setLogger(lc.getLogger());
+        if(mCompositeLoader==null) mCompositeLoader = loader;
+        else mCompositeLoader.addExtraLoader(loader);
     }
     
     /**
      * @return Returns the classRegistry.
      */
     public ClassRegistry getClassRegistry() {
-        return classRegistry;
+        return mClassRegistry;
     }
     /**
      * @param classRegistry The classRegistry to set.
@@ -393,89 +429,95 @@ public class UncertainEngine implements IChildContainerAcceptable {
      * @return Returns the compositeLoader.
      */
     public CompositeLoader getCompositeLoader() {
-        return compositeLoader;
+        return mCompositeLoader;
     }
 
     /**
      * @return Returns the compositeParser.
      */
     public CompositeMapParser getCompositeParser() {
-        return compositeParser;
+        return mCompositeParser;
     }
     /**
      * @param compositeParser The compositeParser to set.
      */
     public void setCompositeParser(CompositeMapParser compositeParser) {
-        this.compositeParser = compositeParser;
+        this.mCompositeParser = compositeParser;
     }
     /**
      * @return Returns the ocManager.
      */
     public OCManager getOcManager() {
-        return ocManager;
+        return mOcManager;
     }
     
     public IObjectCreator getObjectCreator(){
-        return objectSpace;
+        return mObjectRegistry;
     }
 
-    public ObjectSpace getObjectSpace(){
-        return objectSpace;
+    public IObjectRegistry getObjectSpace(){
+        return mObjectRegistry;
     }    
 
     /**
      * @param ocManager The ocManager to set.
      */
     public void setOcManager(OCManager ocManager) {
-        this.ocManager = ocManager;
+        this.mOcManager = ocManager;
     }
     /**
      * @return Returns the participantRegistry.
      */
     public ParticipantRegistry getParticipantRegistry() {
-        return participantRegistry;
+        return mParticipantRegistry;
     }
     /**
      * @param participantRegistry The participantRegistry to set.
      */
     public void setParticipantRegistry(ParticipantRegistry participantRegistry) {
-        this.participantRegistry = participantRegistry;
+        this.mParticipantRegistry = participantRegistry;
     }
-    /**
-     * @param objectSpace The objectSpace to set.
-     */
-    public void setObjectSpace(ObjectSpace objectSpace) {
-        this.objectSpace = objectSpace;
-    }    
 
+/*    
+    public void setObjectSpace(ObjectSpace objectSpace) {
+        this.mObjectSpace = objectSpace;
+    }    
+*/
     public CompositeMap getGlobalContext(){
-        return globalContext;
+        return mGlobalContext;
     }
 
     /**
      * @return Returns the logger.
      */
     public Logger getLogger() {
-        return logger;
+        if(mLogger instanceof DefaultLogger)
+            return ((DefaultLogger)mLogger);
+        else
+            return Logger.getAnonymousLogger();
     }
     /**
      * @return Returns the config_dir.
      */
     public File getConfigDirectory() {
-        return config_dir;
+        return mConfigDir;
     }
     
     public boolean isRunning(){
-        return is_running;
+        return mIsRunning;
+    }
+    
+    public void addContextListener( IContextListener listener ){
+        mContextListenerSet.add(listener);
     }
     
     public void shutdown(){
-        is_running = false;
-        logger.info("Uncertain engine shutdown");        
+        mIsRunning = false;
+        mLogger.log("Uncertain engine shutdown");        
         Procedure proc = loadProcedure("uncertain.core.EngineShutdown");
         if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineShutdown.xml from class loader");
         ProcedureRunner runner = createProcedureRunner(proc);
-        runner.addConfiguration(config);
+        runner.addConfiguration(mConfig);
         runner.run(); 
     }
 }

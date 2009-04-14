@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uncertain.event.Configuration;
-import uncertain.ocm.ObjectSpace;
+import uncertain.ocm.IObjectRegistry;
 
 /**
  * Holds and manages server components
@@ -23,11 +23,11 @@ public class ServerComponentManager {
     HashMap             component_map = new HashMap();
     LinkedList          component_list = new LinkedList();
     UncertainEngine     uncertainEngine;
-    ObjectSpace         objectSpace;
+    IObjectRegistry         objectSpace;
     
     public ServerComponentManager(UncertainEngine     uncertainEngine){
         this.uncertainEngine = uncertainEngine;
-        this.objectSpace = uncertainEngine.objectSpace;
+        this.objectSpace = uncertainEngine.getObjectSpace();
     }
     
     public ServerComponent getComponent( String name ){
@@ -49,7 +49,7 @@ public class ServerComponentManager {
         while(it.hasNext()){
             Object inst = it.next();
             if(inst instanceof IGlobalInstance) 
-                objectSpace.registerParameter(inst);
+                objectSpace.registerInstance(inst);
         }
         
     }

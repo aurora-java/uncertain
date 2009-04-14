@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.logging.Logger;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeUtil;
 import uncertain.composite.IterationHandle;
+import uncertain.logging.ILogger;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.proc.IEventHandle;
@@ -105,14 +105,14 @@ public class Configuration  implements Cloneable
      * @param obj
      */
     public void addParticipant(Object obj){
-        Logger logger = ocManager.getLogger();
+        ILogger logger = ocManager.getLogger();
         if(obj!=null){
             Class cls = obj.getClass();
 	        if(registry.isParticipant(cls)||obj instanceof IEventListener){
 	            if(listener!=null)
 	                if(!listener.addParticipant(obj)) return;
 	            participant_list.add(obj);
-	            logger.info("Added participant instance "+cls.getName());
+	            logger.log("Added participant instance "+cls.getName());
 	        }else{
 	            // logger.warning("Instance of "+cls.getName()+" created, but no handle method found");
                 // still add instance even if it has no handle method
@@ -135,7 +135,7 @@ public class Configuration  implements Cloneable
             instance_map.put(new Integer(CompositeUtil.uniqueHashCode(container)), obj);
         }
         else
-            ocManager.getLogger().info("Can't create instance from "+container.toXML());
+            ocManager.getLogger().log("Can't create instance from "+container.toXML());
         return obj;
     }
     
