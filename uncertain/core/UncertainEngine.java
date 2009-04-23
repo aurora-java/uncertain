@@ -2,17 +2,17 @@
  * Created on 2005-7-24
  */
 package uncertain.core;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,16 +25,18 @@ import uncertain.composite.CompositeMapParser;
 import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
-import uncertain.logging.DummyLogger;
-import uncertain.logging.LoggingConfig;
+import uncertain.logging.ConfigurableLoggerProvider;
 import uncertain.logging.DefaultLogger;
+import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
+import uncertain.logging.LoggingConfig;
+import uncertain.logging.LoggingTopic;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.IChildContainerAcceptable;
 import uncertain.ocm.IObjectCreator;
-import uncertain.ocm.OCManager;
 import uncertain.ocm.IObjectRegistry;
+import uncertain.ocm.OCManager;
 import uncertain.ocm.ObjectRegistryImpl;
 import uncertain.proc.ParticipantRegistry;
 import uncertain.proc.Procedure;
@@ -51,7 +53,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public static final String UNCERTAIN_NAMESPACE = "http://engine.uncertain.org/defaultns";
     public static final String UNCERTAIN_LOGGING_SPACE = "uncertain.core";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
+    
     public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
+    public static final String UNCERTAIN_ERROR_TOPIC = "error";
     
     CompositeMapParser		mCompositeParser;
     CompositeLoader			mCompositeLoader = new CompositeLoader(".");
@@ -69,6 +73,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
 
     // Logging
     ILogger                 mLogger;    
+    ILogger                 mErrorLogger;
     
     /* ================== Constructors ======================================= */
     
@@ -105,7 +110,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
             CompositeMap config_map = OCManager.defaultParser().parseStream(fis);
             initialize(config_map);
         }catch(SAXException ex){
-            handleException(ex);
+            logException("Error when reading configuration file "+config_file_name,ex);
         }        
         finally{
             if(fis!=null) fis.close();
@@ -168,8 +173,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mGlobalContext = new CompositeMap("global");
         registerBuiltinInstances(); 
         // load internal registry
-        
-        
     } 
 
     public void initialize(CompositeMap config){
@@ -185,14 +188,33 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     /* ================== logging process ======================================= */
     
+    protected ILoggerProvider createDefaultLoggerProvider(){
+        ConfigurableLoggerProvider clp = new ConfigurableLoggerProvider();
+        clp.addTopics( new LoggingTopic[]{
+                new LoggingTopic(UNCERTAIN_LOGGING_TOPIC, Level.INFO),
+                new LoggingTopic(OCManager.LOGGING_TOPIC, Level.WARNING)
+        });
+        clp.addHandles( new Handler[]{
+                new ConsoleHandler()
+        });
+        return clp;
+    }
+    
     protected void checkLogger(){
         ILoggerProvider logger_provider = (ILoggerProvider)mObjectRegistry.getInstanceOfType(ILoggerProvider.class);
-        if(logger_provider!=null){
-            mLogger = logger_provider.getLogger(UNCERTAIN_LOGGING_TOPIC);
+        if(logger_provider==null){
+            logger_provider = createDefaultLoggerProvider();
+            mObjectRegistry.registerInstance(ILoggerProvider.class, logger_provider);
             mOcManager.setLoggerProvider(logger_provider);
         }
-        if(mLogger==null)
-            mLogger = new DefaultLogger(UNCERTAIN_LOGGING_TOPIC);        
+        mLogger = logger_provider.getLogger(UNCERTAIN_LOGGING_TOPIC);
+        if(mErrorLogger==null)
+            mErrorLogger = logger_provider.getLogger(UNCERTAIN_ERROR_TOPIC);
+        if(mErrorLogger==DummyLogger.getInstance()){
+            DefaultLogger l =new DefaultLogger("error");
+            l.addHandler( new ConsoleHandler());
+            mErrorLogger = l;
+        }
     }
     
     public void addLoggingConfig( LoggingConfig logging_config ){
@@ -216,9 +238,11 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mExtraConfig.add(child);
     }
 
-    void handleException(Throwable thr){
-        mLogger.log(Level.SEVERE, thr.getMessage(), thr);
+    public void logException(String message, Throwable thr){
+        mErrorLogger.log(Level.SEVERE, message, thr);
+        //mLogger.log(Level.SEVERE, thr.getMessage(), thr);
     }
+
     
     /**
      * 
@@ -251,7 +275,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         Throwable thr = runner.getException();
         if(thr!=null){
             mLogger.log(Level.SEVERE, "An error happened during initialize process");
-            handleException(thr);
+            logException("Error when running procedure", thr);
         }
         // update logger instance if new LoggerProvider generated
         checkLogger();        
@@ -291,7 +315,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
                     cfg_list.add(config_map);
                 }catch(Throwable thr){
                     mLogger.log(Level.SEVERE, "Can't load initialize config file "+file_path);
-                    handleException(thr);
+                    logException("Error when loading configuration file "+file_path, thr);
                 }
             }
             if(cfg_list.size()>0)
