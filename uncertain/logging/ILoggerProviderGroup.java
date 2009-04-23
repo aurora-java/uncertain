@@ -4,8 +4,12 @@
  */
 package uncertain.logging;
 
+import java.util.Collection;
+
 public interface ILoggerProviderGroup {
     
     public void addLoggerProvider( ILoggerProvider another );
+    
+    public Collection getLoggerProviders();
 
 }

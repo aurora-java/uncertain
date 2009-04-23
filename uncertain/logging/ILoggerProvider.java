@@ -6,5 +6,7 @@ package uncertain.logging;
 public interface ILoggerProvider {
     
     public ILogger getLogger( String topic );
+    
+    //public String getName();
 
 }

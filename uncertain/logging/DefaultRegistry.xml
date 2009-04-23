@@ -2,6 +2,7 @@
 	<class-mapping elementName="logging-config" className="uncertain.logging.LoggingConfig" />
 	<class-mapping elementName="logger-provider" className="uncertain.logging.ConfigurableLoggerProvider" />	
 	<class-mapping elementName="logging-topic" className="uncertain.logging.LoggingTopic" />
-	<class-mapping elementName="jdk-file-handle" className="uncertain.logging.ConfigurableFileHandler" />
-	<class-mapping elementName="log-console-handle" className="java.util.logging.ConsoleHandler" />
+	<class-mapping elementName="jdk-file-handler" className="uncertain.logging.JDKFileHandler" />
+	<class-mapping elementName="log-console-handler" className="java.util.logging.ConsoleHandler" />
+	<class-mapping elementName="log-file-handler" className="uncertain.logging.BasicFileHandler" />
 </class-registry>

@@ -17,7 +17,7 @@ import java.util.logging.SimpleFormatter;
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IConfigurable;
 
-public class ConfigurableFileHandler extends Handler implements IConfigurable {
+public class JDKFileHandler extends Handler implements IConfigurable {
 
     String      pattern = null;
     
@@ -29,7 +29,7 @@ public class ConfigurableFileHandler extends Handler implements IConfigurable {
 
     FileHandler mFileHandler;
 
-    public ConfigurableFileHandler() {
+    public JDKFileHandler() {
 
     }
 
