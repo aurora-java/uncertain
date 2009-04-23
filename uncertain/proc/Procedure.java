@@ -9,9 +9,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.logging.Level;
 
 import uncertain.composite.CompositeMap;
+import uncertain.logging.ILogger;
 import uncertain.ocm.OCManager;
 
 /**
@@ -81,7 +82,8 @@ public class Procedure extends EntryList {
     }
     
     public void run(ProcedureRunner runner) throws Exception {
-         //clearFields(runner.getContext());
+         ILogger logger = runner.getLogger();
+         logger.log(Level.CONFIG, "Enter procedure " + getName());
          populateContextFields(runner);
          if(exception_handles!=null) 
              runner.addExceptionHandles(exception_handles);

@@ -23,6 +23,8 @@ import uncertain.ocm.OCManager;
  */
 public class ProcedureRunner {
     
+    public static final String LOGGING_TOPIC = "uncertain.proc";    
+    
     CompositeMap		context;
     Procedure			procedure;
     ProcedureRunner		caller;
@@ -42,10 +44,6 @@ public class ProcedureRunner {
     /** flag to designate continue running after an exception caught */
     boolean             resume_after_exception = false;
     
-    /** is trace turned on */
-    boolean             trace = false;
-    
-    
     /** current iterator on EntryList */
     ListIterator		current_iterator;
     
@@ -61,6 +59,8 @@ public class ProcedureRunner {
     
     /** exception thrown during running process */
     Throwable			procException;
+    
+    ILogger             mLogger;
     
     public ProcedureRunner(){
         setContext(new CompositeMap("runtime-context"));
@@ -371,6 +371,7 @@ public class ProcedureRunner {
         //child.config_map = config_map;
         // child.config = config;
         child.uncertainEngine = uncertainEngine;
+        child.mLogger = mLogger;
         child.reset();
         return child;
     }
@@ -511,47 +512,17 @@ public class ProcedureRunner {
     }
     
     public ILogger getLogger(){
+        if(mLogger!=null) return mLogger;
         ILogger logger = (ILogger)runtime_context.getInstanceOfType(ILogger.class);
         return logger==null?DummyLogger.getInstance():logger;
     }
+    
+    public void setLogger( ILogger logger ){
+        this.mLogger = logger;
+    }
 
-    /**
-     * @return the trace
-     */
-    public boolean isTraceOn() {
-        return trace;
-    }
-    
-    /**
-     * @param trace the trace to set
-     */
-    public void setTrace(boolean trace) {
-        this.trace = trace;
-    }
-    
     public Throwable getLatestException(){
         return lastException;
     }
-    
-    /*
-    void populateContextFields(ProcedureRunner runner) throws Exception { 
-        List inputs = getInputFieldList();
-        if(inputs==null) return;
-        if(oc_manager==null) return;
-        Collection participants = runner.getHandleManager().getParticipants();
-        if(participants==null) return;
-        Iterator it = inputs.iterator();
-        CompositeMap    context = runner.getContext();
-        while(it.hasNext()){
-            Field field = (Field)it.next();
-            String name = field.getName().toLowerCase();
-            Object value = context.getObject(field.getPath());
-            if(value==null) continue;
-            for(Iterator pit = participants.iterator(); pit.hasNext();){
-                Object participant = pit.next();
-                oc_manager.setAttribute(participant, name, value);
-            }
-        }
-    }    
-    */
+
 }
