@@ -17,6 +17,10 @@ public class LoggingContext extends RuntimeContext {
         return getLoggerProvider(context).getLogger(topic);
     }
     
+    public static ILogger getErrorLogger( CompositeMap context ){
+        return getLogger(context, "error");
+    }
+    
     public static LoggingContext getLoggingContext( CompositeMap m ){
         LoggingContext lc = new LoggingContext();
         lc.initialize(m);

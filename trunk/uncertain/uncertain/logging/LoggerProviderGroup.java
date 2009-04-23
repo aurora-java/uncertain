@@ -3,13 +3,15 @@
  */
 package uncertain.logging;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class LoggerProviderGroup implements ILoggerProvider, ILoggerProviderGroup {
     
-    Set    mProviderSet;
+    Set         mProviderSet;
+    String      mName;
     
     public LoggerProviderGroup(){
         mProviderSet = new HashSet();
@@ -39,5 +41,19 @@ public class LoggerProviderGroup implements ILoggerProvider, ILoggerProviderGrou
                 return logger_group;
         }
     }
-
+    
+    public Collection getLoggerProviders(){
+        return mProviderSet;
+    }
+/*    
+    String      mName;
+     
+    public String getName(){
+        return mName;
+    }
+    
+    public void setName( String name ){
+        mName = name;
+    }
+*/
 }

@@ -84,5 +84,19 @@ public class LoggingConfig implements ILoggerProvider, IContextListener {
     public Collection getLoggerProviders(){
         return Collections.unmodifiableCollection(mLoggerProviderGroup.mProviderSet); 
     }
+    
+    /*
+    String                      mName;    
+      
+     
+    public String getName(){
+        return mName;
+    }
+    
+    public void setName( String name ){
+        mName = name;
+    } 
+    
+       */
 
 }

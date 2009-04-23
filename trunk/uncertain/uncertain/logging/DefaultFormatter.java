@@ -14,7 +14,7 @@ import java.util.Date;
 public class DefaultFormatter extends Formatter {
     
     static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    static final String DEFAULT_MESSAGE_FORMAT = "{0,date} {0,time} {1} [{2}] {3}"; 
+    static final String DEFAULT_MESSAGE_FORMAT = "{0,date,yyyy-MM-dd} {0,time,HH:mm:ss.S} {1} [{2}] {3}"; 
     String              mFormatMask = DEFAULT_MESSAGE_FORMAT;
     MessageFormat       mMessageFormat;
 
@@ -33,9 +33,11 @@ public class DefaultFormatter extends Formatter {
         buf.append(LINE_SEPARATOR);    
         if(record.getThrown()!=null){
             try {
+                Throwable thr = record.getThrown().getCause();
+                if(thr==null) thr = record.getThrown();
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
-                record.getThrown().printStackTrace(pw);
+                thr.printStackTrace(pw);
                 pw.close();
                 buf.append(sw.toString());
             } catch (Exception ex) {

@@ -12,19 +12,18 @@ public class DefaultLogger extends Logger implements ILogger {
     public DefaultLogger( String name ){
         super(name, null);
         setLevel(Level.INFO);
-        initHandles();
+        setUseParentHandlers(false);
+        //initHandles();
     }
     
-    
+/*    
     private void initHandles(){
         setUseParentHandlers(false);
-        /*
         Handler[] handlers = getHandlers();
         for(int i=0; i<handlers.length; i++)
             removeHandler(handlers[i]);
-            */
-    }
-    
+     }
+  */  
     public void log( String message ){
         super.log( getLevel(), message);
     }

@@ -11,6 +11,15 @@ public class LoggingTopic {
     String  mLevel = "INFO";
     Level   mLevelObject = Level.INFO;
     
+    public LoggingTopic(){
+        
+    }
+    
+    public LoggingTopic( String name, Level level ){
+        setName(name);
+        setLevelObject(level);
+    }
+    
     /**
      * @return the name of topic
      */
@@ -37,6 +46,11 @@ public class LoggingTopic {
     public void setLevel(String level) {
         this.mLevel = level;
         mLevelObject = Level.parse(level);
+    }
+    
+    public void setLevelObject(Level level){
+        this.mLevelObject = level;
+        this.mLevel = level.getName();
     }
     
     public Level getLevelObject(){
