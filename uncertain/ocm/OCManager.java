@@ -187,8 +187,8 @@ public class OCManager implements IMappingHandle {
 			((IConfigurable)obj).beginConfigure(container);
 		}
         default_mapper.toObject(container, obj, handle);
-        if( obj instanceof IConfigurable){
-            ((IConfigurable)obj).endConfigure();
+        if( obj instanceof IConfigureListener){
+            ((IConfigureListener)obj).endConfigure();
         }
 		if( isEventEnable())
 			fireEvent(OCMEventFactory.newObjectCreatedEvent(this,obj));
@@ -333,6 +333,7 @@ public class OCManager implements IMappingHandle {
     
     /** provide a single entry to handle exception in o/c mapping process */
     public void handleException(String message, Throwable thr){
+        if(thr instanceof Error) throw (Error)thr;
         Throwable t;
         for(t = thr; t.getCause()!=null; t=t.getCause());
         logger.log(Level.SEVERE, message, t);
