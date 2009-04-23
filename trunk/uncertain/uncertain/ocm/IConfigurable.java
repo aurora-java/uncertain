@@ -9,7 +9,7 @@ import uncertain.composite.CompositeMap;
 /**
  * Implement this interface to get aware of configuration process
  */
-public interface IConfigurable {
+public interface IConfigurable extends IConfigureListener {
 	
     /**
      * This method is called just after instance is created, before populating any
@@ -18,9 +18,5 @@ public interface IConfigurable {
      */
 	public void beginConfigure(CompositeMap config);
 	
-    /**
-     * This method is called after this instance has been populated from container
-     */
-	public void endConfigure();
 
 }
