@@ -4,9 +4,11 @@
 package uncertain.proc;
 
 import java.util.LinkedList;
+import java.util.logging.Level;
 
 import uncertain.composite.CompositeMap;
 import uncertain.core.ConfigurationError;
+import uncertain.logging.ILogger;
 import uncertain.util.StringSplitter;
 
 /**
@@ -132,9 +134,9 @@ public class Action extends AbstractEntry {
     
     public void run(ProcedureRunner runner) throws Exception {  
         Procedure proc = (Procedure)runner.getProcedure().getRootOwner();
-        if(proc.Debug){
-            System.out.println("[action] "+getName());
-        }
+        ILogger logger = runner.getLogger();
+        logger.log(Level.CONFIG, "[action] "+getName());
+
         CompositeMap context = runner.getContext();
         Object[] args = getFieldValues(proc, context);
         runner.fireEvent(getName(), args);
