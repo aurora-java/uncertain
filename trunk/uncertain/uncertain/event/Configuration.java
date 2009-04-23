@@ -8,11 +8,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Level;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeUtil;
 import uncertain.composite.IterationHandle;
 import uncertain.logging.ILogger;
+import uncertain.logging.LoggingContext;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.proc.IEventHandle;
@@ -31,6 +33,8 @@ public class Configuration  implements Cloneable
 //implements IMappingHandle
 {
     
+    public static final String LOGGING_TOPIC = "uncertain.event";
+
     /**
      * implement this interface to get & filter participant on its creation
      * @author Zhou Fan
@@ -112,7 +116,7 @@ public class Configuration  implements Cloneable
 	            if(listener!=null)
 	                if(!listener.addParticipant(obj)) return;
 	            participant_list.add(obj);
-	            logger.log("Added participant instance "+cls.getName());
+	            logger.log(Level.CONFIG, "Added participant instance "+cls.getName());
 	        }else{
 	            // logger.warning("Instance of "+cls.getName()+" created, but no handle method found");
                 // still add instance even if it has no handle method
@@ -323,9 +327,7 @@ public class Configuration  implements Cloneable
     protected int fireEventInternal(String event_name, Object[] args, ProcedureRunner runner, CompositeMap context, HandleManager handle_manager)
         throws Exception 
     {
-        boolean create_trace = false;
-        if(runner!=null)
-            create_trace = runner.isTraceOn();
+        ILogger logger = runner==null? LoggingContext.getLogger(context, LOGGING_TOPIC) : runner.getLogger();
         
         current_handle = null;
         if(handle_manager==null) return EventModel.HANDLE_NORMAL;
@@ -360,7 +362,7 @@ public class Configuration  implements Cloneable
                     handle_flag = EventModel.HANDLE_NORMAL;
                     IEventHandle handle = (IEventHandle)it.next();
                     current_handle = handle;
-                    if(create_trace) System.out.println(handle.toString());
+                    logger.log(Level.CONFIG, handle.toString());
                     if(runner!=null)
                         handle_flag = handle.handleEvent(i, runner, args);
                     else
