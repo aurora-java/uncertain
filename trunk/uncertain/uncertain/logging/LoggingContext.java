@@ -9,6 +9,7 @@ import uncertain.event.RuntimeContext;
 public class LoggingContext extends RuntimeContext {
     
     public static ILoggerProvider getLoggerProvider( CompositeMap context ){
+        if(context==null) return DummyLoggingProvider.getInstance();
         ILoggerProvider p = (ILoggerProvider)RuntimeContext.getInstance(context).getInstanceOfType(ILoggerProvider.class);
         return p==null ? DummyLoggingProvider.getInstance(): p;
     }
