@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import uncertain.ocm.IConfigureListener;
 
 public class ConfigurableLoggerProvider implements ILoggerProvider  {
     
@@ -21,6 +20,18 @@ public class ConfigurableLoggerProvider implements ILoggerProvider  {
     Formatter           mFormatter = DEFAULT_FORMATTER;
     String              mName;
     String              mLogPath;
+    
+    public static ConfigurableLoggerProvider createInstance(){
+        ConfigurableLoggerProvider provider = new ConfigurableLoggerProvider();
+        provider.addHandles( new Handler[] { new BasicConsoleHandler()});
+        return provider;
+    }
+    
+    public static ConfigurableLoggerProvider createInstance( String topic, Level level ){
+        ConfigurableLoggerProvider provider = createInstance();
+        provider.getTopicManager().setTopicLevel(topic, level);
+        return provider;
+    }
     
     public ConfigurableLoggerProvider(){
         mTopicManager = new TopicManager();
