@@ -28,6 +28,10 @@ public class FeatureAttach {
         setElementName(elName);
         setFeatureClass(fClass);
     }
+    
+    public FeatureAttach( String ns, String elName, Class type ){
+        this( ns, elName, type.getName() );
+    }
 
     /**
      * @return Returns the elementName.
