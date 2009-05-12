@@ -14,6 +14,7 @@ import uncertain.event.Configuration;
 import uncertain.event.RuntimeContext;
 import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
+import uncertain.logging.ILoggerProvider;
 import uncertain.ocm.OCManager;
 
 /**
@@ -514,7 +515,14 @@ public class ProcedureRunner {
     public ILogger getLogger(){
         if(mLogger!=null) return mLogger;
         ILogger logger = (ILogger)runtime_context.getInstanceOfType(ILogger.class);
-        return logger==null?DummyLogger.getInstance():logger;
+        if(logger==null){
+            ILoggerProvider provider = (ILoggerProvider)runtime_context.getInstanceOfType(ILoggerProvider.class);
+            if(provider!=null)
+                return provider.getLogger(LOGGING_TOPIC);
+            else
+                return DummyLogger.getInstance();
+        }else
+            return logger;
     }
     
     public void setLogger( ILogger logger ){
