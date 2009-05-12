@@ -21,6 +21,7 @@ public class BasicConsoleHandler extends Handler {
     {
        if( !super.isLoggable(record)) return;
        Formatter f = getFormatter();
+       if(f==null) return;
        String content = f.format(record);
        out.print(content);
     }
