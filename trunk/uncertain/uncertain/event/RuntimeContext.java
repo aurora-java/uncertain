@@ -83,6 +83,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
      * @return
      */
     public Object getInstanceOfType( Class type){
+        if( getObjectContext()==null) throw new IllegalStateException("Object context not initialized");
         Object obj = get(getTypeKey(type));
         if( obj==null && getParentMap() !=null)
             obj = getParentMap().get(getTypeKey(type));
@@ -108,7 +109,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     public void setException(Throwable e){
         put(KEY_EXCEPTION, e);
     }
-    
+   
     public boolean isTrace(){
         return getBoolean(KEY_IS_TRACE, false);
     }
@@ -116,7 +117,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     public void setTrace( boolean trace ){
         putBoolean(KEY_IS_TRACE, trace);
     }
-    
+
     public Object getTraceObject() {
         return get(KEY_TRACE_OBJECT);
     }
