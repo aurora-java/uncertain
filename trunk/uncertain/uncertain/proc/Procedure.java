@@ -82,8 +82,8 @@ public class Procedure extends EntryList {
     }
     
     public void run(ProcedureRunner runner) throws Exception {
-         ILogger logger = runner.getLogger();
-         logger.log(Level.CONFIG, "Enter procedure " + getName());
+         //ILogger logger = runner.getLogger();
+         //logger.log(Level.CONFIG, "Enter procedure " + getName());
          populateContextFields(runner);
          if(exception_handles!=null) 
              runner.addExceptionHandles(exception_handles);
