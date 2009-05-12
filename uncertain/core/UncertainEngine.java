@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +24,7 @@ import uncertain.composite.CompositeMapParser;
 import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
+import uncertain.logging.BasicConsoleHandler;
 import uncertain.logging.ConfigurableLoggerProvider;
 import uncertain.logging.DefaultLogger;
 import uncertain.logging.DummyLogger;
@@ -195,7 +195,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
                 new LoggingTopic(OCManager.LOGGING_TOPIC, Level.WARNING)
         });
         clp.addHandles( new Handler[]{
-                new ConsoleHandler()
+                new BasicConsoleHandler()
         });
         return clp;
     }
@@ -205,16 +205,17 @@ public class UncertainEngine implements IChildContainerAcceptable {
         if(logger_provider==null){
             logger_provider = createDefaultLoggerProvider();
             mObjectRegistry.registerInstance(ILoggerProvider.class, logger_provider);
-            mOcManager.setLoggerProvider(logger_provider);
+            mOcManager.setLoggerProvider(logger_provider);            
         }
         mLogger = logger_provider.getLogger(UNCERTAIN_LOGGING_TOPIC);
         if(mErrorLogger==null)
             mErrorLogger = logger_provider.getLogger(UNCERTAIN_ERROR_TOPIC);
         if(mErrorLogger==DummyLogger.getInstance()){
             DefaultLogger l =new DefaultLogger("error");
-            l.addHandler( new ConsoleHandler());
+            l.addHandler( new BasicConsoleHandler());
             mErrorLogger = l;
         }
+        //mLogger.info("Logging provider set to "+logger_provider);
     }
     
     public void addLoggingConfig( LoggingConfig logging_config ){

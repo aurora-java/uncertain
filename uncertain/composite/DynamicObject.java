@@ -77,6 +77,7 @@ public class DynamicObject {
 /*  ----------------- get/set property of specified type ---------------------------*/
     
     public Object get( Object key ){
+        if(object_context==null) throw new IllegalStateException("Object context not initialized");
         return object_context.get(key);
     }
     

@@ -183,8 +183,11 @@ public class Configuration  implements Cloneable
      * @return
      */
     public Object createFeatureInstance(Class fClass, CompositeMap config){
+        if(fClass==null)
+            throw new NullPointerException("Class parameter is null");
         try{
             Object fInst = ocManager.getObjectCreator().createInstance(fClass);
+            if( fInst ==null ) throw new RuntimeException("Can't create instance of "+fClass.getName());
             ocManager.populateObject(config,fInst);
             if( fInst instanceof IFeature){
                 attach_result = ((IFeature)fInst).attachTo(config, this);
@@ -303,7 +306,7 @@ public class Configuration  implements Cloneable
     public int fireEvent(String event_name, Object[] args)
         throws Exception
     {
-        return fireEvent(event_name, args, null, handleManager);
+        return fireEventInternal(event_name, args, null, null, this.handleManager);
     }    
     
     public int fireEvent(String event_name, CompositeMap context, Object[] args)
@@ -315,8 +318,14 @@ public class Configuration  implements Cloneable
     public int fireEvent(String event_name, Object[] args, HandleManager handle_manager)
         throws Exception
     {
-        return fireEvent(event_name, args, null, handle_manager);
+        return fireEventInternal(event_name, args, null, null, handle_manager);
     }
+    
+    public int fireEvent(String event_name, Object[] args, CompositeMap context, HandleManager handle_manager)
+    throws Exception
+    {
+        return fireEventInternal(event_name, args, null, context, handle_manager);
+    }    
     
     public int fireEvent(String event_name, Object[] args, ProcedureRunner runner, HandleManager handle_manager)
         throws Exception
@@ -328,7 +337,7 @@ public class Configuration  implements Cloneable
         throws Exception 
     {
         ILogger logger = runner==null? LoggingContext.getLogger(context, LOGGING_TOPIC) : runner.getLogger();
-        
+        //System.out.println(logger);
         current_handle = null;
         if(handle_manager==null) return EventModel.HANDLE_NORMAL;
         handle_flag = 0;
@@ -362,6 +371,7 @@ public class Configuration  implements Cloneable
                     handle_flag = EventModel.HANDLE_NORMAL;
                     IEventHandle handle = (IEventHandle)it.next();
                     current_handle = handle;
+                    //logger.info("to invoke "+handle.toString());
                     logger.log(Level.CONFIG, handle.toString());
                     if(runner!=null)
                         handle_flag = handle.handleEvent(i, runner, args);
@@ -397,6 +407,7 @@ public class Configuration  implements Cloneable
         List features = null;
         if(feature_map==null) 
             return null;
+        features = (List)feature_map.get(config);
         if(features==null){
             loadConfig(config);
             features = (List)feature_map.get(config);
