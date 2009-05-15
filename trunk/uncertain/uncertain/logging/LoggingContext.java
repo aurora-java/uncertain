@@ -5,6 +5,7 @@ package uncertain.logging;
 
 import uncertain.composite.CompositeMap;
 import uncertain.event.RuntimeContext;
+import uncertain.ocm.IObjectRegistry;
 
 public class LoggingContext extends RuntimeContext {
     
@@ -12,6 +13,11 @@ public class LoggingContext extends RuntimeContext {
         if(context==null) return DummyLoggingProvider.getInstance();
         ILoggerProvider p = (ILoggerProvider)RuntimeContext.getInstance(context).getInstanceOfType(ILoggerProvider.class);
         return p==null ? DummyLoggingProvider.getInstance(): p;
+    }
+    
+    public static ILogger  getLoggerProvider( String topic, IObjectRegistry reg ){
+        ILoggerProvider p = (ILoggerProvider)reg.getInstanceOfType(ILoggerProvider.class);
+        return p==null ? DummyLogger.getInstance(): p.getLogger(topic);
     }
     
     public static ILogger getLogger( CompositeMap context, String topic ){

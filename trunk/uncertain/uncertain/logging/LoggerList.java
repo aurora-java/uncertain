@@ -80,6 +80,10 @@ public class LoggerList implements ILogger {
         log(Level.INFO, message);    
     }    
     
+    public void config( String message ){
+        log(Level.CONFIG, message);    
+    }      
+    
     public int size(){
         return mLoggerSet.size();
     }
