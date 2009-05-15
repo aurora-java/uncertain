@@ -17,6 +17,8 @@ public interface ILogger {
     
     public void log( Level level, String message, Object[] parameters );
     
+    public void config( String message );
+    
     public void info( String message );
     
     public void warning( String message );

@@ -49,4 +49,8 @@ public class DummyLogger implements ILogger {
     public void info( String message ){
         
     }
+    
+    public void config( String message ){
+        
+    }
 }
