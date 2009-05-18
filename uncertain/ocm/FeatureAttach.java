@@ -54,8 +54,14 @@ public class FeatureAttach {
     /**
      * @param featureClass The featureClass to set.
      */
-    public void setFeatureClass(String featureClass) {
-        this.featureClass = featureClass;
+    public void setFeatureClass(String featureClass) 
+    {
+        try{
+            this.featureClass = featureClass;
+            Class.forName(featureClass);
+        }catch(ClassNotFoundException ex){
+            throw new RuntimeException("Feature class not found", ex);
+        }
     }
     /**
      * @return Returns the nameSpace.

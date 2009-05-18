@@ -57,7 +57,6 @@ public class ReflectionMapper implements IObjectMapper {
 	 */
 	public void toObject(CompositeMap map, Object target, IMappingHandle handle) {
 		MappingRule rule = getMappingRule(target.getClass());
-		//System.out.println("Populating " + target+"\r\n======================================");
 		if(rule == null) return;
 		ObjectAccessor[] for_attrib = rule.getAttribMapping();
 		
@@ -67,7 +66,6 @@ public class ReflectionMapper implements IObjectMapper {
 			ObjectAccessor oa = for_attrib[i];
 			try{                
 			    Object value = map.get(oa.getFieldName());
-                //System.out.println(oa.getFieldName()+"->"+value);
                 if(value!=null)
 				    oa.writeToObject(target, value);
 			}catch(Exception ex){
