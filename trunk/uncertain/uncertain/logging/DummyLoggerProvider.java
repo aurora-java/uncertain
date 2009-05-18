@@ -3,11 +3,11 @@
  */
 package uncertain.logging;
 
-public class DummyLoggingProvider implements ILoggerProvider {
+public class DummyLoggerProvider implements ILoggerProvider {
     
-    static final DummyLoggingProvider DEFAULT_INSTANCE = new  DummyLoggingProvider();
+    static final DummyLoggerProvider DEFAULT_INSTANCE = new  DummyLoggerProvider();
     
-    public static DummyLoggingProvider getInstance(){
+    public static DummyLoggerProvider getInstance(){
         return DEFAULT_INSTANCE;
     }
 

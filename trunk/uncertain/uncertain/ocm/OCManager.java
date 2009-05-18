@@ -336,7 +336,8 @@ public class OCManager implements IMappingHandle {
         if(thr instanceof Error) throw (Error)thr;
         Throwable t;
         for(t = thr; t.getCause()!=null; t=t.getCause());
-        logger.log(Level.SEVERE, message, t);
+        throw new RuntimeException(t);
+        //logger.log(Level.SEVERE, message, t);
     }
     
     /**
