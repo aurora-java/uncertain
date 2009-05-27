@@ -30,8 +30,10 @@ import uncertain.logging.DefaultLogger;
 import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
+import uncertain.logging.ILoggingTopicRegistry;
 import uncertain.logging.LoggingConfig;
 import uncertain.logging.LoggingTopic;
+import uncertain.logging.TopicManager;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.IChildContainerAcceptable;
 import uncertain.ocm.IObjectCreator;
@@ -51,7 +53,6 @@ import uncertain.util.FilePatternFilter;
 public class UncertainEngine implements IChildContainerAcceptable {
     
     public static final String UNCERTAIN_NAMESPACE = "http://engine.uncertain.org/defaultns";
-    public static final String UNCERTAIN_LOGGING_SPACE = "uncertain.core";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
     
     public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
@@ -74,6 +75,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     // Logging
     ILogger                 mLogger;    
     ILogger                 mErrorLogger;
+    TopicManager            mTopicManager;
     
     /* ================== Constructors ======================================= */
     
@@ -128,6 +130,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstance(mOcManager);           
         mObjectRegistry.registerInstanceOnce(UncertainEngine.class,this);
         mObjectRegistry.registerInstanceOnce(IObjectRegistry.class, mObjectRegistry);  
+        mObjectRegistry.registerInstanceOnce(ILoggingTopicRegistry.class, mTopicManager);
     }
     
     private void setDefaultClassRegistry(){
@@ -145,6 +148,13 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mClassRegistry.registerClass("extra-class-registry", "uncertain.init", "ExtraClassRegistry");
         
         loadInternalRegistry(LoggingConfig.LOGGING_REGISTRY_PATH);
+    }
+    
+    private void loadBuiltinLoggingTopic(){
+        mTopicManager.registerLoggingTopic(UNCERTAIN_LOGGING_TOPIC);
+        mTopicManager.registerLoggingTopic(OCManager.LOGGING_TOPIC);
+        mTopicManager.registerLoggingTopic(Configuration.LOGGING_TOPIC);
+        mTopicManager.registerLoggingTopic(ProcedureRunner.LOGGING_TOPIC);
     }
     
     private void loadInternalRegistry( String file_path ){
@@ -171,7 +181,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
         setDefaultClassRegistry();
         mParticipantRegistry = new ParticipantRegistry();    
         mGlobalContext = new CompositeMap("global");
-        registerBuiltinInstances(); 
+        mTopicManager = new TopicManager();
+        registerBuiltinInstances();
+        loadBuiltinLoggingTopic();
         // load internal registry
     } 
 
@@ -510,6 +522,10 @@ public class UncertainEngine implements IChildContainerAcceptable {
 */
     public CompositeMap getGlobalContext(){
         return mGlobalContext;
+    }
+    
+    public ILoggingTopicRegistry getLoggingTopicRegistry(){
+        return mTopicManager;
     }
 
     /**
