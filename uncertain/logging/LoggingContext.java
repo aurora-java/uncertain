@@ -26,6 +26,12 @@ public class LoggingContext extends RuntimeContext {
         return p==null ? DummyLogger.getInstance(): p.getLogger(topic);
     }
     
+    public static ILogger getLogger( CompositeMap context ){
+        RuntimeContext rt = RuntimeContext.getInstance(context);
+        ILogger logger = (ILogger)rt.getInstanceOfType(ILogger.class);
+        return logger==null ? DummyLogger.getInstance(): logger;
+    }
+    
     public static ILogger getLogger( CompositeMap context, String topic ){
         return getLoggerProvider(context).getLogger(topic);
     }

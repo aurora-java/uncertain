@@ -28,7 +28,8 @@ public class DefaultFormatter extends Formatter {
         args[0] = new Date(record.getMillis());
         args[1] = record.getLoggerName()==null? "": "[" + record.getLoggerName() + "]";
         args[2] = record.getLevel().getName();
-        args[3] = record.getMessage();
+        //args[3] = record.getMessage();
+        args[3] = super.formatMessage(record);
         mMessageFormat.format(args, buf, null);
         buf.append(LINE_SEPARATOR);    
         if(record.getThrown()!=null){
