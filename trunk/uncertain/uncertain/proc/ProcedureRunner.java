@@ -147,8 +147,7 @@ public class ProcedureRunner {
         resume_after_exception = false;
         if(handleException(procException)){
             procException = null;
-        }else;
-            //thr.printStackTrace();
+        }
         if(!resume_after_exception)
             stop();
     }
@@ -306,7 +305,7 @@ public class ProcedureRunner {
             config.fireEvent(event_name, parameters, this, config.getHandleManager());
         }catch(Exception ex){
             //System.out.println("error in "+config.getCurrentHandle());
-            ex.printStackTrace();
+            //ex.printStackTrace();
             throwException(ex);
         }
         /*
