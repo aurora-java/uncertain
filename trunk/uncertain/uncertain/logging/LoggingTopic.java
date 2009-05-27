@@ -5,11 +5,12 @@ package uncertain.logging;
 
 import java.util.logging.Level;
 
-public class LoggingTopic {
+public class LoggingTopic implements Comparable {
     
     String  mName;
     String  mLevel = "INFO";
     Level   mLevelObject = Level.INFO;
+    String  mCategory;
     
     public LoggingTopic(){
         
@@ -55,6 +56,27 @@ public class LoggingTopic {
     
     public Level getLevelObject(){
         return mLevelObject;
+    }
+
+    /**
+     * @return the category
+     */
+    public String getCategory() {
+        return mCategory;
+    }
+
+    /**
+     * @param category the category to set
+     */
+    public void setCategory(String category) {
+        this.mCategory = category;
+    }
+    
+    public int compareTo(Object o){
+        if( o instanceof LoggingTopic && mName != null ){
+            return mName.compareTo( ((LoggingTopic)o).getName() );
+        }else
+            return -1;
     }
 
 }
