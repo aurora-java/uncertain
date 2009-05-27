@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeUtil;
 import uncertain.composite.IterationHandle;
+import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.ClassRegistry;
@@ -71,6 +72,9 @@ public class Configuration  implements Cloneable
     
     // Parent Configuration
     Configuration           parent;
+    
+    // logger
+    ILogger                 mLogger;
     
     public Configuration(){
         this(ParticipantRegistry.defaultInstance(), OCManager.getInstance());
@@ -333,11 +337,27 @@ public class Configuration  implements Cloneable
         return fireEventInternal( event_name, args, runner, null, handle_manager );
     }
     
+    protected ILogger getLogger( ProcedureRunner runner, CompositeMap context ){
+        if( mLogger!=null)
+            return mLogger;
+        ILogger logger = null;
+        if( parent!=null )
+            logger = parent.getLogger();
+        if( logger ==null ){            
+            if( runner!=null )
+                logger = runner.getLogger();
+            else
+                logger = LoggingContext.getLogger(context, LOGGING_TOPIC);
+        }
+        if( logger == null)
+            logger = DummyLogger.getInstance();
+        return logger;
+    }
+    
     protected int fireEventInternal(String event_name, Object[] args, ProcedureRunner runner, CompositeMap context, HandleManager handle_manager)
         throws Exception 
     {
-        ILogger logger = runner==null? LoggingContext.getLogger(context, LOGGING_TOPIC) : runner.getLogger();
-        //System.out.println(logger);
+        ILogger logger = getLogger(runner, context);
         current_handle = null;
         if(handle_manager==null) return EventModel.HANDLE_NORMAL;
         handle_flag = 0;
@@ -371,8 +391,7 @@ public class Configuration  implements Cloneable
                     handle_flag = EventModel.HANDLE_NORMAL;
                     IEventHandle handle = (IEventHandle)it.next();
                     current_handle = handle;
-                    //logger.info("to invoke "+handle.toString());
-                    logger.log(Level.CONFIG, handle.toString());
+                    logger.log(Level.FINE, handle.toString());
                     if(runner!=null)
                         handle_flag = handle.handleEvent(i, runner, args);
                     else
@@ -495,6 +514,18 @@ public class Configuration  implements Cloneable
         if(parent==this) throw new IllegalArgumentException("Can't set parent to be self");
         this.parent = parent;
     }    
+    
+    public void setLogger( ILogger logger ){
+        this.mLogger = logger;
+    }
+    
+    public ILogger getLogger(){
+        if( mLogger!=null) 
+            return mLogger;
+        if( parent!=null)
+            return parent.getLogger();
+        return DummyLogger.getInstance();
+    }
     
     public Object clone(){
         Configuration conf = new Configuration( registry, ocManager);
