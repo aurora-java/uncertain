@@ -40,10 +40,13 @@ public class CompositeLoader {
 	
 	
 	CompositeMap parse( InputStream stream) throws IOException, SAXException {
+	    CompositeMapParser p = null;
 		if(parser==null)
-		    return CompositeMapParser.parse(stream,this);
+		    p = new CompositeMapParser();
 		else
-		    return parser.parseStream(stream);
+		    p = new CompositeMapParser(parser);
+		p.setCompositeLoader(this);
+		return p.parseStream(stream);
 	}
 	
 	public CompositeMap getCachedMap(Object key){
@@ -78,7 +81,7 @@ public class CompositeLoader {
 		this(dir, CompositeLoader.DEFAULT_EXT);
 	}
 	
-	public void setCompositeParser(CompositeMapParser p){
+	public void setParserPrototype(CompositeMapParser p){
 	    parser = p;
 	}
 	

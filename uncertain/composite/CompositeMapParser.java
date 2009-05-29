@@ -172,10 +172,17 @@ public class CompositeMapParser extends DefaultHandler {
 	public CompositeMapParser(){
 	}
 	
+	public CompositeMapParser( CompositeMapParser prototype ){
+	    this();
+	    copySettings(prototype);
+	}
+	
+	/*
 	public CompositeMapParser( CompositeLoader loader){
 		if( loader == null) return;
 		setCompositeLoader(loader);
 	}
+	*/
 	
 	/** set a new INameProcessor */
 	public void setNameProcessor(NameProcessor processor){
@@ -231,9 +238,18 @@ public class CompositeMapParser extends DefaultHandler {
     }
     
     public static CompositeMapParser createInstance(CompositeLoader loader, NameProcessor name_processor){
-        CompositeMapParser parser =  new CompositeMapParser(loader);
-    	parser.setNameProcessor(name_processor);
+        CompositeMapParser parser =  new CompositeMapParser();
+        if(loader!=null)
+            parser.setCompositeLoader(loader);
+        if(name_processor!=null)
+            parser.setNameProcessor(name_processor);
     	return parser;
+    }
+    
+    public void copySettings( CompositeMapParser next ){
+        this.name_processor = next.name_processor;
+        this.support_xinclude = next.support_xinclude;
+        this.composite_loader = next.composite_loader;
     }
     
     /*
