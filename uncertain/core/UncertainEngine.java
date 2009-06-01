@@ -170,7 +170,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
                 mCompositeLoader,
                 new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
         );
-        mCompositeLoader.setCompositeParser(mCompositeParser);
+        mCompositeLoader.setParserPrototype(mCompositeParser);
 
         // create bootstrap object instance
         mContextListenerSet = new HashSet();
