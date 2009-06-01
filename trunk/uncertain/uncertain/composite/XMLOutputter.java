@@ -6,6 +6,9 @@
 
 package uncertain.composite;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,12 +23,13 @@ import uncertain.util.XMLWritter;
  */
 public class XMLOutputter {
     
+    public static final String DEFAULT_INDENT = "    ";
     boolean new_line;
     String    indent;
     
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
  
-    public static XMLOutputter default_inst = new XMLOutputter(  "    ", true);
+    public static XMLOutputter default_inst = new XMLOutputter(  DEFAULT_INDENT, true);
     
     public static XMLOutputter defaultInstance(){
         return default_inst;
@@ -149,6 +153,22 @@ public class XMLOutputter {
         if( new_line) xml.append( LINE_SEPARATOR);
         return xml.toString();
         
+    }
+    
+    public static void saveToFile( File target_file, CompositeMap map, String encoding )
+        throws IOException
+    {
+        FileOutputStream os = null;
+        try{
+            os = new FileOutputStream(target_file);
+            String xml_decl = "<?xml version=\"1.0\" encoding=\""+encoding+"\"?>\n";
+            os.write(xml_decl.getBytes());
+            os.write(map.toXML().getBytes(encoding));
+            os.flush();
+        }finally{
+            if(os!=null)
+                os.close();
+        }
     }
 
 }

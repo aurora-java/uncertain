@@ -23,7 +23,7 @@ public class PackageManager {
                 mCompositeLoader,
                 new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
         );
-        mCompositeLoader.setCompositeParser(parser);
+        mCompositeLoader.setParserPrototype(parser);
         mOCManager = OCManager.getInstance();
     }
     
