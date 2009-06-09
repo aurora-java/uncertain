@@ -5,10 +5,9 @@ package uncertain.composite;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-
-import javax.swing.text.StringContent;
 
 import uncertain.util.GroupObjectProcessorImpl;
 import uncertain.util.IGroupObjectProcessor;
@@ -64,7 +63,47 @@ public class CompositeUtil {
             this.attrib_name = attrib_name;
             this.attrib_value = attrib_value;
         }
-    };   
+    };
+    
+    public static class ChildsFinder implements IterationHandle {
+    	
+        private String element_name;
+        private String attrib_name;
+        private String attrib_value;
+        
+        private LinkedList	result = new LinkedList();;
+        
+        public LinkedList getResult(){
+            return result; 
+        }
+        
+        public int process( CompositeMap map ){
+        	
+            if(element_name!=null)
+                if(!CompositeUtil.compare(map.getName(), element_name))
+                    return IterationHandle.IT_CONTINUE;
+            if(attrib_name!=null){
+                Object vl = map.get(attrib_name);
+                if(CompositeUtil.compare(vl, attrib_value)){
+                    result.add(map);
+                }
+            }else{
+                result.add(map);
+            }
+            return IterationHandle.IT_CONTINUE;
+        }        
+        
+        /**
+         * @param element_name
+         * @param attrib_name
+         * @param attrib_value
+         */
+        public ChildsFinder(String element_name, String attrib_name,String attrib_value) {
+            this.element_name = element_name;
+            this.attrib_name = attrib_name;
+            this.attrib_value = attrib_value;
+        }
+    };
     
     
     static boolean compare(Object field, String value){
@@ -107,6 +146,20 @@ public class CompositeUtil {
    public static CompositeMap findChild( CompositeMap root, String elementName ){
        if(root==null) return null;
        ChildFinder cf = new ChildFinder(elementName, null, null);
+       root.iterate(cf,true);
+       return cf.getResult();
+   }
+   
+   public static List findChilds(CompositeMap root, String elementName, String attribName, String value) {
+	   if(root==null) return null;
+       ChildsFinder cf = new ChildsFinder(elementName, attribName, value);
+       root.iterate(cf,true);
+       return cf.getResult();
+   }
+   
+   public static List findChilds( CompositeMap root, String elementName ){
+       if(root==null) return null;
+       ChildsFinder cf = new ChildsFinder(elementName, null, null);
        root.iterate(cf,true);
        return cf.getResult();
    }
