@@ -23,6 +23,8 @@ import uncertain.util.XMLWritter;
  */
 public class XMLOutputter {
     
+    public static final String CDATA_END = "]]>";
+    public static final String CDATA_BEGIN = "<![CDATA[";
     public static final String DEFAULT_INDENT = "    ";
     boolean new_line;
     String    indent;
@@ -115,7 +117,7 @@ public class XMLOutputter {
         StringBuffer childs = new StringBuffer();
         StringBuffer xml = new StringBuffer();
         String indent_str = getIndentString(level);
-        
+        boolean need_new_line_local = new_line;
         
         if(map.namespace_uri != null ){
             boolean uri_exists  = false;
@@ -133,8 +135,10 @@ public class XMLOutputter {
         
         getAttributeXML( map,attribs);
         if(map.getChilds()==null){
-            if(map.getText()!=null)
-                childs.append(map.getText());
+            if(map.getText()!=null){
+                need_new_line_local = false;
+                childs.append(CDATA_BEGIN).append(map.getText()).append(CDATA_END);
+            }
         }
         else
             getChildXML( level+1, map.getChilds(), childs, namespaces);
@@ -146,8 +150,11 @@ public class XMLOutputter {
         xml.append(indent_str).append('<').append(elm).append(attribs);
         if( childs.length()>0){ 
             xml.append('>');
-            if( new_line) xml.append( LINE_SEPARATOR);
-            xml.append(childs).append(indent_str).append(XMLWritter.endTag(elm));
+            if( need_new_line_local) xml.append( LINE_SEPARATOR);
+            xml.append(childs);
+            if( need_new_line_local)
+                xml.append(indent_str);
+            xml.append(XMLWritter.endTag(elm));
         }
         else xml.append("/>");
         if( new_line) xml.append( LINE_SEPARATOR);

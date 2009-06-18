@@ -17,7 +17,7 @@ import uncertain.composite.CompositeMap;
 import uncertain.ocm.IConfigurable;
 import uncertain.util.FilePatternFilter;
 
-public class BasicFileHandler extends Handler implements IFileBasedLogger, IConfigurable {
+public class BasicFileHandler extends Handler implements ILogPathSettable, IConfigurable {
     
     FileWriter          mWriter;    
     String              mBasePath;
@@ -97,7 +97,7 @@ public class BasicFileHandler extends Handler implements IFileBasedLogger, IConf
        }
     }
     
-    public void setBasePath( String path ){
+    public void setLogPath( String path ){
         //System.out.println("Setting path to "+path);
         mBasePath = path;
         mBasePathFile = new File(path);
@@ -105,8 +105,15 @@ public class BasicFileHandler extends Handler implements IFileBasedLogger, IConf
             throw new IllegalArgumentException("Invalid base file path:"+mBasePath);
     }
     
-    public String getBasePath(){
+    public String getLogPath(){
         return mBasePath;
+    }
+    
+    public File getCurrentLogFile(){
+        if(mBasePathFile==null)
+            return null;
+        File logFile = new File( mBasePathFile, getLogFileName() );
+        return logFile;
     }
     
     public String[] getFileList(){

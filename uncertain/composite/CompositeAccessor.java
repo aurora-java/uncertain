@@ -188,6 +188,8 @@ public class CompositeAccessor implements ICompositeAccessor {
     public CompositeMap createChild( CompositeMap map, String key){
     	if( key == null || map == null) return null;
     	//key = key.toLowerCase();
+    	if("/".equals(key))
+    	    return map.getRoot();
         int id = key.indexOf(this.separator_char);
         if( id == 0)
             return createChild(map.getRoot(), key.substring(1));
