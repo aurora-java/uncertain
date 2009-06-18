@@ -55,6 +55,7 @@ public class TopicManager implements ILoggingTopicRegistry {
     public void registerLoggingTopic( String topic ){
         LoggingTopic t = new LoggingTopic();
         t.setName(topic);
+        t.setLevelObject(Level.WARNING);
         registerLoggingTopic( t );
     }
     

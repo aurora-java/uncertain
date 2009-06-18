@@ -5,18 +5,20 @@ package uncertain.logging;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
 import uncertain.ocm.IObjectRegistry;
 
-public class LoggingConfig implements ILoggerProvider, IContextListener {
+public class LoggingConfig implements ILoggerProvider, IContextListener, ILogPathSettable {
 
     /** Internal registry file */
     public static final String LOGGING_REGISTRY_PATH = "uncertain.logging.DefaultRegistry";
     
     LoggerProviderGroup         mLoggerProviderGroup;
     IObjectRegistry             mObjectRegistry;
+    String                      mLogPath;
     
     public LoggingConfig(){
         mLoggerProviderGroup = new LoggerProviderGroup();
@@ -83,6 +85,21 @@ public class LoggingConfig implements ILoggerProvider, IContextListener {
     
     public Collection getLoggerProviders(){
         return Collections.unmodifiableCollection(mLoggerProviderGroup.mProviderSet); 
+    }
+
+    public String getLogPath() {
+        return mLogPath;
+    }
+
+    public void setLogPath(String logPath) {
+        mLogPath = logPath;
+        Iterator it = mLoggerProviderGroup.mProviderSet.iterator();
+        while(it.hasNext()){
+            ILoggerProvider provider = (ILoggerProvider)it.next();
+            if(provider instanceof ILogPathSettable){
+                ((ILogPathSettable)provider).setLogPath(logPath);
+            }
+        }
     }
     
     /*

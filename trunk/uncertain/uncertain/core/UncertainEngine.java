@@ -21,6 +21,7 @@ import uncertain.composite.CharCaseProcessor;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeMapParser;
+import uncertain.composite.DynamicObject;
 import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
@@ -52,6 +53,7 @@ import uncertain.util.FilePatternFilter;
  */
 public class UncertainEngine implements IChildContainerAcceptable {
     
+    public static final String KEY_NAME = "NAME";
     public static final String UNCERTAIN_NAMESPACE = "http://engine.uncertain.org/defaultns";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
     
@@ -66,6 +68,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     ParticipantRegistry		mParticipantRegistry;
     Configuration           mConfig;
     CompositeMap            mGlobalContext;
+    DirectoryConfig         mDirectoryConfig;
     
     Set                     mContextListenerSet;
     LinkedList				mExtraConfig = new LinkedList();
@@ -138,14 +141,16 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mClassRegistry.registerPackage("uncertain.proc");
         mClassRegistry.registerPackage("uncertain.ocm");
         mClassRegistry.registerPackage("uncertain.logging");
+        mClassRegistry.registerPackage("uncertain.core");
+        mClassRegistry.registerPackage("uncertain.core.admin");
         
-        mClassRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
-        mClassRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
+        //mClassRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
+        //mClassRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
         mClassRegistry.registerClass("class-registry","uncertain.ocm","ClassRegistry");
         mClassRegistry.registerClass("package-mapping","uncertain.ocm","PackageMapping");
         mClassRegistry.registerClass("class-mapping","uncertain.ocm","ClassMapping");
         mClassRegistry.registerClass("feature-attach","uncertain.ocm","FeatureAttach");
-        mClassRegistry.registerClass("extra-class-registry", "uncertain.init", "ExtraClassRegistry");
+        //mClassRegistry.registerClass("extra-class-registry", "uncertain.init", "ExtraClassRegistry");
         
         loadInternalRegistry(LoggingConfig.LOGGING_REGISTRY_PATH);
     }
@@ -159,7 +164,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     private void loadInternalRegistry( String file_path ){
         CompositeMap map = loadCompositeMap(file_path);
-        if(map==null) throw new IllegalStateException("Can't load internal resource "+file_path);
+        if(map==null) throw new RuntimeException("Can't load internal resource "+file_path);
         ClassRegistry reg = (ClassRegistry)mOcManager.createObject(map);
         this.mClassRegistry.addAll(reg);
     }
@@ -171,6 +176,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
                 new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
         );
         mCompositeLoader.setParserPrototype(mCompositeParser);
+        mDirectoryConfig = (DirectoryConfig)DynamicObject.cast(this.mGlobalContext, DirectoryConfig.class);
 
         // create bootstrap object instance
         mContextListenerSet = new HashSet();
@@ -231,8 +237,15 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
     
     public void addLoggingConfig( LoggingConfig logging_config ){
+        //System.out.println("Adding "+logging_config);
         logging_config.registerTo(mObjectRegistry);
         mContextListenerSet.add(logging_config);
+        String log_path = mDirectoryConfig.getLogDirectory();
+        if(log_path!=null && logging_config.getLogPath()==null ){
+            System.out.println("log path set to "+log_path);
+            logging_config.setLogPath(log_path);
+        }
+        //System.out.println("Logger set to "+getLogger(UNCERTAIN_LOGGING_TOPIC));        
     }
     
     public ILogger getLogger( String topic ){
@@ -266,6 +279,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public void doConfigure(Collection cfg){
         //if(config!=null) 
         mConfig = createConfig();
+        mConfig.setLogger(mLogger);
         //logger.info("Attached:"+this.ocManager.getClassRegistry().getFeatures(new ElementIdentifier(null,"class-registry")));
         mConfig.loadConfigList(cfg);
         if(mConfig.getParticipantList().size()>0)
@@ -433,6 +447,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
 
     public void setConfigDirectory(File dir){
         mConfigDir = dir;
+        if(mDirectoryConfig==null)
+            mDirectoryConfig = (DirectoryConfig)DynamicObject.cast(this.mGlobalContext, DirectoryConfig.class);
+        mDirectoryConfig.setConfigDirectory(dir.getPath());
     }
     
     public void addClassRegistry(ClassRegistry reg){
@@ -472,15 +489,19 @@ public class UncertainEngine implements IChildContainerAcceptable {
     /**
      * @return Returns the compositeParser.
      */
+    /*
     public CompositeMapParser getCompositeParser() {
         return mCompositeParser;
     }
+    */
     /**
      * @param compositeParser The compositeParser to set.
      */
+    /*
     public void setCompositeParser(CompositeMapParser compositeParser) {
         this.mCompositeParser = compositeParser;
     }
+    */
     /**
      * @return Returns the ocManager.
      */
@@ -532,10 +553,12 @@ public class UncertainEngine implements IChildContainerAcceptable {
      * @return Returns the logger.
      */
     public Logger getLogger() {
+        //return mLogger;
         if(mLogger instanceof DefaultLogger)
             return ((DefaultLogger)mLogger);
         else
             return Logger.getAnonymousLogger();
+    
     }
     /**
      * @return Returns the config_dir.
@@ -560,5 +583,17 @@ public class UncertainEngine implements IChildContainerAcceptable {
         ProcedureRunner runner = createProcedureRunner(proc);
         runner.addConfiguration(mConfig);
         runner.run(); 
+    }
+    
+    public DirectoryConfig getDirectoryConfig(){
+        return mDirectoryConfig;
+    }
+    
+    public String getName(){
+        return mGlobalContext.getString(KEY_NAME);
+    }
+    
+    public void setName( String name ){
+        mGlobalContext.putString(KEY_NAME, name);
     }
 }

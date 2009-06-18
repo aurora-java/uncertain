@@ -9,7 +9,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 
-public class ConfigurableLoggerProvider implements ILoggerProvider  {
+public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSettable  {
     
     static final DefaultFormatter DEFAULT_FORMATTER = new DefaultFormatter(); 
     
@@ -52,8 +52,8 @@ public class ConfigurableLoggerProvider implements ILoggerProvider  {
         for(int i=0; i<mHandlers.length; i++){
             Handler h = mHandlers[i]; 
             h.setFormatter(mFormatter);
-            if( h instanceof IFileBasedLogger && mLogPath != null){
-                ((IFileBasedLogger)h).setBasePath(mLogPath);
+            if( h instanceof ILogPathSettable && mLogPath != null){
+                ((ILogPathSettable)h).setLogPath(mLogPath);
             }
         }          
     }

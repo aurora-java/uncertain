@@ -4,13 +4,16 @@
 package uncertain.ocm;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import uncertain.composite.CompositeMap;
 import uncertain.logging.ILogger;
 
 /** Create object by constructor reflection, using instances associated with specific class
@@ -301,6 +304,21 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
     
     public void setLogger(Logger l){
         logger = l;
+    }
+    
+    public CompositeMap dumpInstanceList( CompositeMap list ){
+        Iterator it = instance_map.entrySet().iterator();
+        while( it.hasNext() ){
+            Map.Entry entry = (Map.Entry)it.next();
+            Object obj = entry.getValue();
+            Class type = (Class)entry.getKey();
+            CompositeMap instance = new CompositeMap("instance");
+            instance.put("type", type.getName());
+            instance.put("instance", obj.toString());
+            instance.put("instance_type", obj.getClass().getName());
+            list.addChild(instance);
+        }
+        return list;
     }
 
 }
