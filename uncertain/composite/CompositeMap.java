@@ -6,6 +6,7 @@
 
 package uncertain.composite;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,17 +23,20 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
 	public static final int DEFAULT_HASHMAP_SIZE = 30;
     
     /** name of this map */
-    String name = null;
-    String prefix = null;
-    String namespace_uri = null;
+	protected String name;
+    protected String prefix;
+    protected String namespace_uri;
     
-    String text;
+    protected String text;
     
-    CompositeMap    parent = null;
+    protected CompositeMap    parent;
     
     /** list of childs, each child is also a CompositeMap
      */
-    protected List   childs = null;
+    protected List   childs;
+    
+    /** source file where this CompositeMap is parsed from */
+    protected String  source_file;
     
     
     /** Creates new CompositeMap
@@ -552,14 +556,6 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
 	public void clear() {
 		super.clear();
 		if( childs != null){
-            /*
-            // Clear all items in child list
-            Iterator it = childs.iterator();
-            while(it.hasNext()){
-                CompositeMap item = (CompositeMap)it.next();
-                item.clear();
-            }
-            */
             childs.clear();
         }
         name = null;
@@ -568,17 +564,16 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         prefix = null;
 		childs = null;
 		parent = null;
+		source_file = null;
 	}
 	
 	public ElementIdentifier getIdentifier(){
 	    return new ElementIdentifier(namespace_uri,name);
 	}
 	
-	
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
+	/**
+	 * create a new CompositeMap and copy content to it 
+	 */
     public Object clone() {
         CompositeMap m =(CompositeMap)super.clone();
         if(childs!=null) {
@@ -592,5 +587,13 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
             }
         }
         return m;
+    }
+    
+    public String getSourceFile(){
+        return source_file;
+    }
+    
+    public void setSourceFile( String file ){
+        source_file = file;
     }
 }
