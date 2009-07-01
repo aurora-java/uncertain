@@ -7,6 +7,7 @@ package uncertain.composite;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 /** Base class for Dynamic member capable classes 
  * 
@@ -141,6 +142,12 @@ public class DynamicObject {
      */
     public void checkValidation(){
         
+    }
+    
+    public List getChilds( String name ){
+        CompositeMap child = object_context.getChild("name");
+        if(child==null) return null;
+        return child.getChilds();
     }
 	
 	

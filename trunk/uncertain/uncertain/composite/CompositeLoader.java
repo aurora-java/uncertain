@@ -145,7 +145,9 @@ public class CompositeLoader {
 		FileInputStream fis = null;
 		try{
 			fis = new FileInputStream(file_name);
-			return parse(fis);
+			CompositeMap map =  parse(fis);
+			map.setSourceFile(file_name);
+			return map;
 		} finally{
 			if( fis != null) fis.close();
 		}
