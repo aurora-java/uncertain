@@ -80,6 +80,12 @@ public class UncertainEngine implements IChildContainerAcceptable {
     ILogger                 mErrorLogger;
     TopicManager            mTopicManager;
     
+    public static UncertainEngine createInstance(){
+        UncertainEngine     engine = new UncertainEngine();
+        engine.initialize(null);
+        return engine;
+    }
+    
     /* ================== Constructors ======================================= */
     
     public UncertainEngine(InputStream config_stream) throws IOException {
@@ -195,7 +201,8 @@ public class UncertainEngine implements IChildContainerAcceptable {
 
     public void initialize(CompositeMap config){
         // populate self from config
-        mOcManager.populateObject(config,this);
+        if( config!=null )
+            mOcManager.populateObject(config,this);
         checkLogger();
         mLogger.log("Uncertain engine startup");
         // perform configuration
