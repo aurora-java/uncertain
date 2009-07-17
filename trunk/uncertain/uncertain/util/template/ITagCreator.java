@@ -3,8 +3,13 @@
  */
 package uncertain.util.template;
 
+/**
+ * Creates ITagContent instance under certain namespace 
+ * @author Zhou Fan
+ *
+ */
 public interface ITagCreator {
     
-    public ITagContent createInstance( String name_space, String tag );
+    public ITagContent createInstance( String namespace, String tag );
 
 }
