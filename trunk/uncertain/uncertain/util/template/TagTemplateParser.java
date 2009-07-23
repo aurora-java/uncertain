@@ -117,9 +117,14 @@ public class TagTemplateParser {
     {
         FileInputStream fis = new FileInputStream(template_file);
         InputStreamReader reader = new InputStreamReader(fis, "utf-8");
-        //FileReader reader = new FileReader(template_file);
         return buildTemplate( template_file.getPath(), reader, registry);
     }
+    
+    public TextTemplate buildTemplate( File template_file )
+    throws IOException
+    {
+        return buildTemplate( template_file, mDefaultRegistry );
+    }    
     
     public TextTemplate buildTemplate( String source_file_name, Reader reader, ITagCreatorRegistry registry ) 
         throws IOException 
