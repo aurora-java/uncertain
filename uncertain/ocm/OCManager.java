@@ -130,7 +130,7 @@ public class OCManager implements IMappingHandle {
 	
 	void fireEvent(OCMEvent evt){
 	    //logger.info(evt.toString());
-	    getLogger().log(evt.getLevel(),evt.toString());
+	    //getLogger().log(evt.getLevel(),evt.toString());
 		if(isEventEnable()&&listener_list!=null){
 			Iterator it = listener_list.iterator();
 			while(it.hasNext()){
