@@ -58,7 +58,7 @@ public class Field {
         return type;
     }
     /**
-     * @param type the type to set
+     * @param mType the type to set
      */
     public void setType(String t) throws ClassNotFoundException {
         type = t;
