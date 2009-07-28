@@ -6,14 +6,20 @@ package uncertain.pkg;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import org.xml.sax.SAXException;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.QualifiedName;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
+import uncertain.schema.ComplexType;
 import uncertain.schema.ISchemaManager;
+import uncertain.schema.IType;
 import uncertain.schema.SchemaManager;
 
 public class ComponentPackage {
@@ -72,6 +78,7 @@ public class ComponentPackage {
     
     protected void loadSchemaFile( File config_path )
     {
+        // load all schema in config directory
         String extension = "."+SchemaManager.DEFAULT_EXTENSION;
         File[] files = config_path.listFiles();
         for(int i=0; i<files.length; i++){
@@ -81,6 +88,22 @@ public class ComponentPackage {
                     mSchemaManager.loadSchemaByFile(files[i].getAbsolutePath());
                 }catch(Exception ex){
                     throw new RuntimeException("Error when parsing schema file "+files[i].getAbsolutePath(), ex);                    
+                }
+            }
+        }
+        // add attached feature classes
+        Collection cl = mSchemaManager.getAllTypes();
+        if(cl!=null){
+            for( Iterator it = cl.iterator(); it.hasNext(); ){
+                IType type = (IType)it.next();
+                if(type instanceof ComplexType){
+                    ComplexType complex_type = (ComplexType)type;
+                    List lst = complex_type.getAllAttachedClasses();
+                    if(lst!=null&&lst.size()>0){
+                        QualifiedName qname = complex_type.getQName();
+                        for( Iterator tit = lst.iterator(); tit.hasNext();)
+                            mClassRegistry.attachFeature(qname, (Class)tit.next());
+                    }
                 }
             }
         }
