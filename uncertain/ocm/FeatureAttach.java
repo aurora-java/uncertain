@@ -3,7 +3,7 @@
  */
 package uncertain.ocm;
 
-import uncertain.composite.ElementIdentifier;
+import uncertain.composite.QualifiedName;
 
 /**
  * FeatureMapping
@@ -76,8 +76,8 @@ public class FeatureAttach {
         this.nameSpace = nameSpace;
     }
     
-    public ElementIdentifier getElementIdentifier(){
-        return new ElementIdentifier(nameSpace,elementName);
+    public QualifiedName getElementIdentifier(){
+        return new QualifiedName(nameSpace,elementName);
     }
     
     

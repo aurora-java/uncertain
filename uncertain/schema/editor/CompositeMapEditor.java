@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.QualifiedName;
 import uncertain.schema.Attribute;
 import uncertain.schema.Element;
 import uncertain.schema.ISchemaManager;
-import uncertain.schema.QualifiedName;
 
 public class CompositeMapEditor {
 

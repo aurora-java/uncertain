@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.xml.sax.SAXException;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.QualifiedName;
 import uncertain.document.DocumentFactory;
 import uncertain.ocm.OCManager;
 import uncertain.ocm.PackageMapping;
@@ -34,6 +35,13 @@ public class SchemaManager implements ISchemaManager {
         mDocumentFactory = new DocumentFactory();
         mNamedObjectManager = new NamedObjectManager();
         mOcManager = OCManager.getInstance();
+        initOCManager();
+    }
+    
+    public SchemaManager( OCManager oc_manager ){
+        mDocumentFactory = new DocumentFactory();
+        mNamedObjectManager = new NamedObjectManager();
+        mOcManager = oc_manager;
         initOCManager();
     }
     

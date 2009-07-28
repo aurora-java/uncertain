@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import uncertain.composite.QualifiedName;
+
 public class ComplexType extends AbstractQualifiedNamed implements IType {
     
     Attribute[]         mAttributes;
@@ -16,7 +18,8 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
     Extension[]         mExtensions;
     CollectionRef[]     mCollections;
     IValidator[]        mValidators;
-
+    FeatureClass[]      mClasses;
+    
     Schema          mSchema;
 
     public boolean isComplex() {       
@@ -92,21 +95,21 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         return map.values();
     }
     
-    private void addAttributes( List set, Attribute[] array){
+    private void addAttributesToList( List list, Attribute[] array){
         if(array!=null)
             for( int i=0; i<array.length; i++){
-                set.add(array[i]);
+                list.add(array[i]);
             }
     }
     
     public List getAllAttributes(){
         List result = new LinkedList();
-        addAttributes(result, mAttributes);
+        addAttributesToList(result, mAttributes);
         Collection types = getExtendedTypes();
         if(types!=null)
             for(Iterator it = types.iterator(); it.hasNext(); ){
                 ComplexType t = (ComplexType)it.next();
-                addAttributes(result, t.mAttributes);
+                addAttributesToList(result, t.mAttributes);
             }
         return result;
     }
@@ -133,5 +136,14 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         super.doAssemble();
         mSchema = getSchema();
     }    
+    
+    public FeatureClass[] getClasses(){
+        return mClasses;
+    }
+    
+    public void setClasses( FeatureClass[] classes ){
+        this.mClasses = classes;
+    }
+    
 
 }

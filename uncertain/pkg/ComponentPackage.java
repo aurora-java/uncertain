@@ -13,11 +13,13 @@ import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
+import uncertain.schema.ISchemaManager;
+import uncertain.schema.SchemaManager;
 
 public class ComponentPackage {
     
     static final String CONFIG_PATH = "config";
-    
+  
     static final String CLASS_REGISTRY_FILE = "class-registry.xml";
     static final String PACKAGE_CONFIG_FILE = "package.xml";
     
@@ -30,6 +32,7 @@ public class ComponentPackage {
     String              mDescription;
     String              mName;
     PackageManager      mOwner;
+    SchemaManager       mSchemaManager;
     
     CompositeMap        mPackageConfig;
     
@@ -67,6 +70,22 @@ public class ComponentPackage {
         }
     }
     
+    protected void loadSchemaFile( File config_path )
+    {
+        String extension = "."+SchemaManager.DEFAULT_EXTENSION;
+        File[] files = config_path.listFiles();
+        for(int i=0; i<files.length; i++){
+            String file = files[i].getName().toLowerCase();
+            if(file.endsWith(extension)){
+                try{
+                    mSchemaManager.loadSchemaByFile(files[i].getAbsolutePath());
+                }catch(Exception ex){
+                    throw new RuntimeException("Error when parsing schema file "+files[i].getAbsolutePath(), ex);                    
+                }
+            }
+        }
+    }
+    
     protected void initPackage()
         throws IOException
     {
@@ -82,6 +101,8 @@ public class ComponentPackage {
             }catch(ClassCastException ex){
                 throw new RuntimeException(CLASS_REGISTRY_FILE+" is not valid, the root element should be mapped to "+ClassRegistry.class.getName());
             }
+        mSchemaManager = new SchemaManager(oc_manager);
+        loadSchemaFile(config_path);
     }
     
     /**
@@ -164,6 +185,10 @@ public class ComponentPackage {
     
     public PackageManager getPackageManager(){
         return mOwner;
+    }
+    
+    public ISchemaManager getSchemaManager(){
+        return mSchemaManager;
     }
 
 }

@@ -3,6 +3,8 @@
  */
 package uncertain.schema;
 
+import uncertain.composite.QualifiedName;
+
 /**
  * Define general method for schema object that has a qualified name,
  * such as element, attribute, complexType

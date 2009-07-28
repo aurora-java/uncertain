@@ -5,6 +5,8 @@ package uncertain.schema;
 
 import java.util.Iterator;
 
+import uncertain.composite.QualifiedName;
+
 public abstract class AbstractQualifiedNamed extends AbstractSchemaObject implements
         IQualifiedNamed, Comparable {
     
@@ -29,7 +31,7 @@ public abstract class AbstractQualifiedNamed extends AbstractSchemaObject implem
     }
     
     public String getLocalName(){
-        return mQname==null?null:mQname.mLocalName;
+        return mQname==null?null:mQname.getLocalName();
     }
     
     /**

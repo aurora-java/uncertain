@@ -3,11 +3,13 @@
  */
 package uncertain.schema;
 
+import uncertain.composite.QualifiedName;
+
 public class Element extends ComplexType {
     
     String          mRef;    
     String          mUsage;
-    String          mType;    
+    String          mType;
     
     boolean         mIsRef = false;
     ComplexType     mRefType;
@@ -39,7 +41,7 @@ public class Element extends ComplexType {
             mRefType = getSchemaManager().getComplexType(qname);
             if(mRefType==null)
                 throw new SchemaError("Unresolvable element ref:"+mRef);
-        }        
+        }
     }    
 
 /*    
