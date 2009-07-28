@@ -16,9 +16,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 
@@ -67,6 +66,8 @@ public class CompositeMapParser extends DefaultHandler {
         //Class nodeCls = node.getClass();
         for( int i=0; i<attribs.getLength(); i++){
         		 String attrib_name = attribs.getQName(i);
+        		 /** @todo Add attribute namespace support */  
+        		 //String uri = attribs.getURI(i);
         		 if( name_processor!=null) attrib_name = name_processor.getAttributeName(attrib_name);
                  node.put( attrib_name, attribs.getValue(i) );        
         }
@@ -251,21 +252,7 @@ public class CompositeMapParser extends DefaultHandler {
         this.support_xinclude = next.support_xinclude;
         this.composite_loader = next.composite_loader;
     }
-    
-    /*
-    public static CompositeMap parse(XMLReader xmlreader, InputSource source, CompositeMapParser parser)throws SAXException, IOException {
-        xmlreader.setContentHandler(parser);
-        xmlreader.parse( source);
-        return parser.getRoot();    
-    }
-    
-    
-    public static CompositeMap parse( XMLReader xmlreader, InputSource source, CompositeLoader loader) throws SAXException, IOException {
-        CompositeMapParser parser =  new CompositeMapParser(loader);
-        return parse(xmlreader, source, parser);
-    }
 
-    */
     public static CompositeMap parse( InputStream stream, CompositeLoader loader, NameProcessor processor ) 
     throws SAXException, IOException {
     	CompositeMapParser parser = null;
@@ -290,6 +277,15 @@ public class CompositeMapParser extends DefaultHandler {
     public static CompositeMap parse( InputStream stream) throws SAXException, IOException {
     	return parse(stream, null, null);
     }
+    
+    /**
+     * @todo Add element location info
+     */
+    /*
+    public void setDocumentLocator(Locator locator){
+        super.setDocumentLocator(locator);
+    }
+    */
 
 
 }

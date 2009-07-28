@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
-import uncertain.composite.ElementIdentifier;
+import uncertain.composite.QualifiedName;
 import uncertain.core.ConfigurationError;
 
 
@@ -183,7 +183,7 @@ public class ClassRegistry implements IClassLocator {
     
     
     public void attachFeature(String namespace, String element_name, Class feature_class){
-        ElementIdentifier eid = new ElementIdentifier(namespace, element_name);
+        QualifiedName eid = new QualifiedName(namespace, element_name);
         List fList = (List)feature_map.get(eid);
         if(fList==null){
             fList = new LinkedList();
@@ -192,13 +192,13 @@ public class ClassRegistry implements IClassLocator {
         fList.add(feature_class);
     }
     
-    public List getFeatures(ElementIdentifier eid){
+    public List getFeatures(QualifiedName eid){
         List fList = (List)feature_map.get(eid);
         return fList;       
     }
     
     public List getFeatures(String namespace, String element_name){
-        ElementIdentifier eid = new ElementIdentifier(namespace, element_name);
+        QualifiedName eid = new QualifiedName(namespace, element_name);
         return getFeatures(eid);
     }
     

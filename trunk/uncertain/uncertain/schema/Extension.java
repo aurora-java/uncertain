@@ -3,6 +3,8 @@
  */
 package uncertain.schema;
 
+import uncertain.composite.QualifiedName;
+
 public class Extension  implements ISchemaObject, IQualifiedNameAware {
     
     String          mBase;

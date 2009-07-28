@@ -6,6 +6,8 @@ package uncertain.schema;
 import java.util.HashMap;
 import java.util.Map;
 
+import uncertain.composite.QualifiedName;
+
 class NamedObjectManager {
 
     // QName -> ISchemaObject

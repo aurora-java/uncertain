@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import uncertain.util.GroupObjectProcessorImpl;
 import uncertain.util.IGroupObjectProcessor;
@@ -295,6 +296,40 @@ public class CompositeUtil {
        }       
        return data;
    }
+   
+   /**
+    * put childs into a Map, using specified field as key in each child item
+    * @param target Target Map to hold data
+    * @param data Source data containing childs that will be processed
+    * @param key_field key field that will identify each child
+    */
+   public static void fillMap( Map target, CompositeMap data, Object key_field ){
+       Iterator it = data.getChildIterator();
+       if( it==null ) return;
+       while(it.hasNext()){
+           CompositeMap item = (CompositeMap)it.next();
+           Object key = item.get(key_field);
+           target.put(key, item);
+       }
+   }
+
+   /**
+    * put specified field value into a Map
+    * @param target Target Map to hold data
+    * @param data Source data containing childs that will be processed
+    * @param key_field key field that will identify each child
+    * @param value_field value field that will be put into target Map
+    */
+   public static void fillMap( Map target, CompositeMap data, Object key_field, Object value_field ){
+       Iterator it = data.getChildIterator();
+       if( it==null ) return;
+       while(it.hasNext()){
+           CompositeMap item = (CompositeMap)it.next();
+           Object key = item.get(key_field);
+           Object value = item.get(value_field);
+           target.put(key, value);
+       }
+   }   
    
    public static Object[][] toArray(CompositeMap m, String[] fields){
        return toArray(m,fields,null);

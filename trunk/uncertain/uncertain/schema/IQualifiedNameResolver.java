@@ -3,6 +3,8 @@
  */
 package uncertain.schema;
 
+import uncertain.composite.QualifiedName;
+
 /**
  * Get QualifiedName by given prefix and name
  * @author Zhou Fan

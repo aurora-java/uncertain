@@ -1,9 +1,7 @@
 /*
  * Created on 2009-6-26
  */
-package uncertain.schema;
-
-import uncertain.composite.ElementIdentifier;
+package uncertain.composite;
 
 /**
  * Encapsulates qualified name of an schema object. The qualified name contains a name and an optional
@@ -76,7 +74,7 @@ public class QualifiedName {
         StringBuffer buf = new StringBuffer();
         if(mPrefix!=null)
             buf.append(mPrefix).append(":");
-        buf.append("name");
+        buf.append(mLocalName);
         return buf.toString();
     }
     
@@ -91,7 +89,7 @@ public class QualifiedName {
             QualifiedName q = (QualifiedName)obj;
             return isEqual(mLocalName, q.mLocalName) && isEqual( mNameSpace, q.mNameSpace );
         }else{
-            return super.equals(obj);
+            return false;
         }
     }
     
