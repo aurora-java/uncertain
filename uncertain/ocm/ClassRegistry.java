@@ -181,8 +181,19 @@ public class ClassRegistry implements IClassLocator {
         }
     }
     
+    public void attachFeature( QualifiedName qname, Class feature_class ){
+        List fList = (List)feature_map.get(qname);
+        if(fList==null){
+            fList = new LinkedList();
+            feature_map.put(qname, fList);
+        }
+        fList.add(feature_class);        
+    }
+    
     
     public void attachFeature(String namespace, String element_name, Class feature_class){
+        attachFeature( new QualifiedName(namespace, element_name), feature_class );
+        /*
         QualifiedName eid = new QualifiedName(namespace, element_name);
         List fList = (List)feature_map.get(eid);
         if(fList==null){
@@ -190,6 +201,7 @@ public class ClassRegistry implements IClassLocator {
             feature_map.put(eid, fList);
         }
         fList.add(feature_class);
+        */
     }
     
     public List getFeatures(QualifiedName eid){
