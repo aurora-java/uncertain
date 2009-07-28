@@ -3,8 +3,8 @@
  */
 package uncertain.schema;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import org.xml.sax.SAXException;
 
@@ -111,6 +111,10 @@ public class SchemaManager implements ISchemaManager {
     public void setOCManager(OCManager ocManager) {
         mOcManager = ocManager;
         initOCManager();
+    }
+    
+    public Collection getAllTypes(){
+        return mNamedObjectManager.getObjectMap(SchemaConstant.TYPE_ITYPE).values();
     }
 
 }
