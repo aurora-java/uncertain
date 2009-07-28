@@ -3,6 +3,8 @@
  */
 package uncertain.schema;
 
+import java.util.Collection;
+
 import uncertain.composite.QualifiedName;
 
 public interface ISchemaManager {
@@ -18,5 +20,7 @@ public interface ISchemaManager {
     public SimpleType   getSimpleType( QualifiedName qname );
     
     public IType        getType( QualifiedName qname );
+    
+    public Collection   getAllTypes();    
 
 }
