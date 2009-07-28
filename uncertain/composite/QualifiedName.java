@@ -94,7 +94,10 @@ public class QualifiedName {
     }
     
     public String toString(){
-        return mInternalName;
+        if( mNameSpace==null)
+            return mLocalName;
+        else
+            return "{"+mNameSpace+"}"+mLocalName;
     }
 
 }
