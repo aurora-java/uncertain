@@ -16,9 +16,10 @@ import uncertain.schema.ISchemaManager;
 
 public class CompositeMapEditor {
 
-    CompositeMap mData;
-    Element mElement;
-    ISchemaManager mSchemaManager;
+    CompositeMap    mData;
+    Element         mElement;
+    ISchemaManager  mSchemaManager;
+    List            mAttribs;
 
     /**
      * @param data
@@ -27,8 +28,9 @@ public class CompositeMapEditor {
     public CompositeMapEditor(ISchemaManager schemaManager, CompositeMap data) {
         this.mData = data;
         this.mSchemaManager = schemaManager;
-        mElement = mSchemaManager.getElement( new QualifiedName(mData.getNamespaceURI(), mData
-                .getName()));
+        mElement = mSchemaManager.getElement( mData.getQName());
+        if(mElement!=null)
+            mAttribs = mElement.getAllAttributes();
     }
 
     /**
@@ -39,12 +41,10 @@ public class CompositeMapEditor {
      */
     public AttributeValue[] getAttributeList() {
         if (mElement != null) {
-            List attribs = mElement.getAllAttributes();
-            Collections.sort(attribs);
-            
-            AttributeValue[] values = new AttributeValue[attribs.size()];
+            Collections.sort(mAttribs);            
+            AttributeValue[] values = new AttributeValue[mAttribs.size()];
             int i=0;
-            for( Iterator it = attribs.iterator() ; it.hasNext(); ){
+            for( Iterator it = mAttribs.iterator() ; it.hasNext(); ){
                 Attribute attrib = (Attribute)it.next();
                 values[i++] = new AttributeValue(mData, attrib, mData.get(attrib.getLocalName()));
             }

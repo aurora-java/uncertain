@@ -12,6 +12,8 @@ public class Attribute extends AbstractQualifiedNamed {
     String          mRef;    
     String          mType;    
     String          mUsage;
+    String          mDefault;
+    
     IValidator[]    mValidators;
     Attribute       mRefAttribute;
     
@@ -92,6 +94,14 @@ public class Attribute extends AbstractQualifiedNamed {
     
     public boolean equals( Object another ){
         return this == another;
+    }
+
+    public String getDefault() {
+        return mDefault;
+    }
+
+    public void setDefault(String default1) {
+        mDefault = default1;
     }
    
 }
