@@ -187,7 +187,7 @@ public class ClassRegistry implements IClassLocator {
             fList = new LinkedList();
             feature_map.put(qname, fList);
         }
-        fList.add(feature_class);        
+        fList.add(feature_class);
     }
     
     
@@ -215,7 +215,7 @@ public class ClassRegistry implements IClassLocator {
     }
     
     public List getFeatures( CompositeMap config ) {
-        return getFeatures(config.getIdentifier());
+        return getFeatures(config.getQName());
     }
     
     public Map getFeatureMap(){

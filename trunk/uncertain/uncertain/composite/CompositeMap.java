@@ -567,7 +567,7 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
 		source_file = null;
 	}
 	
-	public QualifiedName getIdentifier(){
+	public QualifiedName getQName(){
 	    return new QualifiedName(namespace_uri,name);
 	}
 	
