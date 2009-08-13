@@ -52,6 +52,14 @@ class NamedObjectManager {
             throw new IllegalArgumentException("Specified QName {"+qname+"} is not Element but "+type.getClass().getName());
     }
     
+    public Array getArray( QualifiedName qname ){
+        Element elm = getElement(qname);
+        if(elm.isArray())
+            return (Array)elm;
+        else
+            throw new IllegalArgumentException("Specified QName {"+qname+"} is not Array but ");
+    }
+    
     public ComplexType  getComplexType( QualifiedName qname ){
         IType type = getType(qname);
         if(type==null)
@@ -79,6 +87,20 @@ class NamedObjectManager {
     
     public Category getCategory( QualifiedName qname ){
         return (Category)mChildMapArray[SchemaConstant.TYPE_CATEGORIE].get(qname);
+    }
+    
+    public void addAttributes( Attribute[] attribs ){
+        if(attribs!=null)
+            for(int i=0; i<attribs.length; i++){
+                this.addNamedObject(SchemaConstant.TYPE_ATTRIBUTE, attribs[i]);
+            }
+    }
+    
+    public void addElements( Element[] elements ){
+        if(elements!=null)
+            for(int i=0; i<elements.length; i++){
+                this.addNamedObject(SchemaConstant.TYPE_ITYPE, elements[i]);
+            }
     }
 
 }
