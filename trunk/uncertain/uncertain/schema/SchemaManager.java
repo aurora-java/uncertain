@@ -116,5 +116,24 @@ public class SchemaManager implements ISchemaManager {
     public Collection getAllTypes(){
         return mNamedObjectManager.getObjectMap(SchemaConstant.TYPE_ITYPE).values();
     }
+    
+    /**
+     * Get Element by CompositeMap's QName
+     * @param data
+     * @return
+     */
+    public Element getElement( CompositeMap data ){
+        QualifiedName qname = data.getQName();
+        Element element = getElement(qname);
+        if(element==null){
+            CompositeMap parent = data.getParent();
+            if(parent!=null){
+                Element parent_element = getElement(parent);
+                if(parent_element!=null)
+                    element = parent_element.getElement(qname);
+            }
+        }
+        return element;
+    }
 
 }

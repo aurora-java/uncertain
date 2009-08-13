@@ -6,6 +6,7 @@ package uncertain.document;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 
 import org.xml.sax.SAXException;
 
@@ -43,7 +44,11 @@ public class DocumentFactory {
     public File getByClassPath( String name, String extension ){
         StringBuffer path = new StringBuffer(name.replace('.', '/'));
         path.append('.').append(extension);
-        return new File(mClassLoader.getResource(path.toString()).getFile());
+        URL url = mClassLoader.getResource(path.toString());
+        if(url==null)
+            return null;
+        else
+            return new File(url.getFile());
     }
     
     public CompositeMap loadCompositeMap( String name )        

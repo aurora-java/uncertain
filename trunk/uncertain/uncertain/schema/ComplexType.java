@@ -4,12 +4,12 @@
 package uncertain.schema;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 
 import uncertain.composite.QualifiedName;
@@ -19,11 +19,14 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
     Attribute[]         mAttributes;
     Element[]           mElements;
     Extension[]         mExtensions;
-    CollectionRef[]     mCollections;
+//    CollectionRef[]     mCollections;
+    Array[]             mArrays;
     IValidator[]        mValidators;
     FeatureClass[]      mClasses;
     
-    Schema          mSchema;
+    NamedObjectManager  mObjectManager = new NamedObjectManager();
+    
+    Schema              mSchema;
 
     public boolean isComplex() {       
         return true;
@@ -63,7 +66,7 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         this.mExtensions = extensions;
         addChilds(extensions);
     }
-
+/*
     public CollectionRef[] getCollections() {
         return mCollections;
     }
@@ -71,7 +74,7 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
     public void setCollections( CollectionRef[] collections) {
         this.mCollections = collections;
     }
-    
+*/    
     public boolean isExtensionOf( ComplexType another ){
         return false;    
     }
@@ -213,6 +216,46 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         else
             return "complexType";
     }
+
+    public void resolveQName(IQualifiedNameResolver resolver) {
+        super.resolveQName(resolver);
+        mObjectManager.addAttributes(mAttributes);
+        mObjectManager.addElements(mElements);
+        mObjectManager.addElements(mArrays);
+    }
     
+    public Element getElement( QualifiedName qname ){
+        return mObjectManager.getElement(qname);
+    }
+    
+    public Attribute getAttribute( QualifiedName qname ){
+        return mObjectManager.getAttribute(qname);
+    }
+
+    public Array[] getArrays() {
+        return mArrays;
+    }
+
+    public void setArrays(Array[] arrays) {
+        mArrays = arrays;
+        addChilds(arrays);
+    }
+    
+    public Array getArray( QualifiedName qname ){
+        return mObjectManager.getArray(qname);
+    }
+    
+    
+
+/*    
+    boolean             mIsCollection;    
+    public boolean getIsCollection() {
+        return mIsCollection;
+    }
+
+    public void setIsCollection(boolean isCollection) {
+        mIsCollection = isCollection;
+    }
+*/    
 
 }

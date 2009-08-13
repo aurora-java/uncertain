@@ -5,8 +5,9 @@ package uncertain.schema;
 
 import uncertain.composite.DynamicObject;
 
-public class CollectionRef extends AbstractQualifiedNamed {
+public class Array extends Element {
     
+    /*
     String          name;
     String          type;
     String          minOccur = "0";
@@ -47,5 +48,10 @@ public class CollectionRef extends AbstractQualifiedNamed {
     public void doAssemble(){
         
     }    
+    */
+    
+    public boolean isArray(){
+        return true;
+    }
 
 }

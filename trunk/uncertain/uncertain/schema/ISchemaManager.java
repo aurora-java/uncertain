@@ -5,6 +5,7 @@ package uncertain.schema;
 
 import java.util.Collection;
 
+import uncertain.composite.CompositeMap;
 import uncertain.composite.QualifiedName;
 
 public interface ISchemaManager {
@@ -22,5 +23,12 @@ public interface ISchemaManager {
     public IType        getType( QualifiedName qname );
     
     public Collection   getAllTypes();    
+    
+    /**
+     * Get Element by CompositeMap's QName
+     * @param data
+     * @return
+     */
+    public Element getElement( CompositeMap data );    
 
 }
