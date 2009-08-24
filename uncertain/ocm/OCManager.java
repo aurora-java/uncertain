@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 
 import uncertain.composite.CharCaseProcessor;
+import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeMapParser;
 import uncertain.datatype.DataTypeRegistry;
@@ -48,7 +49,13 @@ public class OCManager implements IMappingHandle {
 	boolean			event_enable = true;
 	
 	static OCManager default_instance = new OCManager();
-
+	
+	static CompositeLoader default_loader = CompositeLoader.createInstanceForOCM();
+	
+	public static CompositeLoader getDefaultCompositeLoader(){
+	    return default_loader;
+	}
+/*
 	static CompositeMapParser default_parser = CompositeMapParser.createInstance(
 		null, 
 		new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
@@ -57,7 +64,7 @@ public class OCManager implements IMappingHandle {
     public static CompositeMapParser defaultParser(){
         return default_parser;
     }
-
+*/
     public static OCManager getInstance(){
 		return default_instance;
 	}
@@ -207,6 +214,7 @@ public class OCManager implements IMappingHandle {
 	 * @return
 	 */
 	public Object createObject( CompositeMap container){
+	    assert container!=null;
 	    Object obj = createNewInstance(container);
 	    if(obj!=null) populateObjectInternal(container, obj, this);
 	    return obj;
