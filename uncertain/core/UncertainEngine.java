@@ -60,8 +60,8 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
     public static final String UNCERTAIN_ERROR_TOPIC = "error";
     
-    CompositeMapParser		mCompositeParser;
-    CompositeLoader			mCompositeLoader = new CompositeLoader(".");
+    //CompositeMapParser		mCompositeParser;
+    CompositeLoader			mCompositeLoader = CompositeLoader.createInstanceForOCM();
     OCManager				mOcManager;
     ObjectRegistryImpl		mObjectRegistry;
     ClassRegistry			mClassRegistry;
@@ -89,9 +89,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
     /* ================== Constructors ======================================= */
     
     public UncertainEngine(InputStream config_stream) throws IOException {
-        mCompositeParser = OCManager.defaultParser();
+        //mCompositeParser = OCManager.defaultParser();
         try{
-	        CompositeMap config = mCompositeParser.parseStream(config_stream);
+	        CompositeMap config = mCompositeLoader.loadFromStream(config_stream);
 	        initialize(config);
         } catch(SAXException ex){
             throw new IOException(ex.getMessage());
@@ -118,7 +118,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         FileInputStream fis = null;
         try{
             fis = new FileInputStream(new File(config_dir, config_file_name));
-            CompositeMap config_map = OCManager.defaultParser().parseStream(fis);
+            CompositeMap config_map = mCompositeLoader.loadFromStream(fis);
             initialize(config_map);
         }catch(SAXException ex){
             logException("Error when reading configuration file "+config_file_name,ex);
@@ -177,11 +177,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     protected void bootstrap(){
         // create internal CompositeMapLoader 
-        mCompositeParser = CompositeMapParser.createInstance(
-                mCompositeLoader,
-                new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
-        );
-        mCompositeLoader.setParserPrototype(mCompositeParser);
+        mCompositeLoader = CompositeLoader.createInstanceForOCM();
         mDirectoryConfig = (DirectoryConfig)DynamicObject.cast(this.mGlobalContext, DirectoryConfig.class);
 
         // create bootstrap object instance
@@ -321,8 +317,11 @@ public class UncertainEngine implements IChildContainerAcceptable {
             scanConfigFiles(mConfigDir, DEFAULT_CONFIG_FILE_PATTERN);
         }
         else{
-            mLogger.log("Scanning config directory "+mCompositeLoader.getBaseDir());
-            scanConfigFiles(new File(mCompositeLoader.getBaseDir()), DEFAULT_CONFIG_FILE_PATTERN);
+            if(mDirectoryConfig!=null)
+                if(mDirectoryConfig.getBaseDirectory()!=null){
+                    mLogger.log("Scanning config directory "+mCompositeLoader.getBaseDir());
+                    scanConfigFiles(new File(mDirectoryConfig.getBaseDirectory()), DEFAULT_CONFIG_FILE_PATTERN);
+                }
         }
     }
     
@@ -374,19 +373,11 @@ public class UncertainEngine implements IChildContainerAcceptable {
     {
         try{
 
-	        CompositeMap m = mCompositeLoader.loadFromClassPath(class_path, false);
+	        CompositeMap m = mCompositeLoader.loadFromClassPath(class_path);
 	        return m;
         }catch(Exception ex){
             throw new RuntimeException("Can't load CompositeMap from path "+class_path, ex);
         }
-/*            
-            try{
-            } catch(Throwable ex){
-            logger.log(Level.SEVERE,"Can't load CompositeMap from "+class_path, ex);
-            ex.printStackTrace();
-            return null;
-        }
-*/        
     }
         
     
