@@ -6,13 +6,14 @@
 
 package uncertain.composite;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+
+import org.xml.sax.Locator;
 
 /** A Map with a list of child maps, and a name and namespace
  * for xml creation
@@ -37,6 +38,9 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     
     /** source file where this CompositeMap is parsed from */
     protected String  source_file;
+    
+    
+    //protected Locator locator;
     
     
     /** Creates new CompositeMap
@@ -593,7 +597,19 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         return source_file;
     }
     
+    /** source file path where this CompositeMap is parsed from */
     public void setSourceFile( String file ){
         source_file = file;
     }
+
+    /*
+    // Location in source file 
+    public Locator getLocator() {
+        return locator;
+    }
+
+    public void setLocator(Locator locator) {
+        this.locator = locator;
+    }
+    */
 }

@@ -23,16 +23,47 @@ import org.xml.sax.SAXException;
  * 
  */
 public class CompositeLoader {
+    
+    /**
+     * Create a CompositeLoader that use lower attribute case
+     * @param extension
+     * @return
+     */
+    public static CompositeLoader createInstanceForOCM( String extension ){
+        CompositeLoader loader = new CompositeLoader();
+        loader.ignoreAttributeCase();
+        loader.setDefaultExt(extension==null?DEFAULT_EXT:extension);
+        return loader;        
+    }
 	
+    public static CompositeLoader createInstanceForOCM(){
+        return createInstanceForOCM(DEFAULT_EXT);
+    }
+    
+    public static CompositeLoader createInstanceWithExt( String default_file_ext ){
+        CompositeLoader loader = new CompositeLoader();
+        loader.setDefaultExt(default_file_ext);
+        return loader;
+    }
+    
+    public static CompositeLoader createInstanceWithBaseDir( String base_dir ){
+        CompositeLoader loader = new CompositeLoader();
+        loader.setBaseDir(base_dir);
+        return loader;
+    }
+    
 	public static final String DEFAULT_EXT = "xml";
 	
-	String          	base_dir;
-	String				default_ext;
-	boolean				support_xinclude = true;
-	boolean				caseInsensitive = false;
+	String          	mBaseDir;
+	String				mDefaultExt;
+	boolean				mSupportXinclude = true;
+	boolean				mCaseInsensitive = false;
+	//boolean             mCreateLocator = false;
+	NameProcessor       mNameProcessor = null;
+	ClassLoader         mClassLoader = Thread.currentThread().getContextClassLoader();
 	
 	LinkedList			extra_path_list = null;
-	CompositeMapParser  parser;
+	//CompositeMapParser  parser;
 	
 	// cache feature
 	HashMap				composite_map_cache = null;
@@ -40,12 +71,7 @@ public class CompositeLoader {
 	
 	
 	CompositeMap parse( InputStream stream) throws IOException, SAXException {
-	    CompositeMapParser p = null;
-		if(parser==null)
-		    p = new CompositeMapParser();
-		else
-		    p = new CompositeMapParser(parser);
-		p.setCompositeLoader(this);
+	    CompositeMapParser p = new CompositeMapParser(this);
 		return p.parseStream(stream);
 	}
 	
@@ -58,7 +84,7 @@ public class CompositeLoader {
 	        composite_map_cache.clear();
 	}
 	
-	public Map getCache(){
+	protected Map getCache(){
 	    return composite_map_cache;
 	}
 	
@@ -68,23 +94,15 @@ public class CompositeLoader {
 	}
 
 	public CompositeLoader(){
-	    base_dir = null;
-	    default_ext = DEFAULT_EXT;
+	    mBaseDir = null;
+	    mDefaultExt = DEFAULT_EXT;
 	}
 	
-	public CompositeLoader( String dir, String ext){
-		setBaseDir(dir);
-		setDefaultExt(ext);
+	public CompositeLoader( String base_dir, String default_ext){
+		setBaseDir(base_dir);
+		setDefaultExt(default_ext);
 	}
-	
-	public CompositeLoader( String dir){
-		this(dir, CompositeLoader.DEFAULT_EXT);
-	}
-	
-	public void setParserPrototype(CompositeMapParser p){
-	    parser = p;
-	}
-	
+
 	public void addExtraLoader( CompositeLoader loader ){
 		if( extra_path_list == null) extra_path_list = new LinkedList();
 		extra_path_list.add(loader);
@@ -100,9 +118,13 @@ public class CompositeLoader {
 	
 	
 	/** convert path from class style to file style */
-	public String ConvertResourcePath( String path ){
-		return path.replace('.', '/') +'.' + default_ext;
+	public String convertResourcePath( String path ){
+		return path.replace('.', '/') +'.' + mDefaultExt;
 	}
+
+    public String convertResourcePath( String path, String file_ext ){
+        return path.replace('.', '/') +'.' + file_ext;
+    }
 	
 	public CompositeMap loadFromString( String str) throws IOException, SAXException {
 		return parse( new ByteArrayInputStream(str.getBytes()));
@@ -141,7 +163,6 @@ public class CompositeLoader {
 	}
 
 	public CompositeMap loadByFullFilePath( String file_name) throws IOException, SAXException {
-//	    System.out.println("loading "+file_name);
 		FileInputStream fis = null;
 		try{
 			fis = new FileInputStream(file_name);
@@ -158,10 +179,10 @@ public class CompositeLoader {
 		String full_name = file_name;;
 		if( file_name == null) return null;
 		// attach default extension and file path if nessesary
-		if( this.default_ext != null && file_name.indexOf('.')<0)
-			full_name = full_name + '.' + this.default_ext;
-		if( this.base_dir != null)
-			full_name = this.base_dir + full_name;
+		if( this.mDefaultExt != null && file_name.indexOf('.')<0)
+			full_name = full_name + '.' + this.mDefaultExt;
+		if( this.mBaseDir != null)
+			full_name = this.mBaseDir + full_name;
 		return full_name;		
 	}
 	
@@ -237,29 +258,30 @@ public class CompositeLoader {
 	}
 	
     public CompositeMap loadFromClassPath( String full_name) throws IOException, SAXException {
-        return loadFromClassPath(full_name, true);
+        return loadFromClassPath(full_name, mDefaultExt, false);
+    }
+    
+    public CompositeMap loadFromClassPath( String full_name, String file_ext ) throws IOException, SAXException {
+        return loadFromClassPath(full_name, file_ext, false);
     }
 	
-	public CompositeMap loadFromClassPath( String full_name, boolean cache ) throws IOException, SAXException {
+	private CompositeMap loadFromClassPath( String full_name, String file_ext, boolean cache ) throws IOException, SAXException {
         if(full_name==null) throw new IllegalArgumentException("path to load CompositeMap is null");
 		InputStream stream = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String path = ConvertResourcePath(full_name);
+        String path = convertResourcePath(full_name, file_ext);
 		try{
             if(cache){
-                stream = loader.getResourceAsStream(path);
+                stream = mClassLoader.getResourceAsStream(path);
+                return parse(stream);
             }else{
-                URL url = loader.getResource(path);
+                URL url = mClassLoader.getResource(path);                
                 if(url==null) throw new IOException("Can't get resource from "+path);
-                stream = url.openStream();    
+                String file = url.getFile(); 
+                return loadByFullFilePath(file);    
             }
-		    //stream = CompositeLoader.class.getClassLoader().getResourceAsStream(path);
-		    //if(stream==null) System.out.println("Can't load "+path);
-		    return parse(stream);
 		}finally{
 			if(stream != null) stream.close();
 		}
-		
 	}
 	
 
@@ -268,7 +290,7 @@ public class CompositeLoader {
 	 * @return String
 	 */
 	public String getBaseDir() {
-		return base_dir;
+		return mBaseDir;
 	}
 
 	/**
@@ -276,7 +298,7 @@ public class CompositeLoader {
 	 * @return String
 	 */
 	public String getDefaultExt() {
-		return default_ext;
+		return mDefaultExt;
 	}
 
 	/**
@@ -288,8 +310,8 @@ public class CompositeLoader {
 	    if(!f.exists()) throw new IllegalArgumentException("Directory not exists:"+base_dir);
 		int len = base_dir.length();
 		if( base_dir.charAt(len-1) != '\\' && base_dir.charAt(len-1) != '/')
-		this.base_dir = base_dir + File.separatorChar;
-		else this.base_dir = base_dir;
+		this.mBaseDir = base_dir + File.separatorChar;
+		else this.mBaseDir = base_dir;
 	}
 
 	/**
@@ -297,7 +319,7 @@ public class CompositeLoader {
 	 * @param default_ext The default_ext to set
 	 */
 	public void setDefaultExt(String default_ext) {
-		this.default_ext = default_ext;
+		this.mDefaultExt = default_ext;
 	}
 
 	/**
@@ -305,7 +327,7 @@ public class CompositeLoader {
 	 * @return boolean
 	 */
 	public boolean getSupportXInclude() {
-		return support_xinclude;
+		return mSupportXinclude;
 	}
 
 	/**
@@ -313,11 +335,11 @@ public class CompositeLoader {
 	 * @param support_xinclude The support_xinclude to set
 	 */
 	public void setSupportXInclude(boolean support_xinclude) {
-		this.support_xinclude = support_xinclude;
+		this.mSupportXinclude = support_xinclude;
 	}
 	
 	public CompositeMap createCompositeMap(String _prefix, String _uri, String _name) {
-	    if(caseInsensitive)
+	    if(mCaseInsensitive)
 	        return new CaseInsensitiveMap(_prefix, _uri, _name);
 	    else
 	        return new CompositeMap(_prefix, _uri, _name);
@@ -327,13 +349,13 @@ public class CompositeLoader {
      * @return Returns the caseInsensitive.
      */
     public boolean getCaseInsensitive() {
-        return caseInsensitive;
+        return mCaseInsensitive;
     }
     /**
      * @param caseInsensitive The caseInsensitive to set.
      */
     public void setCaseInsensitive(boolean caseInsensitive) {
-        this.caseInsensitive = caseInsensitive;
+        this.mCaseInsensitive = caseInsensitive;
     }
     /**
      * @return Returns the cache_enabled.
@@ -356,4 +378,34 @@ public class CompositeLoader {
             }
         }
     }
+
+    public NameProcessor getNameProcessor() {
+        return mNameProcessor;
+    }
+
+    public void setNameProcessor(NameProcessor name_processor) {
+        this.mNameProcessor = name_processor;
+    }
+    
+    public void ignoreAttributeCase(){
+        NameProcessor p = new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED);
+        setNameProcessor(p);
+    }
+
+    public ClassLoader getClassLoader() {
+        return mClassLoader;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        mClassLoader = classLoader;
+    }
+/*
+    public boolean getCreateLocator() {
+        return mCreateLocator;
+    }
+
+    public void setCreateLocator(boolean createLocator) {
+        mCreateLocator = createLocator;
+    }
+*/    
 }
