@@ -3,6 +3,7 @@
  */
 package uncertain.schema;
 
+
 public class SimpleType extends AbstractQualifiedNamed implements IType {
   
     public boolean isComplex() {
@@ -12,4 +13,5 @@ public class SimpleType extends AbstractQualifiedNamed implements IType {
     public void doAssemble(){
         
     }
+
 }

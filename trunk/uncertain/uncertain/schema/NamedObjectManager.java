@@ -3,7 +3,11 @@
  */
 package uncertain.schema;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import uncertain.composite.QualifiedName;
@@ -11,7 +15,9 @@ import uncertain.composite.QualifiedName;
 class NamedObjectManager {
 
     // QName -> ISchemaObject
-    Map[]               mChildMapArray = new Map[10];    
+    Map[]               mChildMapArray = new Map[10]; 
+    // List of IReference
+    List                mReference = new LinkedList();
     
     public NamedObjectManager(){
         for( int i=0; i<mChildMapArray.length; i++){
@@ -20,10 +26,18 @@ class NamedObjectManager {
     }
     
     public void addNamedObject( int type, IQualifiedNamed obj ){
-        assert type>=0 && type<mChildMapArray.length;
+        assert type>=0 && type<mChildMapArray.length && obj!=null;
+        if(obj instanceof IHasReference){
+            IHasReference ref = (IHasReference)obj;
+            if( ref.isRef() ){
+                mReference.add(obj);                
+                mChildMapArray[type].put(ref.getRefQName(), obj );
+                return;
+            }
+        }        
         if(obj.getQName()==null)
             throw new SchemaError("Qualified name is not set for object "+obj);
-        mChildMapArray[type].put(obj.getQName(), obj );
+        mChildMapArray[type].put(obj.getQName(), obj );        
     }
     
     public Map getObjectMap( int type ){
@@ -101,6 +115,27 @@ class NamedObjectManager {
             for(int i=0; i<elements.length; i++){
                 this.addNamedObject(SchemaConstant.TYPE_ITYPE, elements[i]);
             }
+    }
+    
+    public void addAll( NamedObjectManager another ){
+        for(int i=0; i<mChildMapArray.length; i++){
+            mChildMapArray[i].putAll(another.mChildMapArray[i]);
+        }
+    }
+    
+    public void resolveReference( ISchemaManager manager ){
+        for(Iterator it = mReference.iterator(); it.hasNext(); ){            
+            IHasReference ref = (IHasReference)it.next();
+            ref.resolveReference( manager );
+        }
+        Collection types = mChildMapArray[ SchemaConstant.TYPE_ITYPE ].values();
+        for( Iterator it = types.iterator(); it.hasNext(); ){
+            Object o = it.next();
+            if( o instanceof ComplexType ){
+                ComplexType type = (ComplexType)o;
+                type.resolveReference(manager);
+            }
+        }
     }
 
 }

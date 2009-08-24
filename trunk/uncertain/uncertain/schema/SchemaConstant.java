@@ -14,7 +14,10 @@ public final class SchemaConstant {
     public static final String USAGE_OPTIONAL = "optional";
     public static final String USAGE_PROHIBITED = "prohibited";
     
-    public static final String OCCUR_UNBOUNDED = "unbounded"; 
+    public static final String OCCUR_UNBOUNDED = "unbounded";
+    public static final String NAME_ARRAY = "array";
+    public static final String NAME_ELEMENT = "element";
+    public static final String NAME_ATTRIBUTE = "attribute"; 
     
     
 

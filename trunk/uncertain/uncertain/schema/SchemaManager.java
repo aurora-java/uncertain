@@ -8,9 +8,9 @@ import java.util.Collection;
 
 import org.xml.sax.SAXException;
 
+import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.QualifiedName;
-import uncertain.document.DocumentFactory;
 import uncertain.ocm.OCManager;
 import uncertain.ocm.PackageMapping;
 
@@ -23,24 +23,27 @@ public class SchemaManager implements ISchemaManager {
     
     public static final String DEFAULT_EXTENSION = "sxsd";
     
-    DocumentFactory     mDocumentFactory;
+    //DocumentFactory     mDocumentFactory;
+    CompositeLoader     mCompositeLoader;
     NamedObjectManager  mNamedObjectManager;  
     OCManager           mOcManager;
     
     static final PackageMapping SCHEMA_NS_PACKAGE_MAPPING 
         = new PackageMapping(ISchemaManager.SCHEMA_NAMESPACE, SchemaManager.class.getPackage().getName());
     
+    private void _init(){
+        mCompositeLoader = CompositeLoader.createInstanceForOCM(DEFAULT_EXTENSION);
+        mNamedObjectManager = new NamedObjectManager();
+    }
     
     public SchemaManager(){
-        mDocumentFactory = new DocumentFactory();
-        mNamedObjectManager = new NamedObjectManager();
+        _init();
         mOcManager = OCManager.getInstance();
         initOCManager();
     }
     
     public SchemaManager( OCManager oc_manager ){
-        mDocumentFactory = new DocumentFactory();
-        mNamedObjectManager = new NamedObjectManager();
+        _init();
         mOcManager = oc_manager;
         initOCManager();
     }
@@ -70,6 +73,10 @@ public class SchemaManager implements ISchemaManager {
         return mNamedObjectManager.getType(qname);
     }
     
+    public Category getCategory( QualifiedName qname ){
+        return mNamedObjectManager.getCategory(qname);
+    }
+    
     public Schema loadSchema( CompositeMap schema_config ){
         Schema schema = (Schema)mOcManager.createObject(schema_config);
         schema.setSchemaManager(this);
@@ -82,26 +89,27 @@ public class SchemaManager implements ISchemaManager {
         throws IOException, SAXException
     {
         CompositeMap map = null;
-         map = mDocumentFactory.getCompositeLoader().loadByFullFilePath( source_file );
+         map = mCompositeLoader.loadByFullFilePath( source_file );
          return loadSchema(map);
     }
     
-    public Schema loadSchemaByClassPath( String class_path, String extension )
+    public Schema loadSchemaFromClassPath( String class_path, String extension )
         throws IOException, SAXException
     {
-        CompositeMap map = mDocumentFactory.loadCompositeMap(class_path, extension);
+        CompositeMap map = mCompositeLoader.loadFromClassPath(class_path, extension); 
         return loadSchema(map);
     }
     
-    public Schema loadSchemaByClassPath( String class_path )
+    public Schema loadSchemaFromClassPath( String class_path )
         throws IOException, SAXException    
     {
-        return loadSchemaByClassPath( class_path, DEFAULT_EXTENSION );        
+        return loadSchemaFromClassPath( class_path, DEFAULT_EXTENSION );        
     }
 
     
     public void addSchema( Schema schema ){
-        mNamedObjectManager.putAll(schema.mNamedObjectManager);        
+        mNamedObjectManager.putAll(schema.mNamedObjectManager);  
+        schema.resolveReference();
     }
 
     public OCManager getOCManager() {
@@ -134,6 +142,10 @@ public class SchemaManager implements ISchemaManager {
             }
         }
         return element;
+    }
+    
+    public void addAll( SchemaManager another ){
+        mNamedObjectManager.addAll(another.mNamedObjectManager);
     }
 
 }

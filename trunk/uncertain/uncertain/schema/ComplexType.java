@@ -19,7 +19,6 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
     Attribute[]         mAttributes;
     Element[]           mElements;
     Extension[]         mExtensions;
-//    CollectionRef[]     mCollections;
     Array[]             mArrays;
     IValidator[]        mValidators;
     FeatureClass[]      mClasses;
@@ -66,15 +65,7 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         this.mExtensions = extensions;
         addChilds(extensions);
     }
-/*
-    public CollectionRef[] getCollections() {
-        return mCollections;
-    }
 
-    public void setCollections( CollectionRef[] collections) {
-        this.mCollections = collections;
-    }
-*/    
     public boolean isExtensionOf( ComplexType another ){
         return false;    
     }
@@ -115,24 +106,59 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         return result;
     }
     
-    private void addAttributesToList( List list, Attribute[] array){
-        if(array!=null)
-            for( int i=0; i<array.length; i++){
-                list.add(array[i]);
-            }
+    private ISchemaObject[] getChildArray( String type ){
+        if(SchemaConstant.NAME_ATTRIBUTE.equals(type))
+            return mAttributes;
+        else if(SchemaConstant.NAME_ELEMENT.equals(type))
+            return mElements;
+        else if(SchemaConstant.NAME_ARRAY.equals(type))
+            return mArrays;
+        else
+            throw new IllegalArgumentException("Unknown type "+type);
     }
     
-    /** Get all attributes, including attributes from extended types */
-    public List getAllAttributes(){
+    private void addObjectToList( List list, ISchemaObject[] array){
+        if(array!=null)
+            for( int i=0; i<array.length; i++){
+                ISchemaObject obj = array[i];
+                if(obj instanceof IHasReference){
+                    IHasReference ref = (IHasReference)obj;
+                    if(ref.isRef())
+                        list.add(ref.getRefObject());
+                    else
+                        list.add(obj);
+                }else
+                    list.add(obj);
+            }
+    }
+
+    protected List getAllChilds( String type ){
         List result = new LinkedList();
-        addAttributesToList(result, mAttributes);
+        addObjectToList(result, getChildArray(type));
         Collection types = getAllExtendedTypes();
         if(types!=null)
             for(Iterator it = types.iterator(); it.hasNext(); ){
                 ComplexType t = (ComplexType)it.next();
-                addAttributesToList(result, t.mAttributes);
+                addObjectToList(result, t.getChildArray(type));
             }
-        return result;
+        return result;        
+    }
+    
+    /** Get all attributes, including explicitly declared and extended types */
+    public List getAllAttributes(){
+        return getAllChilds(SchemaConstant.NAME_ATTRIBUTE);
+    }
+
+    /** Get all elements, including explicitly declared and extended types 
+     * @return A List of ComplexType, not including Array
+     */
+    public List getAllElements(){
+        return getAllChilds(SchemaConstant.NAME_ELEMENT);
+    }
+    
+    /** Get all arrays, including explicitly declared and extended types */    
+    public List getAllArrays(){
+        return getAllChilds(SchemaConstant.NAME_ARRAY);
     }
     
     protected ComplexType[] loadSuperTypes(){
@@ -157,6 +183,9 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
     public void doAssemble(){
         super.doAssemble();
         mSchema = getSchema();
+        mObjectManager.addAttributes(mAttributes);
+        mObjectManager.addElements(mElements);
+        mObjectManager.addElements(mArrays);        
     }    
     
     public FeatureClass[] getClasses(){
@@ -179,14 +208,14 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         return list;
     }
     
-    static void addList( Set set, List list, Object o ){
+    private static void addList( Set set, List list, Object o ){
         if(set.contains(o))
             return;
         set.add(o);
         list.add(o);
     }
     
-    static void addListAll( Set set, List list, Collection data ){
+    private static void addListAll( Set set, List list, Collection data ){
         for(Iterator it = data.iterator(); it.hasNext(); )
             addList( set, list, it.next());
     }
@@ -219,9 +248,7 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
 
     public void resolveQName(IQualifiedNameResolver resolver) {
         super.resolveQName(resolver);
-        mObjectManager.addAttributes(mAttributes);
-        mObjectManager.addElements(mElements);
-        mObjectManager.addElements(mArrays);
+
     }
     
     public Element getElement( QualifiedName qname ){
@@ -245,17 +272,8 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         return mObjectManager.getArray(qname);
     }
     
-    
-
-/*    
-    boolean             mIsCollection;    
-    public boolean getIsCollection() {
-        return mIsCollection;
+    public void resolveReference( ISchemaManager manager ){
+        mObjectManager.resolveReference(manager);
     }
-
-    public void setIsCollection(boolean isCollection) {
-        mIsCollection = isCollection;
-    }
-*/    
 
 }

@@ -22,6 +22,8 @@ public interface ISchemaManager {
     
     public IType        getType( QualifiedName qname );
     
+    public Category     getCategory( QualifiedName qname );
+    
     public Collection   getAllTypes();    
     
     /**

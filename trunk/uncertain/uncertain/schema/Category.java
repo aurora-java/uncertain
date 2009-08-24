@@ -3,25 +3,83 @@
  */
 package uncertain.schema;
 
-public class Category extends AbstractQualifiedNamed {
-    
-    String      mParentCategory;
-    String      mPrompt;
+import uncertain.composite.QualifiedName;
 
-    public String getParentCategory() {
+public class Category extends AbstractQualifiedNamed implements IHasReference {
+    
+    String          mParentName;
+    String          mTitle;
+    String          mDescription;
+    QualifiedName   mParentQName;
+    Category        mParentCategory;
+
+    public String getParentName() {
+        return mParentName;
+    }
+
+    /**
+     * QName of parent category
+     */
+    public void setParentName(String parent) {
+        this.mParentName = parent;
+    }
+    
+    public Category getParentCategory(){
         return mParentCategory;
     }
 
-    public void setParentCategory(String parent) {
-        this.mParentCategory = parent;
+    /**
+     * Title of category
+     */
+    public String getTitle() {
+        return mTitle;
     }
 
-    public String getPrompt() {
-        return mPrompt;
+    public void setTitle(String title) {
+        mTitle = title;
     }
 
-    public void setPrompt(String prompt) {
-        this.mPrompt = prompt;
+    public void resolveQName(IQualifiedNameResolver resolver) {
+        super.resolveQName(resolver);
+        if(mParentName!=null){
+            mParentQName = resolver.getQualifiedName(mParentName);
+            if(mParentQName==null)
+                throw new InvalidQNameError(mParentName);
+        }
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public void setDescription(String description) {
+        mDescription = description;
+    }
+    
+    /**
+     * Always return false: Category doesn't need ref
+     */
+    public boolean isRef(){
+        return mParentName!=null;
+    }
+    
+    public QualifiedName getRefQName(){
+        return mQname;
+    }
+    
+    /**
+     * @return Referenced object instance
+     */
+    public ISchemaObject getRefObject(){
+        return mParentCategory;
+    }
+    
+    public void resolveReference( ISchemaManager manager ){
+        if(mParentQName!=null){
+            mParentCategory = manager.getCategory(mParentQName);
+            if(mParentCategory==null)
+                throw new SchemaError("Unknown category:"+mParentQName);
+        }
     }
 
 }

@@ -5,7 +5,7 @@ package uncertain.schema;
 
 import uncertain.composite.QualifiedName;
 
-public class Element extends ComplexType {
+public class Element extends ComplexType implements IHasReference {
     
     String          mRef;    
     String          mUsage;
@@ -24,34 +24,12 @@ public class Element extends ComplexType {
         mIsRef = mRef!=null;
     }
     
-    public boolean isRef(){
-        return mIsRef;
-    }    
-    
     public ComplexType getRefType(){
         return mRefType;
     }
     
     public void doAssemble() {
         super.doAssemble();
-   /*
-        Schema schema = getSchema();
-        if(mIsRef){
-            QualifiedName qname = schema.getQualifiedName(mRef);
-            if(qname!=null) 
-                throw new SchemaError("Unknown element:"+mRef);
-            mRefType = getSchemaManager().getComplexType(qname);
-            if(mRefType==null)
-                throw new SchemaError("Unresolvable element ref:"+mRef);
-        }
-        if(mType!=null){
-            QualifiedName typename = schema.getQualifiedName(mType); 
-            mElementType = getSchemaManager().getType(typename);
-            // @todo check type      
-            if(mElementType==null)
-                throw new SchemaError("Unknown type:"+typename);
-        }
-    */
     }    
     
     public boolean isArray(){
@@ -71,6 +49,50 @@ public class Element extends ComplexType {
         QualifiedName qname = schema.getQualifiedName(mType);
         return getSchemaManager().getType(qname);
     }
+    
+    public boolean isRef() {
+        return mIsRef;
+    }
+    
+    /**
+     * @return  Qualified name for referenced object
+     */
+    public QualifiedName getRefQName(){
+        return mQname;
+    }
+    
+    /**
+     * @return Referenced object instance
+     */
+    public ISchemaObject getRefObject(){
+        return null;
+    }
+    
+    public void resolveReference( ISchemaManager manager ){
+        if(mIsRef){
+            mRefType = manager.getComplexType(mQname);
+            if(mRefType==null)
+                throw new SchemaError("Unresolvable element ref:"+mRef);
+        }
+        if(mType!=null){
+            QualifiedName type_qname = getSchema().getQualifiedName(mType);
+            if(type_qname==null) 
+                throw new InvalidQNameError(mType);
+            mElementType = manager.getType(type_qname);
+        }
+        super.resolveReference(manager);
+    }
+
+    public void resolveQName(IQualifiedNameResolver resolver) {
+        if( mIsRef ){
+            mQname = resolver.getQualifiedName(mRef);
+            if(mQname==null)
+                throw new SchemaError("Can't resolve ref qualified name:"+mRef);
+        }else
+            super.resolveQName(resolver);
+    }
+    
+    
 
 /*    
     String      editor;

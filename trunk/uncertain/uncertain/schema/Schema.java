@@ -176,4 +176,8 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
             ((IQualifiedNamed)child).resolveQName(this);
         }
     }
+    
+    public void resolveReference(){
+        mNamedObjectManager.resolveReference( mSchemaManager );
+    }
 }
