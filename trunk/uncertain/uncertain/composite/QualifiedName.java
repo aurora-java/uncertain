@@ -24,6 +24,10 @@ public class QualifiedName {
     public QualifiedName(String nameSpace, String name) {
         this(null,nameSpace,name);
     }
+    
+    public QualifiedName( String name ){
+        this(null,null,name);
+    }
 
     /**
      * @param namespace
