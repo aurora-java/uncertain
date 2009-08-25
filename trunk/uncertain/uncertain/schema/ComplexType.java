@@ -14,7 +14,7 @@ import java.util.Set;
 
 import uncertain.composite.QualifiedName;
 
-public class ComplexType extends AbstractQualifiedNamed implements IType {
+public class ComplexType extends AbstractCategorized implements IType {
     
     Attribute[]         mAttributes;
     Element[]           mElements;
@@ -121,8 +121,8 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
         if(array!=null)
             for( int i=0; i<array.length; i++){
                 ISchemaObject obj = array[i];
-                if(obj instanceof IHasReference){
-                    IHasReference ref = (IHasReference)obj;
+                if(obj instanceof IReference){
+                    IReference ref = (IReference)obj;
                     if(ref.isRef())
                         list.add(ref.getRefObject());
                     else
@@ -273,6 +273,7 @@ public class ComplexType extends AbstractQualifiedNamed implements IType {
     }
     
     public void resolveReference( ISchemaManager manager ){
+        super.resolveReference(manager);
         mObjectManager.resolveReference(manager);
     }
 

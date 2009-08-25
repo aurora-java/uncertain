@@ -41,7 +41,7 @@ public abstract class AbstractQualifiedNamed extends AbstractSchemaObject implem
         if( mName != null){
             mQname = resolver.getQualifiedName(mName);
             if( mQname == null )
-                throw new SchemaError("Unresolvable name:"+mName);
+                throw new InvalidQNameError(mName);
         }
         // call resolveQName for each child
         if( super.mChilds!=null){

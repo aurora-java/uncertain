@@ -56,24 +56,6 @@ public class Category extends AbstractQualifiedNamed implements IHasReference {
         mDescription = description;
     }
     
-    /**
-     * Always return false: Category doesn't need ref
-     */
-    public boolean isRef(){
-        return mParentName!=null;
-    }
-    
-    public QualifiedName getRefQName(){
-        return mQname;
-    }
-    
-    /**
-     * @return Referenced object instance
-     */
-    public ISchemaObject getRefObject(){
-        return mParentCategory;
-    }
-    
     public void resolveReference( ISchemaManager manager ){
         if(mParentQName!=null){
             mParentCategory = manager.getCategory(mParentQName);
