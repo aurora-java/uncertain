@@ -5,11 +5,16 @@ package uncertain.schema;
 
 import uncertain.composite.QualifiedName;
 
-public class Element extends ComplexType implements IHasReference {
+public class Element extends ComplexType implements IReference {
     
     String          mRef;    
     String          mUsage;
     String          mType;
+    String          mDefault;
+    String          mMaxOccurs;
+    String          mMinOccurs;
+    
+    String          mEditor;
     
     boolean         mIsRef = false;
     ComplexType     mRefType;
@@ -91,21 +96,37 @@ public class Element extends ComplexType implements IHasReference {
         }else
             super.resolveQName(resolver);
     }
-    
-    
-
-/*    
-    String      editor;
 
     public String getEditor() {
-        return editor;
+        return mEditor;
     }
 
     public void setEditor(String editor) {
-        this.editor = editor;
+        mEditor = editor;
     }
-*/    
-    
-    
+
+    public String getDefault() {
+        return mDefault;
+    }
+
+    public void setDefault(String default1) {
+        mDefault = default1;
+    }
+
+    public String getMaxOccurs() {
+        return mMaxOccurs;
+    }
+
+    public void setMaxOccurs(String maxOccurs) {
+        mMaxOccurs = maxOccurs;
+    }
+
+    public String getMinOccurs() {
+        return mMinOccurs;
+    }
+
+    public void setMinOccurs(String minOccurs) {
+        mMinOccurs = minOccurs;
+    }
 
 }

@@ -27,17 +27,18 @@ class NamedObjectManager {
     
     public void addNamedObject( int type, IQualifiedNamed obj ){
         assert type>=0 && type<mChildMapArray.length && obj!=null;
-        if(obj instanceof IHasReference){
-            IHasReference ref = (IHasReference)obj;
+        QualifiedName key = obj.getQName();        
+        if(obj instanceof IReference){
+            IReference ref = (IReference)obj;
             if( ref.isRef() ){
-                mReference.add(obj);                
-                mChildMapArray[type].put(ref.getRefQName(), obj );
-                return;
+                key = ref.getRefQName();
             }
         }        
-        if(obj.getQName()==null)
+        if(key==null)
             throw new SchemaError("Qualified name is not set for object "+obj);
-        mChildMapArray[type].put(obj.getQName(), obj );        
+        mChildMapArray[type].put(key, obj );
+        if( obj instanceof IHasReference )
+            mReference.add(obj);
     }
     
     public Map getObjectMap( int type ){

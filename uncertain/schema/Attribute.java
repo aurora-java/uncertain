@@ -6,20 +6,19 @@ package uncertain.schema;
 import uncertain.composite.QualifiedName;
 
 
-public class Attribute extends AbstractQualifiedNamed implements IHasReference {
+public class Attribute extends AbstractCategorized implements IReference {
     
     boolean         mIsRef = false;
     String          mRef;    
-    String          mType;    
-    String          mUsage;
-    String          mDefault;
+    Attribute       mRefAttribute;
     
-    String          mCategoryName;
-    QualifiedName   mCategoryQName;
-    Category        mCategory;
+    String          mType;    
+    String          mUse;
+    String          mDefault;
+    String          mEditor;    
     
     IValidator[]    mValidators;
-    Attribute       mRefAttribute;
+
 
     public static Attribute createInstance( String name ){
         QualifiedName qname = new QualifiedName(null, null, name);
@@ -60,12 +59,12 @@ public class Attribute extends AbstractQualifiedNamed implements IHasReference {
         this.mType = type;
     }
 
-    public String getUsage() {
-        return mUsage;
+    public String getUse() {
+        return mUse;
     }
 
-    public void setUsage(String usage) {
-        this.mUsage = usage;
+    public void setUse(String use) {
+        this.mUse = use;
     }
     
     public String toString(){
@@ -110,7 +109,8 @@ public class Attribute extends AbstractQualifiedNamed implements IHasReference {
     }
 
     
-    public void resolveReference( ISchemaManager manager ){        
+    public void resolveReference( ISchemaManager manager ){ 
+        super.resolveReference(manager);
         if(mIsRef){
             Schema schema = getSchema();
             QualifiedName qname = schema.getQualifiedName(mRef);
@@ -121,37 +121,23 @@ public class Attribute extends AbstractQualifiedNamed implements IHasReference {
             if(mRefAttribute==null)
                 throw new SchemaError("Unresolvable attribute ref:"+mRef);
         }         
-        if(mCategoryQName!=null){
-            mCategory = manager.getCategory(mCategoryQName);
-            if(mCategory==null)
-                throw new SchemaError("Unknown category:" + mCategoryQName);
-            System.out.println(mCategory);
-        }
     }    
     
     public void resolveQName(IQualifiedNameResolver resolver) {   
+        super.resolveQName(resolver);
         if( mIsRef ){
             mQname = resolver.getQualifiedName(mRef);
             if(mQname==null)
                 throw new SchemaError("Can't resolve ref qualified name:"+mRef);
-        }else
-            super.resolveQName(resolver);
-        if( mCategoryName!=null ){
-            mCategoryQName = resolver.getQualifiedName(mCategoryName);
-        }        
+        }
     }
 
-    public String getCategoryName() {
-        return mCategoryName;
+    public String getEditor() {
+        return mEditor;
     }
 
-    public void setCategoryName(String category) {
-        mCategoryName = category;
+    public void setEditor(String editor) {
+        mEditor = editor;
     }
-    
-    public Category getCategory(){
-        return mCategory;
-    }
-    
    
 }
