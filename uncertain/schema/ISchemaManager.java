@@ -10,8 +10,6 @@ import uncertain.composite.QualifiedName;
 
 public interface ISchemaManager {
     
-    public static final String SCHEMA_NAMESPACE = "http://www.uncertain-framework.org/schema/simple-schema";
-    
     public Attribute    getAttribute( QualifiedName qname );
     
     public Element      getElement( QualifiedName qname );

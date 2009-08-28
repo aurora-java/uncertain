@@ -12,7 +12,6 @@ import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.QualifiedName;
 import uncertain.ocm.OCManager;
-import uncertain.ocm.PackageMapping;
 
 /**
  * Holds all schema object loaded
@@ -23,13 +22,37 @@ public class SchemaManager implements ISchemaManager {
     
     public static final String DEFAULT_EXTENSION = "sxsd";
     
+    static SchemaManager        DEFAULT_INSTANCE = new SchemaManager();
+    static Schema               SCHEMA_FOR_SCHEMA;
+    
+    static void loadBuiltInSchema()
+        throws IOException, SAXException
+    {
+        String pkg_name = SchemaManager.class.getPackage().getName();
+        String schema_name = pkg_name + ".SchemaForSchema";
+        SCHEMA_FOR_SCHEMA = DEFAULT_INSTANCE.loadSchemaFromClassPath(schema_name);
+    }
+    
+    static {
+        try{
+            loadBuiltInSchema();
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    public static SchemaManager getDefaultInstance(){
+        return DEFAULT_INSTANCE;
+    }
+    
+    public static Schema getSchemaForSchema(){
+        return SCHEMA_FOR_SCHEMA;
+    }
+    
     //DocumentFactory     mDocumentFactory;
     CompositeLoader     mCompositeLoader;
     NamedObjectManager  mNamedObjectManager;  
     OCManager           mOcManager;
-    
-    static final PackageMapping SCHEMA_NS_PACKAGE_MAPPING 
-        = new PackageMapping(ISchemaManager.SCHEMA_NAMESPACE, SchemaManager.class.getPackage().getName());
     
     private void _init(){
         mCompositeLoader = CompositeLoader.createInstanceForOCM(DEFAULT_EXTENSION);
@@ -49,7 +72,7 @@ public class SchemaManager implements ISchemaManager {
     }
     
     private void initOCManager(){
-        mOcManager.getClassRegistry().addPackageMapping( SCHEMA_NS_PACKAGE_MAPPING );
+        mOcManager.getClassRegistry().addPackageMapping( SchemaConstant.SCHEMA_NS_PACKAGE_MAPPING );
     }
     
     
