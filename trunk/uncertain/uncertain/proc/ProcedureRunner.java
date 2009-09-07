@@ -512,6 +512,8 @@ public class ProcedureRunner {
     }
     
     public ILogger getLogger(){
+        if(caller!=null)
+            return caller.getLogger();
         if(mLogger!=null) return mLogger;
         ILogger logger = (ILogger)runtime_context.getInstanceOfType(ILogger.class);
         if(logger==null){
