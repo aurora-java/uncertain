@@ -18,7 +18,6 @@ import uncertain.composite.QualifiedName;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.schema.ComplexType;
-import uncertain.schema.ISchemaManager;
 import uncertain.schema.IType;
 import uncertain.schema.SchemaManager;
 
@@ -115,8 +114,14 @@ public class ComponentPackage {
         
         OCManager       oc_manager = mOwner.getOCManager();        
         File config_path = new File( mBasePathFile, CONFIG_PATH);
-        mPackageConfig = loadConfigFile( config_path, PACKAGE_CONFIG_FILE, true);
-        oc_manager.populateObject(mPackageConfig, this);        
+        mPackageConfig = loadConfigFile( config_path, PACKAGE_CONFIG_FILE, false);
+        if( mPackageConfig!=null ){
+            oc_manager.populateObject(mPackageConfig, this);
+        }else{
+            // Do default init work
+            setName(mBasePathFile.getName());            
+        }
+            
         CompositeMap registry = loadConfigFile( config_path, CLASS_REGISTRY_FILE, false);
         if(registry!=null)
             try{
@@ -210,7 +215,7 @@ public class ComponentPackage {
         return mOwner;
     }
     
-    public ISchemaManager getSchemaManager(){
+    public SchemaManager getSchemaManager(){
         return mSchemaManager;
     }
 
