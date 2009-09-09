@@ -485,7 +485,7 @@ public class ProcedureRunner {
         Configuration config = getConfiguration();
         Collection participants = config ==null? null: config.getParticipantList();
         if(participants==null) return;
-        OCManager oc_manager = uncertainEngine.getOcManager();
+        OCManager oc_manager = uncertainEngine==null? OCManager.getInstance(): uncertainEngine.getOcManager();
         // iterate through all fields
         Iterator it = fields.iterator();
         while(it.hasNext()){
