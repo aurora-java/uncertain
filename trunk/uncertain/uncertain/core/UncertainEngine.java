@@ -295,7 +295,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         while(it.hasNext()){
             Object inst = it.next();
             if(inst instanceof IGlobalInstance) 
-                getObjectSpace().registerInstance(inst);
+                getObjectRegistry().registerInstance(inst);
             if(inst instanceof IContextListener)
                 addContextListener((IContextListener)inst);
         }
@@ -514,7 +514,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return mObjectRegistry;
     }
 
-    public IObjectRegistry getObjectSpace(){
+    public IObjectRegistry getObjectRegistry(){
         return mObjectRegistry;
     }    
 

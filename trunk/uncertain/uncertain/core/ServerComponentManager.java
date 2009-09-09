@@ -27,7 +27,7 @@ public class ServerComponentManager {
     
     public ServerComponentManager(UncertainEngine     uncertainEngine){
         this.uncertainEngine = uncertainEngine;
-        this.objectSpace = uncertainEngine.getObjectSpace();
+        this.objectSpace = uncertainEngine.getObjectRegistry();
     }
     
     public ServerComponent getComponent( String name ){
