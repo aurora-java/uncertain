@@ -44,7 +44,7 @@ public class ServletHelper {
 
 
         uncertainEngine = new UncertainEngine(new File(config_dir), config_file);
-        IObjectRegistry os = uncertainEngine.getObjectSpace();
+        IObjectRegistry os = uncertainEngine.getObjectRegistry();
         os.registerInstance(ServletConfig.class,config);
         os.registerInstance(ServletContext.class,servletContext);
          //os.registerParameter(HttpServlet.class, this);
