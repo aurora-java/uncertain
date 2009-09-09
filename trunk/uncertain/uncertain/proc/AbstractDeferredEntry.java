@@ -29,7 +29,8 @@ public abstract class AbstractDeferredEntry extends AbstractEntry implements ICo
      *
      */
     public void doPopulate(){
-        mOCManager.populateObject(mEntryConfig, this);
+        if(mEntryConfig!=null)
+            mOCManager.populateObject(mEntryConfig, this);
     }
     
     public void beginConfigure(CompositeMap config){
