@@ -76,11 +76,12 @@ public class BasicFileHandler extends Handler implements ILogPathSettable, IConf
     }
 
     public void flush() {
-        try{
-            mWriter.flush();
-        }catch(IOException ex){
-            handleException(ex);
-        }
+        if(mWriter!=null)
+            try{
+                mWriter.flush();
+            }catch(IOException ex){
+                handleException(ex);
+            }
     }
 
     public synchronized void publish(LogRecord record) 
