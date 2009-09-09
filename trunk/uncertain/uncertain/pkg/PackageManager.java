@@ -10,20 +10,17 @@ import uncertain.composite.CharCaseProcessor;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMapParser;
 import uncertain.ocm.OCManager;
+import uncertain.schema.SchemaManager;
 
 public class PackageManager {
 
     CompositeLoader        mCompositeLoader;
     OCManager              mOCManager;
-    HashMap                mPackageNameMap = new HashMap();    
+    HashMap                mPackageNameMap = new HashMap();  
+    SchemaManager          mSchemaManager = new SchemaManager();
     
     public PackageManager(){
-        mCompositeLoader = new CompositeLoader();
-        CompositeMapParser     parser = CompositeMapParser.createInstance(
-                mCompositeLoader,
-                new CharCaseProcessor(CharCaseProcessor.CASE_LOWER, CharCaseProcessor.CASE_UNCHANGED)
-        );
-        mCompositeLoader.setParserPrototype(parser);
+        mCompositeLoader = CompositeLoader.createInstanceForOCM(null);
         mOCManager = OCManager.getInstance();
     }
     
@@ -48,7 +45,10 @@ public class PackageManager {
     
     public void addPackage( ComponentPackage pkg ){
         pkg.setPackageManager(this);
-        mPackageNameMap.put(pkg.getName(), pkg);        
+        mPackageNameMap.put(pkg.getName(), pkg); 
+        SchemaManager sm = pkg.getSchemaManager();
+        if(sm!=null)
+            mSchemaManager.addAll(sm);
     }
     
     public ComponentPackage loadPackage( String path, Class implement_cls ) 
