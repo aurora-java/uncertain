@@ -17,10 +17,8 @@ import java.util.logging.Logger;
 
 import org.xml.sax.SAXException;
 
-import uncertain.composite.CharCaseProcessor;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
-import uncertain.composite.CompositeMapParser;
 import uncertain.composite.DynamicObject;
 import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
@@ -41,8 +39,10 @@ import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.ocm.ObjectRegistryImpl;
+import uncertain.proc.IProcedureManager;
 import uncertain.proc.ParticipantRegistry;
 import uncertain.proc.Procedure;
+import uncertain.proc.ProcedureManager;
 import uncertain.proc.ProcedureRunner;
 import uncertain.util.FilePatternFilter;
 
@@ -69,6 +69,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     Configuration           mConfig;
     CompositeMap            mGlobalContext;
     DirectoryConfig         mDirectoryConfig;
+    ProcedureManager        mProcedureManager;
     
     Set                     mContextListenerSet;
     LinkedList				mExtraConfig = new LinkedList();
@@ -140,6 +141,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstanceOnce(UncertainEngine.class,this);
         mObjectRegistry.registerInstanceOnce(IObjectRegistry.class, mObjectRegistry);  
         mObjectRegistry.registerInstanceOnce(ILoggingTopicRegistry.class, mTopicManager);
+        mObjectRegistry.registerInstanceOnce(ILogger.class, mLogger);
     }
     
     private void setDefaultClassRegistry(){
@@ -183,7 +185,8 @@ public class UncertainEngine implements IChildContainerAcceptable {
         // create bootstrap object instance
         mContextListenerSet = new HashSet();
         mObjectRegistry = new ObjectRegistryImpl();
-        mOcManager = new OCManager(mObjectRegistry);  
+        mOcManager = new OCManager(mObjectRegistry);
+        mProcedureManager = new ProcedureManager(this);
 
         mClassRegistry = mOcManager.getClassRegistry();
         setDefaultClassRegistry();
@@ -585,6 +588,10 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     public DirectoryConfig getDirectoryConfig(){
         return mDirectoryConfig;
+    }
+    
+    public IProcedureManager getProcedureManager(){
+        return mProcedureManager;
     }
     
     public String getName(){
