@@ -22,7 +22,7 @@ public class GlobalInstanceList extends AbstractEntry  {
     }
 
     public void run(ProcedureRunner runner) throws Exception {
-        ObjectRegistryImpl registry =  (ObjectRegistryImpl)mEngine.getObjectSpace();
+        ObjectRegistryImpl registry =  (ObjectRegistryImpl)mEngine.getObjectRegistry();
         CompositeMap target = runner.getContext().createChildByTag(mPath);
         registry.dumpInstanceList(target);        
         Collections.sort(target.getChilds(), new CompositeComparator("type"));
