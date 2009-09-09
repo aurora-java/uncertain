@@ -73,7 +73,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
         fireEvent(event_name, null);
     }
 
-    private String getTypeKey( Class type ){
+    public static String getTypeKey( Class type ){
         return "_instance."+type.getName();
     }
     
