@@ -270,6 +270,17 @@ public class CompositeLoader {
 		InputStream stream = null;
         String path = convertResourcePath(full_name, file_ext);
 		try{
+		    URL url = mClassLoader.getResource(path);  
+		    String file = url==null?null:url.getFile(); 
+            if(file==null){
+                stream = mClassLoader.getResourceAsStream(path);
+                if(stream==null)
+                    throw new IOException("Can't get resource from "+path);
+                return parse(stream);                
+            }else{
+                return loadByFullFilePath(file);                
+            }
+            /*
             if(cache){
                 stream = mClassLoader.getResourceAsStream(path);
                 return parse(stream);
@@ -279,6 +290,7 @@ public class CompositeLoader {
                 String file = url.getFile(); 
                 return loadByFullFilePath(file);    
             }
+            */
 		}finally{
 			if(stream != null) stream.close();
 		}
