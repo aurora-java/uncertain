@@ -272,7 +272,15 @@ public class CompositeLoader {
 		try{
 		    URL url = mClassLoader.getResource(path);  
 		    String file = url==null?null:url.getFile(); 
-            if(file==null){
+		    // should load from stream?
+		    boolean need_stream = false;		    
+            if(file==null)
+                need_stream = true;
+            File f = new File(file);
+            if(!f.exists())
+                need_stream = true;
+            if(need_stream)
+            {
                 stream = mClassLoader.getResourceAsStream(path);
                 if(stream==null)
                     throw new IOException("Can't get resource from "+path);
