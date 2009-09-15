@@ -76,6 +76,7 @@ public class ComplexType extends AbstractCategorized implements IType {
      * @return List<ComplexType> A list containing all types 
      */
     public List getAllExtendedTypes(){
+        /** @todo use cache */
         final ComplexType[] extended_types = loadSuperTypes();
         final Set map = new HashSet();
         
@@ -141,11 +142,14 @@ public class ComplexType extends AbstractCategorized implements IType {
                 ComplexType t = (ComplexType)it.next();
                 addObjectToList(result, t.getChildArray(type));
             }
-        return result;        
+        return result;   
+        /**@todo use cache */
+        // return mObjectManager.getObjectMap(SchemaConstant.TYPE_ATTRIBUTE).values();
     }
     
     /** Get all attributes, including explicitly declared and extended types */
     public List getAllAttributes(){
+        /**@todo use cache */
         return getAllChilds(SchemaConstant.NAME_ATTRIBUTE);
     }
 
@@ -153,11 +157,13 @@ public class ComplexType extends AbstractCategorized implements IType {
      * @return A List of ComplexType, not including Array
      */
     public List getAllElements(){
+        /**@todo use cache */
         return getAllChilds(SchemaConstant.NAME_ELEMENT);
     }
     
     /** Get all arrays, including explicitly declared and extended types */    
     public List getAllArrays(){
+        /**@todo use cache */
         return getAllChilds(SchemaConstant.NAME_ARRAY);
     }
     
@@ -185,8 +191,15 @@ public class ComplexType extends AbstractCategorized implements IType {
         mSchema = getSchema();
         mObjectManager.addAttributes(mAttributes);
         mObjectManager.addElements(mElements);
-        mObjectManager.addElements(mArrays);        
-    }    
+        mObjectManager.addElements(mArrays);
+        /** @todo add all super type's mObjectManager */
+    }
+    
+    /** @todo TBI */
+    public void clearCache(){
+        //mObjectManager.clear();
+        doAssemble();
+    }
     
     public FeatureClass[] getClasses(){
         return mClasses;
@@ -252,7 +265,8 @@ public class ComplexType extends AbstractCategorized implements IType {
     }
     
     public Element getElement( QualifiedName qname ){
-        return mObjectManager.getElement(qname);
+        Element elm =  mObjectManager.getElement(qname);
+        return elm;
     }
     
     public Attribute getAttribute( QualifiedName qname ){
