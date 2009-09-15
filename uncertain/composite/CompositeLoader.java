@@ -276,9 +276,11 @@ public class CompositeLoader {
 		    boolean need_stream = false;		    
             if(file==null)
                 need_stream = true;
-            File f = new File(file);
-            if(!f.exists())
-                need_stream = true;
+            else{
+                File f = new File(file);
+                if(!f.exists())
+                    need_stream = true;
+            }
             if(need_stream)
             {
                 stream = mClassLoader.getResourceAsStream(path);
