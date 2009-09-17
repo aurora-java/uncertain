@@ -192,18 +192,22 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
      * @param _uri new namespace uri
      */
     public void setNameSpaceURI( String _uri){
-        if(_uri != null)
-            if( _uri.length()>0)
-                this.namespace_uri = _uri;
+        if(_uri != null){
+            if( _uri.length()==0)
+                _uri=null;
+        }
+        this.namespace_uri = _uri;
     }
     
     /** set prefix string
      * @param _p new prefix
      */
     public void setPrefix( String _p){
-        if(_p != null)
-            if( _p.length()>0)
-                this.prefix = _p;
+        if(_p != null){
+            if( _p.length()==0)
+                _p=null;
+        }
+        this.prefix = _p;
     }
     
     /** set namespace uri and prefix
