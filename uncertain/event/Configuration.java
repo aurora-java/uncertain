@@ -358,6 +358,7 @@ public class Configuration  implements Cloneable
         throws Exception 
     {
         ILogger logger = getLogger(runner, context);
+        //logger.info("Using logger:"+logger);
         current_handle = null;
         if(handle_manager==null) return EventModel.HANDLE_NORMAL;
         handle_flag = 0;
