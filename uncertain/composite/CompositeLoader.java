@@ -18,12 +18,17 @@ import java.util.Map;
 
 import org.xml.sax.SAXException;
 
+import uncertain.composite.decorate.ElementModifier;
+
 /**
  *  load Composite from xml files stored in specified path
  * 
  */
 public class CompositeLoader {
     
+    public static final String KEY_BASE_FILE = "_base_file";
+
+
     /**
      * Create a CompositeLoader that use lower attribute case
      * @param extension
@@ -69,10 +74,22 @@ public class CompositeLoader {
 	HashMap				composite_map_cache = null;
 	boolean				cache_enabled = false;
 	
+	// CompositeMap merge
+	boolean            mSupportFileMerge = false;
+	
 	
 	CompositeMap parse( InputStream stream) throws IOException, SAXException {
 	    CompositeMapParser p = new CompositeMapParser(this);
-		return p.parseStream(stream);
+		CompositeMap m = p.parseStream(stream);
+		if( mSupportFileMerge ){
+		    String base_file = m.getString(KEY_BASE_FILE);
+		    if( base_file != null && m.getChilds()!=null ){
+		        CompositeMap base = load(base_file);
+		        CompositeMap merged = ElementModifier.process(m.getChilds(), base);
+		        return merged;
+		    }
+		}
+		return m;
 	}
 	
 	public CompositeMap getCachedMap(Object key){
@@ -429,5 +446,13 @@ public class CompositeLoader {
     public void setCreateLocator(boolean createLocator) {
         mCreateLocator = createLocator;
     }
-*/    
+*/
+
+    public boolean getSupportFileMerge() {
+        return mSupportFileMerge;
+    }
+
+    public void setSupportFileMerge(boolean supportFileMerge) {
+        this.mSupportFileMerge = supportFileMerge;
+    }    
 }
