@@ -172,6 +172,8 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         //clear();
         putAll( another);
         addChilds( another.childs); 
+        this.text = another.text;
+        this.source_file = another.source_file;
         return this;
     }
  
