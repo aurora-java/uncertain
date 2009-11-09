@@ -494,11 +494,11 @@ public class Configuration  implements Cloneable
             feature_map.clear();
         if(instance_map!=null)
             instance_map.clear();
-        handleManager = null;
-        
-        if(handleManager!=null)
+      
+        if(handleManager!=null){
             handleManager.clear();
-            
+            handleManager = null;
+        }
     }
 
     /**

@@ -23,7 +23,7 @@ public class ClassAnalyzer {
 	HashMap		method_map;
 	OCManager   oc_manager;
 	
-	class MethodPair{
+	public static class MethodPair{
 		
 		Method getter;
 		Method setter;

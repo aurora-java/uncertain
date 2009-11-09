@@ -134,7 +134,7 @@ public class DynamicObject {
 	}
 	
 	public void putBoolean( String key, boolean value){
-		getObjectContext().put(key,new Boolean(value));
+		getObjectContext().put(key, Boolean.valueOf(value));
 	}
     
     /**

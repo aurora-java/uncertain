@@ -15,7 +15,7 @@ public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSett
     
     TopicManager        mTopicManager;
     Handler[]           mHandlers;
-    Map                 mTopicLoggerMap;
+    //Map                 mTopicLoggerMap;
     Level               mDefaultLevel;
     Formatter           mFormatter = DEFAULT_FORMATTER;
     String              mName;
@@ -35,12 +35,12 @@ public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSett
     
     public ConfigurableLoggerProvider(){
         mTopicManager = new TopicManager();
-        mTopicLoggerMap = new HashMap();
+        //mTopicLoggerMap = new HashMap();
     }
     
     public ConfigurableLoggerProvider( TopicManager topic_manager ){
         mTopicManager = topic_manager;
-        mTopicLoggerMap = new HashMap();
+        //mTopicLoggerMap = new HashMap();
     }
     
     public void addTopics( LoggingTopic[] topics ){

@@ -1214,10 +1214,9 @@ public class JSONObject {
         }
         try {
 	        if (value instanceof JSONString) {
-		        Object o = ((JSONString)value).toJSONString();
-		        if (o instanceof String) {
-		        	return (String)o;
-		        }
+	            // Modified by Zhou Fan 2009-11-4
+		        String s = ((JSONString)value).toJSONString();
+		        return s;
 	        }
         } catch (Exception e) {
         	/* forget about it */
