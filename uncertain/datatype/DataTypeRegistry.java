@@ -37,6 +37,7 @@ public class DataTypeRegistry {
         type_map.put(new Integer(Types.DOUBLE),new DoubleType());        
         type_map.put(new Integer(Types.DATE), new DateType());
         type_map.put(new Integer(Types.TIMESTAMP), new TimestampType());
+        type_map.put(new Integer(Types.CLOB), new ClobType());
         Iterator tit = type_map.values().iterator();
         while (tit.hasNext()) {
             DataType type = (DataType) tit.next();
