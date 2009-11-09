@@ -66,43 +66,43 @@ public class BeanInstanceMapper {
     
     public static BeanInstanceMapper defaultInstance(){ return default_mapper; }
     
-    public void BeanToMap( Object inst, Map map){        
+    public void BeanToMap( Object inst, Map map)
+        throws Exception
+    {        
         Class cls = inst.getClass();
         Collection methods = get_cache.getMethods(cls);
         Iterator it = methods.iterator();
         while(it.hasNext()){
             Method mthd = (Method)it.next();
-            try{
             Object result = mthd.invoke(inst,null);
             if( result != null){
                 String method_name = mthd.getName();
                 String prop = method_name.substring(get_prefix.length());
                 map.put(prop,result);
             }
-            } catch(Exception ex){
-            }
         }
     }
     
-    public void MapToBean( Map map, Object inst){
+    public void MapToBean( Map map, Object inst)
+        throws Exception
+    {
         Class cls = inst.getClass();
         Collection methods = set_cache.getMethods(cls);
         Iterator it = methods.iterator();
         Object[] args = new Object[1];
         while(it.hasNext()){
             Method mthd = (Method)it.next();
-            try{
                 String method_name = mthd.getName();
                 String prop = method_name.substring(set_prefix.length());
                 args[0] = map.get(prop);
                 mthd.invoke(inst,args);
-            } catch(Exception ex){
-            }            
         }
         
     }
     
-    public CompositeMap createCompositeMap( Collection objs, String root, String element ){
+    public CompositeMap createCompositeMap( Collection objs, String root, String element )
+        throws Exception
+    {
         CompositeMap map = new CompositeMap(root);
         Iterator it = objs.iterator();
         while(it.hasNext()){

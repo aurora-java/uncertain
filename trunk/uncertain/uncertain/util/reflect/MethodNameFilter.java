@@ -19,7 +19,7 @@ public class MethodNameFilter implements MethodFilter {
     Class[] params;
     String   prefix;
     String   postfix;
-    boolean case_sensitive = true;
+    //boolean case_sensitive = true;
 
     /** Creates new MethodNameFilter */
     public MethodNameFilter(String prefix, String postfix, Class[] params) {
@@ -29,10 +29,11 @@ public class MethodNameFilter implements MethodFilter {
     }
 
     /** not implemented yet */
+    /*
     public void setCaseSensitive(boolean s){
         case_sensitive = s;
     }
-    
+    */
 
     public boolean accepts(Class owner, Method m) {
         boolean accept = true;

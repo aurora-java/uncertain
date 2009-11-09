@@ -21,8 +21,8 @@ public class Echo extends AbstractEntry {
         String m = null;
         if(Message==null) m = runner.getContext().toXML();
         else m = TextParser.parse( Message, runner.getContext() );
-        RuntimeContext rt = RuntimeContext.getInstance(runner.getContext());
-        ILogger logger = (ILogger)rt.getInstanceOfType(ILogger.class);
+        //RuntimeContext rt = RuntimeContext.getInstance(runner.getContext());
+        ILogger logger = runner.getLogger();//LoggingContext.getLogger(runner.getContext());
         if(logger!=null)
             logger.log(m);
         /*

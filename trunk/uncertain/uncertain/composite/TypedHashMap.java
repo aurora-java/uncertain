@@ -69,7 +69,7 @@ public class TypedHashMap extends HashMap {
 			put(key,bl);
 			return bl;
 		}
-		return null;
+		return (Boolean)null;
 	}
 	
 	public boolean getBoolean( Object key, boolean default_value){
@@ -79,7 +79,7 @@ public class TypedHashMap extends HashMap {
 	
     
     public void putBoolean( Object key, boolean value){
-        put(key,new Boolean(value));
+        put(key,Boolean.valueOf(value));
     }
     
 	public Integer getInt( Object key){

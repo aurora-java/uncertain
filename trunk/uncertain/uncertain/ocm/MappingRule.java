@@ -31,7 +31,7 @@ public class MappingRule {
 	HashMap			    for_element_map;
 	
 	// all mapping fields
-	HashMap				all_mapping;
+	//HashMap				all_mapping;
 
 	/**
 	 * Constructor for MappingRule.
@@ -40,7 +40,7 @@ public class MappingRule {
 	public MappingRule(Class _target_class, OCManager _oc_manager) {
 		this.target_class = _target_class;
 		this.oc_manager = _oc_manager;
-		all_mapping    = new HashMap();
+		//all_mapping    = new HashMap();
 		for_attrib_map = new HashMap();				
 	}
 	

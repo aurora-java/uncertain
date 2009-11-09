@@ -20,7 +20,7 @@ public class TagTemplateParser {
     
     ITagCreatorRegistry     mDefaultRegistry = TagCreatorRegistry.getInstance();
     
-    private class ParseHandle implements TagParseHandle {
+    private static class ParseHandle implements TagParseHandle {
         
         TextTemplate            mTemplate = new TextTemplate();        
         StringBuffer            mBuf = null;

@@ -40,14 +40,14 @@ public class BooleanType extends AbstractDataType implements DataType {
 	 */
 	public Object getObject(CallableStatement stmt, int id)
 		throws SQLException {
-		return new Boolean(stmt.getBoolean(id));
+		return Boolean.valueOf(stmt.getBoolean(id));
 	}
 
 	/**
 	 * @see uncertain.datatype.DataType#getObject(ResultSet, int)
 	 */
 	public Object getObject(ResultSet rs, int id) throws SQLException {
-		return new Boolean(rs.getBoolean(id));
+		return Boolean.valueOf(rs.getBoolean(id));
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class BooleanType extends AbstractDataType implements DataType {
 		if( value instanceof String)
 			return Boolean.valueOf((String)value);
 		else if (value instanceof Number)
-			return new Boolean(((Number)value).intValue()!=0);
+			return Boolean.valueOf(((Number)value).intValue()!=0);
         else if (value instanceof Boolean)
             return (Boolean)value;
 		else	

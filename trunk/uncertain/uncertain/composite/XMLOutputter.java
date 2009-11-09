@@ -56,10 +56,11 @@ public class XMLOutputter {
     
     void getAttributeXML( Map map, StringBuffer attribs){
         
-        Iterator it = map.keySet().iterator();
+        Iterator it = map.entrySet().iterator();
         while(it.hasNext()){
-            Object key = it.next();
-            Object value = map.get(key);
+            Map.Entry entry = (Map.Entry)it.next();
+            Object key = entry.getKey();
+            Object value = entry.getValue();
             if( value != null)
                 attribs.append(" ").append(XMLWritter.getAttrib(key.toString(), value.toString() ) );
         }

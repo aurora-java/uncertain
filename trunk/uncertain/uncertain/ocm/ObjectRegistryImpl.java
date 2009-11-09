@@ -151,7 +151,7 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
                }
                
                public boolean equals(Object obj){
-                   return false;
+                   return obj!=null && obj.getClass().equals(this.getClass());
                }
                
            });

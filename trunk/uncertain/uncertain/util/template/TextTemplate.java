@@ -96,4 +96,14 @@ public class TextTemplate implements Serializable, Cloneable {
         mContentList.clear();
     }
 
+    protected Object clone() throws CloneNotSupportedException {
+        TextTemplate new_template = new TextTemplate();
+        new_template.mSourceName = mSourceName;
+        new_template.mContentList = new LinkedList();
+        mContentList.addAll(mContentList);
+        return new_template;
+    }
+    
+    
+
 }
