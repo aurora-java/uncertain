@@ -244,6 +244,12 @@ public class XMLOutputter {
         return xml.toString();        
     }
     
+    public static void saveToFile( File target_file, CompositeMap map  )
+        throws IOException
+    {
+        saveToFile( target_file, map, "UTF-8" );
+    }
+    
     public static void saveToFile( File target_file, CompositeMap map, String encoding )
         throws IOException
     {
@@ -252,7 +258,8 @@ public class XMLOutputter {
             os = new FileOutputStream(target_file);
             String xml_decl = "<?xml version=\"1.0\" encoding=\""+encoding+"\"?>\n";
             os.write(xml_decl.getBytes());
-            os.write(map.toXML().getBytes(encoding));
+            String content = XMLOutputter.defaultInstance().toXML(map, true);
+            os.write( content.getBytes(encoding));
             os.flush();
         }finally{
             if(os!=null)
