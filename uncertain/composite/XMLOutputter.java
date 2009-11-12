@@ -10,11 +10,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import uncertain.util.XMLWritter;
 
@@ -39,40 +37,6 @@ public class XMLOutputter {
         return default_inst;
     }
    
-    static class PrefixMappingHolder implements IterationHandle {
-        
-        static final String  ns_prefix = "ns";
-        int     sequence = 1;
-        Set     prefix_set = new HashSet();
-        Map     prefix_map = new HashMap();
-        
-        public String getUniquePrefix(){
-            String prefix = ns_prefix + sequence++;
-            for( ; prefix_set.contains(prefix); prefix = ns_prefix + sequence++);
-            return prefix;
-        }
-        
-        public int process( CompositeMap map){
-            String url = map.getNamespaceURI();
-            if(url!=null){
-                if(!prefix_map.containsKey(url)){
-                    String prefix = map.getPrefix();
-                    if(prefix==null)
-                        prefix = getUniquePrefix();
-                    if(prefix_set.contains(prefix))
-                        prefix = getUniquePrefix();
-                    prefix_set.add(prefix);
-                    prefix_map.put(url, prefix);
-                }
-            }
-            return IterationHandle.IT_CONTINUE;
-        }
-        
-        public Map getPrefixMapping(){
-            return prefix_map;
-        }
-    };
-    
     /** Creates new XMLOutputter */
     public XMLOutputter(String _indent, boolean _new_line) {
         indent = _indent ;
@@ -141,9 +105,7 @@ public class XMLOutputter {
     
     public String toXML(CompositeMap map, boolean namespace_in_root ){
         if(namespace_in_root){
-            PrefixMappingHolder holder = new PrefixMappingHolder();
-            map.iterate(holder, true);
-            Map prefix_mapping = holder.getPrefixMapping();
+            Map prefix_mapping = CompositeUtil.getPrefixMapping(map);
             return toXMLWithPrefixMapping(0, map, null, prefix_mapping);
         }else
             return toXMLWithPrefixMapping( 0, map, null, null );

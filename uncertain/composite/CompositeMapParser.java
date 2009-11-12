@@ -51,6 +51,9 @@ public class CompositeMapParser extends DefaultHandler {
     // namespace url -> prefix mapping
     Map uri_mapping = new HashMap();
     
+    // save all namespace url -> prefix mapping
+    Map saved_uri_mapping;
+    
     // prefix -> namespace mapping
     Map namespace_mapping = new HashMap();
     
@@ -179,6 +182,11 @@ public class CompositeMapParser extends DefaultHandler {
             throws SAXException {
         uri_mapping.put(uri, prefix);
         namespace_mapping.put(prefix, uri);
+        if( getCompositeLoader().getSaveNamespaceMapping()){
+            if(saved_uri_mapping==null)
+                saved_uri_mapping = new HashMap();
+            saved_uri_mapping.put(uri, prefix);
+        }
     }
 
     public void endPrefixMapping(String prefix) throws SAXException {
@@ -254,14 +262,10 @@ public class CompositeMapParser extends DefaultHandler {
         }
         parser.parse(stream, this);
 
-        /*
-         * // Directly use xerces XMLReader xmlreader = new
-         * org.apache.xerces.parsers.SAXParser();
-         * xmlreader.setContentHandler(this); xmlreader.parse(new
-         * InputSource(stream));
-         */
-
-        return getRoot();
+        CompositeMap root = getRoot();
+        if( getCompositeLoader().getSaveNamespaceMapping())
+            root.setNamespaceMapping(saved_uri_mapping);
+        return root;
     }
 
     public void clear() {
@@ -281,9 +285,11 @@ public class CompositeMapParser extends DefaultHandler {
     }
     */
     
+    /*
     public Map getNamespaceMapping(){
         return namespace_mapping;
     }
+    */
 
     /*
     public void setDocumentLocator(Locator locator) {

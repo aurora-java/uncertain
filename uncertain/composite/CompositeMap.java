@@ -39,6 +39,9 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     /** source file where this CompositeMap is parsed from */
     protected String  source_file;
     
+    /** Map<url,prefix> of namespace declare */
+    protected Map   namespace_mapping;
+    
     
     //protected Locator locator;
     
@@ -606,6 +609,17 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     /** source file path where this CompositeMap is parsed from */
     public void setSourceFile( String file ){
         source_file = file;
+    }
+    
+    /** get a Map containing namespace mapping, with namespace url as key, 
+     *  namespace prefix as value
+     */
+    public Map getNamespaceMapping(){
+        return namespace_mapping;
+    }
+    
+    public void setNamespaceMapping( Map mapping ){
+        namespace_mapping = mapping;
     }
 
     /*
