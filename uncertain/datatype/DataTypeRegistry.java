@@ -52,6 +52,7 @@ public class DataTypeRegistry {
         class_map.put(BigDecimal.class.getName(), new BigDecimalType());
         class_map.put(Class.class.getName(), new JavaClassType());
         class_map.put(java.sql.Date.class.getName(), new DateType());  
+        class_map.put("date", new DateType());
     }
     
 	public DataType getDataType(Class cls){
