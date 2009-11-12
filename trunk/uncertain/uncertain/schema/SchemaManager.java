@@ -5,11 +5,15 @@ package uncertain.schema;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.xml.utils.NameSpace;
 import org.xml.sax.SAXException;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.CompositeUtil;
 import uncertain.composite.QualifiedName;
 import uncertain.ocm.OCManager;
 
@@ -56,6 +60,7 @@ public class SchemaManager implements ISchemaManager {
     
     private void _init(){
         mCompositeLoader = CompositeLoader.createInstanceForOCM(DEFAULT_EXTENSION);
+        mCompositeLoader.setSaveNamespaceMapping(true);
         mNamedObjectManager = new NamedObjectManager();
     }
     
@@ -100,9 +105,36 @@ public class SchemaManager implements ISchemaManager {
         return mNamedObjectManager.getCategory(qname);
     }
     
+    Namespace[] getNameSpaces( CompositeMap map ){
+        Map ns_map = map.getNamespaceMapping();
+        if(ns_map!=null){
+            Namespace[] ns_array = new Namespace[ns_map.size()];
+            int n=0;
+            for(Iterator it = ns_map.entrySet().iterator(); it.hasNext();){
+                Map.Entry entry = (Map.Entry)it.next();
+                String namespace = (String)entry.getKey();
+                String prefix = (String)entry.getValue();
+                ns_array[n] = new Namespace();
+                ns_array[n].setUrl(namespace);
+                ns_array[n].setPrefix(prefix);
+                n++;
+            }
+            return ns_array;
+        }else
+            return null;
+    }
+    
     public Schema loadSchema( CompositeMap schema_config ){
+        /*
         Schema schema = (Schema)mOcManager.createObject(schema_config);
         schema.setSchemaManager(this);
+        */
+        Schema schema = new Schema();
+        schema.setSchemaManager(this);
+        Namespace[] ns = getNameSpaces(schema_config);
+        schema.addNameSpaces(ns);
+        
+        mOcManager.populateObject(schema_config, schema);
         schema.doAssemble();
         addSchema(schema);
         return schema;
