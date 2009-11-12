@@ -74,8 +74,11 @@ public class CompositeLoader {
 	HashMap				composite_map_cache = null;
 	boolean				cache_enabled = false;
 	
-	// CompositeMap merge
+	// CompositeMap merge, so that a CompositeMap can be declared to 'extend' a base 
 	boolean            mSupportFileMerge = false;
+	
+	//
+	boolean            mSaveNamespaceMapping = false;
 	
 	
 	CompositeMap parse( InputStream stream) throws IOException, SAXException {
@@ -454,5 +457,17 @@ public class CompositeLoader {
 
     public void setSupportFileMerge(boolean supportFileMerge) {
         this.mSupportFileMerge = supportFileMerge;
+    }
+
+    /**
+     * Get/set flag to indicate whether namespace mapping should be saved in parsed CompositeMap
+     * @return
+     */
+    public boolean getSaveNamespaceMapping() {
+        return mSaveNamespaceMapping;
+    }
+
+    public void setSaveNamespaceMapping(boolean saveNamespaceMapping) {
+        mSaveNamespaceMapping = saveNamespaceMapping;
     }    
 }

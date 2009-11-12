@@ -4,11 +4,13 @@
 package uncertain.composite;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import uncertain.util.GroupObjectProcessorImpl;
 import uncertain.util.IGroupObjectProcessor;
@@ -107,6 +109,52 @@ public class CompositeUtil {
     };
     
     
+    public static class PrefixMappingHolder implements IterationHandle {
+        
+        static final String  ns_prefix = "ns";
+        int     sequence = 1;
+        Set     prefix_set = new HashSet();
+        Map     prefix_map = new HashMap();
+        
+        public String getUniquePrefix(){
+            String prefix = ns_prefix + sequence++;
+            for( ; prefix_set.contains(prefix); prefix = ns_prefix + sequence++);
+            return prefix;
+        }
+        
+        public int process( CompositeMap map){
+            String url = map.getNamespaceURI();
+            if(url!=null){
+                if(!prefix_map.containsKey(url)){
+                    String prefix = map.getPrefix();
+                    if(prefix==null)
+                        prefix = getUniquePrefix();
+                    if(prefix_set.contains(prefix))
+                        prefix = getUniquePrefix();
+                    prefix_set.add(prefix);
+                    prefix_map.put(url, prefix);
+                }
+            }
+            return IterationHandle.IT_CONTINUE;
+        }
+        
+        public Map getPrefixMapping(){
+            return prefix_map;
+        }
+    }
+    
+    /**
+     * @param map 
+     * @return a Map with namespace url as key, prefix as value
+     */
+    public static Map getPrefixMapping( CompositeMap map ){
+        CompositeUtil.PrefixMappingHolder holder = new CompositeUtil.PrefixMappingHolder();
+        map.iterate(holder, true);
+        Map prefix_mapping = holder.getPrefixMapping();
+        return prefix_mapping;
+    }
+
+
     static boolean compare(Object field, String value){
         if(field==null){
             if(value==null) return true;
