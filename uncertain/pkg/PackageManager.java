@@ -3,15 +3,18 @@
  */
 package uncertain.pkg;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import uncertain.composite.CharCaseProcessor;
 import uncertain.composite.CompositeLoader;
-import uncertain.composite.CompositeMapParser;
 import uncertain.ocm.OCManager;
 import uncertain.schema.SchemaManager;
 
+/**
+ * Manages ComponentPackages
+ * PackageManager
+ */
 public class PackageManager {
 
     CompositeLoader        mCompositeLoader;
@@ -67,6 +70,29 @@ public class PackageManager {
     
     public ComponentPackage getPackage( String name ){
         return (ComponentPackage)mPackageNameMap.get(name);
+    }
+    
+    public SchemaManager getSchemaManager(){
+        return mSchemaManager;
+    }
+    
+    /**
+     * Load all package under specified directory
+     * @param directory root directory that contains packages to load
+     * @throws IOException
+     */
+    public void loadPackgeDirectory( String directory )
+        throws IOException
+    {
+        File path = new File(directory);
+        if(!path.isDirectory())
+            throw new IllegalArgumentException(directory + " is not a directory");
+        File[] files = path.listFiles();
+        for(int i=0; i<files.length; i++){
+            File file = files[i];
+            if(file.isDirectory())
+                loadPackage(file.getAbsolutePath());
+        }
     }
 
 }
