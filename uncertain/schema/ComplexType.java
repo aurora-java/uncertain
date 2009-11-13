@@ -90,6 +90,7 @@ public class ComplexType extends AbstractCategorized implements IType {
             if(!map.contains(qname)){
                 map.add(qname);
                 result.add(t);
+                addSuperElements(t);
             }
         }
         // Add super types extended by parent types
@@ -101,12 +102,37 @@ public class ComplexType extends AbstractCategorized implements IType {
                     if(!map.contains(st.getQName())){
                         map.add(st.getQName());
                         result.add(st);
+                        addSuperElements(st);
                     }
                 }
         }
         return result;
     }
-    
+    private void addSuperElements(ComplexType ct){
+    	Element[] elements = ct.getElements();
+    	if(elements != null){
+	    	for(int i=0;i<elements.length;i++){
+	    		Element ele = elements[i];
+	    		if(mObjectManager.getElement(ele.getQName()) == null){
+	    			mObjectManager.addElements(new Element[]{ele});
+	    		}else{
+//	    			System.out.println("已经存在"+ele.getQName());
+	    		}
+	    	}
+    	}
+    	Array[] arrays = ct.getArrays();
+    	if(arrays != null){
+	    	for(int i=0;i<arrays.length;i++){
+	    		Array arr = arrays[i];
+	    		if(mObjectManager.getElement(arr.getQName()) == null){
+	    			mObjectManager.addElements(new Array[]{arr});
+	    		}
+	    		else{
+//	    			System.out.println("已经存在："+arr.getQName());
+	    		}
+	    	}
+    	}
+    }
     private ISchemaObject[] getChildArray( String type ){
         if(SchemaConstant.NAME_ATTRIBUTE.equals(type))
             return mAttributes;
