@@ -1,9 +1,9 @@
 <ss:schema xmlns:ss="http://www.uncertain-framework.org/schema/simple-schema">
-
+<!--
 	<ss:namespaces>
 		<ss:namespace prefix="ss" url="http://www.uncertain-framework.org/schema/simple-schema" />
 	</ss:namespaces>
-	
+-->	
 	<ss:types>
 		
 		<ss:complexType name="ss:SchemaObject">
