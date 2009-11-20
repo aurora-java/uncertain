@@ -22,6 +22,18 @@ public class PackageManager {
     HashMap                mPackageNameMap = new HashMap();  
     SchemaManager          mSchemaManager = new SchemaManager();
     
+    public static boolean isPackageDirectory( File dir ){
+        if( !dir.isDirectory())
+            return false;
+        File config_dir = new File(dir, "config");
+        if(!config_dir.exists() || !config_dir.isDirectory())
+            return false;
+        File pkg_xml = new File(config_dir, "package.xml");
+        if(!pkg_xml.exists())
+            return false;
+        return true;
+    }
+    
     public PackageManager(){
         mCompositeLoader = CompositeLoader.createInstanceForOCM(null);
         mOCManager = OCManager.getInstance();
@@ -96,7 +108,7 @@ public class PackageManager {
         File[] files = path.listFiles();
         for(int i=0; i<files.length; i++){
             File file = files[i];
-            if(file.isDirectory())
+            if(file.isDirectory() && isPackageDirectory(file))
                 loadPackage(file.getAbsolutePath());
         }
     }
