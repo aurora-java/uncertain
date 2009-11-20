@@ -45,10 +45,15 @@ public class PackageManager {
     {
         return loadPackage( path, ComponentPackage.class);
     }
-    
-    public void addPackage( ComponentPackage pkg ){
+
+    protected void initPackage( ComponentPackage pkg){
         pkg.setPackageManager(this);
         mPackageNameMap.put(pkg.getName(), pkg); 
+    }
+    
+    public void addPackage( ComponentPackage pkg ){
+        if(pkg.getPackageManager()!=this)
+            initPackage(pkg);
         SchemaManager sm = pkg.getSchemaManager();
         if(sm!=null)
             mSchemaManager.addAll(sm);
@@ -63,8 +68,9 @@ public class PackageManager {
         }catch(Exception ex){
             throw new PackageConfigurationError("Can't create instance of "+implement_cls.getName(), ex);
         }
-        addPackage(pkg);
+        initPackage(pkg);
         pkg.load(path);
+        addPackage(pkg);
         return pkg;
     }
     
