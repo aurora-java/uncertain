@@ -20,6 +20,16 @@ public class Element extends ComplexType implements IReference {
     ComplexType     mRefType;
     IType           mElementType;
 
+    String          mDisplayMask;
+    
+    public String getDisplayMask() {
+        return mDisplayMask;
+    }
+
+    public void setDisplayMask(String displayMask) {
+        this.mDisplayMask = displayMask;
+    }
+    
     public String getRef() {
         return mRef;
     }
