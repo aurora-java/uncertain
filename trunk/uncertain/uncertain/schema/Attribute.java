@@ -71,7 +71,7 @@ public class Attribute extends AbstractCategorized implements IReference {
         if( mRefAttribute!=null)
             return mRefAttribute.toString();
         if(mQname==null)
-            return null;
+            return "attribute";
         else
             return mQname.toString();
     }

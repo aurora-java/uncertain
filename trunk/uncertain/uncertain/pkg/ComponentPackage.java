@@ -80,6 +80,8 @@ public class ComponentPackage {
         // load all schema in config directory
         String extension = "."+SchemaManager.DEFAULT_EXTENSION;
         File[] files = config_path.listFiles();
+        if(files==null)
+            return;
         for(int i=0; i<files.length; i++){
             String file = files[i].getName().toLowerCase();
             if(file.endsWith(extension)){

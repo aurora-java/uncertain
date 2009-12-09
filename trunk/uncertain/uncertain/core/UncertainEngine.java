@@ -24,11 +24,14 @@ import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
 import uncertain.logging.BasicConsoleHandler;
-import uncertain.logging.ConfigurableLoggerProvider;
+import uncertain.logging.BasicFileHandler;
+import uncertain.logging.LoggerProvider;
 import uncertain.logging.DefaultLogger;
 import uncertain.logging.DummyLogger;
+import uncertain.logging.ILogPathSettable;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
+import uncertain.logging.ILoggerProviderGroup;
 import uncertain.logging.ILoggingTopicRegistry;
 import uncertain.logging.LoggingConfig;
 import uncertain.logging.LoggingTopic;
@@ -52,14 +55,14 @@ import uncertain.util.FilePatternFilter;
  * 
  */
 public class UncertainEngine implements IChildContainerAcceptable {
-    
-    public static final String KEY_NAME = "NAME";
+
     public static final String UNCERTAIN_NAMESPACE = "http://engine.uncertain.org/defaultns";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
-    
+    public static final String DEFAULT_ENGINE_NAME = "uncertain_engine";
     public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
-    public static final String UNCERTAIN_ERROR_TOPIC = "error";
+    //public static final String UNCERTAIN_ERROR_TOPIC = "error";
     
+    String                  mName = DEFAULT_ENGINE_NAME;
     //CompositeMapParser		mCompositeParser;
     CompositeLoader			mCompositeLoader = CompositeLoader.createInstanceForOCM();
     OCManager				mOcManager;
@@ -76,9 +79,10 @@ public class UncertainEngine implements IChildContainerAcceptable {
     File					mConfigDir;    
     boolean                 mIsRunning = true;
 
-    // Logging
+    /* =========== logging related members =================== */
+    String                  mLogPath;
+    String                  mDefaultLogLevel = "WARNING";
     ILogger                 mLogger;    
-    ILogger                 mErrorLogger;
     TopicManager            mTopicManager;
     
     public static UncertainEngine createInstance(){
@@ -140,6 +144,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstance(mOcManager);           
         mObjectRegistry.registerInstanceOnce(UncertainEngine.class,this);
         mObjectRegistry.registerInstanceOnce(IObjectRegistry.class, mObjectRegistry);  
+        mObjectRegistry.registerInstanceOnce(IObjectCreator.class, mObjectRegistry);
         mObjectRegistry.registerInstanceOnce(ILoggingTopicRegistry.class, mTopicManager);
         mObjectRegistry.registerInstanceOnce(ILogger.class, mLogger);
     }
@@ -151,6 +156,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mClassRegistry.registerPackage("uncertain.logging");
         mClassRegistry.registerPackage("uncertain.core");
         mClassRegistry.registerPackage("uncertain.core.admin");
+        mClassRegistry.registerPackage("uncertain.event");
         
         //mClassRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
         //mClassRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
@@ -212,15 +218,21 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     /* ================== logging process ======================================= */
     
-    protected ILoggerProvider createDefaultLoggerProvider(){
-        ConfigurableLoggerProvider clp = new ConfigurableLoggerProvider();
+    protected ILoggerProvider createDefaultLoggerProvider(){        
+        LoggerProvider clp = new LoggerProvider();
+        clp.setDefaultLogLevel(mDefaultLogLevel);
         clp.addTopics( new LoggingTopic[]{
                 new LoggingTopic(UNCERTAIN_LOGGING_TOPIC, Level.INFO),
                 new LoggingTopic(OCManager.LOGGING_TOPIC, Level.WARNING)
         });
-        clp.addHandles( new Handler[]{
-                new BasicConsoleHandler()
-        });
+        if(mLogPath==null)
+            clp.addHandle(new BasicConsoleHandler());
+        else{
+            BasicFileHandler fh = new BasicFileHandler();
+            fh.setLogPath(mLogPath);
+            fh.setLogFilePrefix(getName());
+            clp.addHandle( fh );
+        }
         return clp;
     }
     
@@ -232,6 +244,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
             mOcManager.setLoggerProvider(logger_provider);            
         }
         mLogger = logger_provider.getLogger(UNCERTAIN_LOGGING_TOPIC);
+        /*
         if(mErrorLogger==null)
             mErrorLogger = logger_provider.getLogger(UNCERTAIN_ERROR_TOPIC);
         if(mErrorLogger==DummyLogger.getInstance()){
@@ -239,19 +252,25 @@ public class UncertainEngine implements IChildContainerAcceptable {
             l.addHandler( new BasicConsoleHandler());
             mErrorLogger = l;
         }
+        */
         //mLogger.info("Logging provider set to "+logger_provider);
     }
     
-    public void addLoggingConfig( LoggingConfig logging_config ){
-        //System.out.println("Adding "+logging_config);
-        logging_config.registerTo(mObjectRegistry);
-        mContextListenerSet.add(logging_config);
-        String log_path = mDirectoryConfig.getLogDirectory();
-        if(log_path!=null && logging_config.getLogPath()==null ){
-            System.out.println("log path set to "+log_path);
-            logging_config.setLogPath(log_path);
+    public void addLoggingConfig( ILoggerProvider logging_config ){
+        if(logging_config instanceof ILoggerProviderGroup ){
+            ILoggerProviderGroup group = (ILoggerProviderGroup)logging_config;
+            group.registerTo(mObjectRegistry);
         }
-        //System.out.println("Logger set to "+getLogger(UNCERTAIN_LOGGING_TOPIC));        
+        
+        if( logging_config instanceof IContextListener)
+            mContextListenerSet.add(logging_config);
+        if( logging_config instanceof ILogPathSettable ){
+            ILogPathSettable lp = (ILogPathSettable)logging_config;
+            String log_path = mDirectoryConfig.getLogDirectory();
+            if(log_path!=null && lp.getLogPath()==null ){
+                lp.setLogPath(log_path);
+            }            
+        }
     }
     
     public ILogger getLogger( String topic ){
@@ -271,8 +290,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
 
     public void logException(String message, Throwable thr){
-        mErrorLogger.log(Level.SEVERE, message, thr);
-        //mLogger.log(Level.SEVERE, thr.getMessage(), thr);
+        mLogger.log(Level.SEVERE, message, thr);
     }
 
     
@@ -595,10 +613,30 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
     
     public String getName(){
-        return mGlobalContext.getString(KEY_NAME);
+        return mName;
     }
     
     public void setName( String name ){
-        mGlobalContext.putString(KEY_NAME, name);
+        mName = name;
+    }
+
+    public String getLogPath() {
+        return mLogPath;
+    }
+
+    public void setLogPath(String logPath) {
+        File dir = new File(logPath);
+        if(!dir.exists() || !dir.isDirectory())
+            throw new ConfigurationError(logPath + " is not a valid logging directory");
+        mLogPath = logPath;        
+    }
+
+    public String getDefaultLogLevel() {
+        return mDefaultLogLevel;
+    }
+
+    public void setDefaultLogLevel(String defaultLogLevel) {
+        Level.parse(defaultLogLevel);
+        mDefaultLogLevel = defaultLogLevel;
     }
 }

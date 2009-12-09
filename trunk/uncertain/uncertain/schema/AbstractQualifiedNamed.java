@@ -22,10 +22,19 @@ public abstract class AbstractQualifiedNamed extends AbstractSchemaObject implem
         mQname = qname;
     }
 
+    /**
+     * Get name with prefix  (such as "ss:element")
+     * This method is designed for O/C mapping and shall not be invoked directly. Use getLocalName()/setQName() instead.
+     * @return
+     */
     public String getName() {
         return mName;
     }
 
+    /**
+     * Set name with prefix (such as "ss:element"), full QName will be resolved later.
+     * This method is designed for O/C mapping and shall not be invoked directly. Use getLocalName()/setQName() instead.
+     */    
     public void setName(String name) {
         mName = name;
     }

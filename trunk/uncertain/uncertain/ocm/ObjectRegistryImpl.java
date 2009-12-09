@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import uncertain.composite.CompositeMap;
+import uncertain.logging.DefaultLogger;
 import uncertain.logging.ILogger;
 
 /** Create object by constructor reflection, using instances associated with specific class
@@ -102,6 +103,9 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
      * @param instance of specified type
      */
     public void registerInstanceOnce( Class type, Object instance){
+        if(instance!=null)
+            if(!type.isAssignableFrom(instance.getClass()))
+                throw new IllegalArgumentException("type "+type.getName() +" isn't compatible with "+instance.getClass().getName());
         instance_map.put(type,instance);
     } 
 
@@ -227,7 +231,7 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
             }
             else{
                 logger.warning("Can't get proper constructor for "+type);
-                //logger.info(parameter_map.toString());
+                //analysisConstructor( , type);
             }
         }
         return c;

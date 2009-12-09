@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class LoggerProviderGroup implements ILoggerProvider, ILoggerProviderGroup {
+public class LoggerProviderGroup extends AbstractLoggerProvider implements ILoggerProviderGroup {    
     
     Set         mProviderSet;
     String      mName;

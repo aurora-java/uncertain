@@ -3,10 +3,16 @@
  */
 package uncertain.logging;
 
+/**
+ *  Provide logger instance by specifying topic
+ */
+
 public interface ILoggerProvider {
     
+    /** Get a ILogger instance in specified topic */
     public ILogger getLogger( String topic );
     
-    //public String getName();
+    /** Get default logger for non-configured topic */
+    // public ILogger getDefaultLogger();
 
 }

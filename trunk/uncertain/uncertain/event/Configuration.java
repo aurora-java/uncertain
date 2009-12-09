@@ -367,48 +367,50 @@ public class Configuration  implements Cloneable
         for(int i=EventModel.PRE_EVENT; i<=EventModel.POST_EVENT; i++){            
             // invoke event listeners
             ListIterator    lsnr_it = handle_manager.getEventListenerIterator();            
-            while(lsnr_it!=null){
-                while(lsnr_it.hasNext()){
-                    //handle_flag = EventModel.HANDLE_NORMAL;
-                    IEventListener lnr = (IEventListener)lsnr_it.next();
-                    handle_flag = lnr.onEvent(runner, i,event_name);
-                    if(handle_flag==EventModel.HANDLE_NO_SAME_SEQUENCE)
-                        break;
-                    else if(handle_flag==EventModel.HANDLE_STOP)
-                        return handle_flag;
-                }
+            do{
+                if(lsnr_it!=null)
+                    while(lsnr_it.hasNext()){
+                        //handle_flag = EventModel.HANDLE_NORMAL;
+                        IEventListener lnr = (IEventListener)lsnr_it.next();
+                        handle_flag = lnr.onEvent(runner, i,event_name);
+                        if(handle_flag==EventModel.HANDLE_NO_SAME_SEQUENCE)
+                            break;
+                        else if(handle_flag==EventModel.HANDLE_STOP)
+                            return handle_flag;
+                    }
                 if(parent_config!=null)
                     parent_config = parent_config.getParent();
                 lsnr_it = null;
                 if(parent_config!=null)
                     if(parent_config.handleManager!=null)
                         lsnr_it =parent_config.handleManager.getEventListenerIterator();
-            }
+            }while(lsnr_it!=null);
             // invoke event handles hooked with this event
             Iterator it = handle_manager.getEventHandleIterator(event_name, i);
             parent_config = this;
-            while(it!=null){
-                while(it.hasNext()){
-                    handle_flag = EventModel.HANDLE_NORMAL;
-                    IEventHandle handle = (IEventHandle)it.next();
-                    current_handle = handle;
-                    logger.log(Level.FINE, handle.toString());
-                    if(runner!=null)
-                        handle_flag = handle.handleEvent(i, runner, args);
-                    else
-                        handle_flag = handle.handleEvent(i, context, args);
-                    if(handle_flag==EventModel.HANDLE_NO_SAME_SEQUENCE)
-                        break;
-                    else if(handle_flag==EventModel.HANDLE_STOP)
-                        return handle_flag;                
-                }
+            do{
+                if(it!=null)
+                    while(it.hasNext()){
+                        handle_flag = EventModel.HANDLE_NORMAL;
+                        IEventHandle handle = (IEventHandle)it.next();
+                        current_handle = handle;
+                        logger.log(Level.FINE, handle.toString());
+                        if(runner!=null)
+                            handle_flag = handle.handleEvent(i, runner, args);
+                        else
+                            handle_flag = handle.handleEvent(i, context, args);
+                        if(handle_flag==EventModel.HANDLE_NO_SAME_SEQUENCE)
+                            break;
+                        else if(handle_flag==EventModel.HANDLE_STOP)
+                            return handle_flag;                
+                    }
                 it = null;
                 if(parent_config!=null)
                     parent_config = parent_config.getParent();
                 if(parent_config!=null)
                     if(parent_config.handleManager!=null)
                         it =parent_config.handleManager.getEventHandleIterator(event_name, i);             
-            }
+            }while(it!=null);
         }
         
         return EventModel.HANDLE_NORMAL;    

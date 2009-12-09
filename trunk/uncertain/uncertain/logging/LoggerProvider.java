@@ -3,42 +3,56 @@
  */
 package uncertain.logging;
 import java.io.File;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 
-public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSettable  {
+import uncertain.event.IContextListener;
+import uncertain.event.RuntimeContext;
+
+public class LoggerProvider extends AbstractLoggerProvider implements ILogPathSettable, IContextListener {
     
     static final DefaultFormatter DEFAULT_FORMATTER = new DefaultFormatter(); 
     
     TopicManager        mTopicManager;
     Handler[]           mHandlers;
     //Map                 mTopicLoggerMap;
-    Level               mDefaultLevel;
+    Level               mDefaultLevel = Level.WARNING;
     Formatter           mFormatter = DEFAULT_FORMATTER;
     String              mName;
     String              mLogPath;
+    // not configured topic -> logger
+    Map                 mDefaultLoggerMap = new HashMap();
     
-    public static ConfigurableLoggerProvider createInstance(){
-        ConfigurableLoggerProvider provider = new ConfigurableLoggerProvider();
+    public static LoggerProvider createInstance(){
+        LoggerProvider provider = new LoggerProvider();
         provider.addHandles( new Handler[] { new BasicConsoleHandler()});
         return provider;
     }
     
-    public static ConfigurableLoggerProvider createInstance( String topic, Level level ){
-        ConfigurableLoggerProvider provider = createInstance();
+    public static LoggerProvider createInstance( Level level, OutputStream log_output ){
+        LoggerProvider provider = new LoggerProvider();
+        provider.setDefaultLogLevel(level.toString());
+        BasicStreamHandler handler = new BasicStreamHandler( log_output );
+        provider.addHandle(handler);
+        return provider;
+    }
+   
+    public static LoggerProvider createInstance( String topic, Level level ){
+        LoggerProvider provider = createInstance();
         provider.getTopicManager().setTopicLevel(topic, level);
         return provider;
     }
     
-    public ConfigurableLoggerProvider(){
+    public LoggerProvider(){
         mTopicManager = new TopicManager();
         //mTopicLoggerMap = new HashMap();
     }
     
-    public ConfigurableLoggerProvider( TopicManager topic_manager ){
+    public LoggerProvider( TopicManager topic_manager ){
         mTopicManager = topic_manager;
         //mTopicLoggerMap = new HashMap();
     }
@@ -58,8 +72,23 @@ public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSett
         }          
     }
     
+    /** Add a single handler */
+    public void addHandle( Handler handler ){
+        addHandles( new Handler[]{handler} );
+    }
+    
     public Handler[] getHandlers(){
         return mHandlers;
+    }
+    
+    protected ILogger getDefaultLogger( String topic ){
+        ILogger logger = (ILogger)mDefaultLoggerMap.get(topic);
+        if(logger==null){
+            logger = createEmptyLogger( topic );
+            logger.setLevel(mDefaultLevel);
+            mDefaultLoggerMap.put(topic, logger);
+        }
+        return logger;
     }
     
     public ILogger getLogger( String topic ){
@@ -68,17 +97,8 @@ public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSett
             logger.setLevel( mTopicManager.getTopicLevel(topic));
             return logger;
         }
-        return DummyLogger.DEFAULT_LOGGER;
+        return getDefaultLogger(topic);
     }
-    
-    public void setDefaultLevel( String level ){
-        mDefaultLevel = Level.parse(level);
-    }
-    
-    public String getDefaultLevel(){
-        return mDefaultLevel.getName();
-    }   
-    
     
     protected ILogger createEmptyLogger(String topic){
         DefaultLogger logger = new DefaultLogger(topic);
@@ -122,13 +142,35 @@ public class ConfigurableLoggerProvider implements ILoggerProvider, ILogPathSett
      * @param logPath the logPath to set
      */
     public void setLogPath(String logPath) {
-        //System.out.println("logpath="+logPath);
         mLogPath = logPath;
         File file = new File(mLogPath);
         if(!file.exists()){
             throw new IllegalArgumentException("Log file path '"+mLogPath+"' does not exist");
         }        
-        //System.out.println("["+mName+"] Setting log path to "+ this.mLogPath);
     }
 
+    public String getDefaultLogLevel() {
+        return mDefaultLevel.toString();
+    }
+
+    public void setDefaultLogLevel(String defaultLogLevel) {
+        mDefaultLevel = Level.parse(defaultLogLevel);
+    }
+    
+    public void initializeContext( RuntimeContext context ){
+        ILoggerProvider lp  =  (ILoggerProvider)context.getInstanceOfType(ILoggerProvider.class);
+        if(lp!=null){
+            ILoggerProvider p = joinTogether(lp);
+            context.setInstanceOfType(ILoggerProvider.class, p);
+        }else
+            context.setInstanceOfType(ILoggerProvider.class, this);
+    }
+    
+   public void onContextCreate( RuntimeContext context ){
+       initializeContext( context);
+   }
+    
+    public void onContextDestroy( RuntimeContext context ){
+        
+    }
 }
