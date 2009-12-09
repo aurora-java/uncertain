@@ -14,6 +14,10 @@ public class DummyLoggerProvider implements ILoggerProvider {
     public ILogger getLogger(String topic) {        
         return DummyLogger.DEFAULT_LOGGER;
     }
+    
+    public ILogger getDefaultLogger(){
+        return DummyLogger.DEFAULT_LOGGER;
+    }
     /*
     public String getName(){
         return "dummy";

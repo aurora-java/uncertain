@@ -64,8 +64,8 @@ public class PackageManager {
     }
     
     public void addPackage( ComponentPackage pkg ){
-        if(pkg.getPackageManager()!=this)
-            initPackage(pkg);
+        //if(pkg.getPackageManager()!=this)
+        initPackage(pkg);
         SchemaManager sm = pkg.getSchemaManager();
         if(sm!=null)
             mSchemaManager.addAll(sm);
@@ -83,6 +83,7 @@ public class PackageManager {
         initPackage(pkg);
         pkg.load(path);
         addPackage(pkg);
+        System.out.println("loaded "+path);
         return pkg;
     }
     

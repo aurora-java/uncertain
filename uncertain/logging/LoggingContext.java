@@ -32,14 +32,25 @@ public class LoggingContext extends RuntimeContext {
         return logger==null ? DummyLogger.getInstance(): logger;
     }
     
+    public static void setLogger( CompositeMap context, ILogger logger ){
+        RuntimeContext rt = RuntimeContext.getInstance(context);
+        rt.setInstanceOfType(ILogger.class, logger);
+    }
+    
+    public static void setLoggerProvider( CompositeMap context, ILoggerProvider provider ){
+        RuntimeContext rt = RuntimeContext.getInstance(context);
+        rt.setInstanceOfType(ILoggerProvider.class, provider);
+        
+    }
+    
     public static ILogger getLogger( CompositeMap context, String topic ){
         return getLoggerProvider(context).getLogger(topic);
     }
-    
+    /*
     public static ILogger getErrorLogger( CompositeMap context ){
         return getLogger(context, "error");
     }
-    
+    */
     public static LoggingContext getLoggingContext( CompositeMap m ){
         LoggingContext lc = new LoggingContext();
         lc.initialize(m);
