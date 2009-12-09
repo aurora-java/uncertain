@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.xml.utils.NameSpace;
 import org.xml.sax.SAXException;
 
 import uncertain.composite.CompositeLoader;
