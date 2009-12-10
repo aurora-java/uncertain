@@ -149,6 +149,9 @@ public class CompositeLoader {
 	public CompositeMap loadFromString( String str) throws IOException, SAXException {
 		return parse( new ByteArrayInputStream(str.getBytes()));
 	}
+	public CompositeMap loadFromString( String str,String charsetName) throws IOException, SAXException {
+		return parse( new ByteArrayInputStream(str.getBytes(charsetName)));
+	}
 	
 	
 	public CompositeMap loadFromStream( InputStream stream) throws IOException, SAXException {
