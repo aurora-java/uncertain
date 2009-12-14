@@ -71,7 +71,10 @@ public class CompositeAccessor implements ICompositeAccessor {
             }
             else{
                    key = _key;
-                   container = root.getChild(key);
+                   if("..".equals(key))
+                       container = root.getParent();
+                   else
+                       container = root.getChild(key);
             }
             
             if( container != null && container instanceof CompositeMap) 
