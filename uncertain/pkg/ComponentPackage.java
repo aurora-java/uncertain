@@ -7,13 +7,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.xml.sax.SAXException;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.DynamicObject;
 import uncertain.composite.QualifiedName;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
@@ -22,131 +25,161 @@ import uncertain.schema.IType;
 import uncertain.schema.SchemaManager;
 
 public class ComponentPackage {
-    
+
     static final String CONFIG_PATH = "config";
-  
+
     static final String CLASS_REGISTRY_FILE = "class-registry.xml";
     static final String PACKAGE_CONFIG_FILE = "package.xml";
-    
-    protected File                mBasePathFile;
-    protected File                mConfigPathFile;
-    protected String              mBasePath;    
-    
-    ClassRegistry       mClassRegistry;
-    String              mVersion;
-    String              mDescription;
-    String              mName;
-    PackageManager      mOwner;
-    SchemaManager       mSchemaManager;
-    
-    CompositeMap        mPackageConfig;
-    
-    protected ComponentPackage(){
-        
+
+    protected File mBasePathFile;
+    protected File mConfigPathFile;
+    protected String mBasePath;
+
+    ClassRegistry mClassRegistry;
+    String mVersion;
+    String mDescription;
+    String mName;
+    PackageManager mOwner;
+    SchemaManager mSchemaManager;
+    // configuration of this package
+    CompositeMap mConfigData;
+    PackageConfig mPackageConfig;
+    // loaded schema file path
+    Set mLoadedSchema = new HashSet();
+
+    protected ComponentPackage() {
+
     }
-    
-    public void load( String path )
-        throws IOException
-    {
+
+    public void load(String path) throws IOException {
         setBasePath(path);
         initPackage();
     }
-    
-    public File getConfigDirectory(){
+
+    public File getConfigDirectory() {
         return mConfigPathFile;
     }
-    
-    protected CompositeMap loadConfigFile( File config_path, String name, boolean is_required )
-        throws IOException
-    {
-        CompositeLoader loader = mOwner.getCompositeLoader();
-        File config_file = new File( config_path, name);
-        if(!config_file.exists()){
-            if(is_required )
-                throw new FileNotFoundException("package config file "+config_file.getPath()+" is not found");
-            else 
-                return null;
-        }   
-        String path = config_file.getPath();
-        try{
-            return loader.loadByFullFilePath(path);
-        }catch(SAXException ex){
-            throw new RuntimeException("Config file is not valid: "+path, ex);
+
+    protected void loadSchemaFileByFullPath(String path) throws IOException {
+        if (mLoadedSchema.contains(path))
+            return;
+        try {
+            mSchemaManager.loadSchemaByFile(path);
+            mLoadedSchema.add(path);
+        } catch (SAXException ex) {
+            throw new IOException("Error in schema config file "+path+":"+ex.getMessage());
         }
     }
-    
-    protected void loadSchemaFile( File config_path )
-    {
+
+    protected CompositeMap loadConfigFile(File config_path, String name,
+            boolean is_required) throws IOException {
+        CompositeLoader loader = mOwner.getCompositeLoader();
+        File config_file = new File(config_path, name);
+        if (!config_file.exists()) {
+            if (is_required)
+                throw new FileNotFoundException("package config file "
+                        + config_file.getPath() + " is not found");
+            else
+                return null;
+        }
+        String path = config_file.getPath();
+        try {
+            return loader.loadByFullFilePath(path);
+        } catch (SAXException ex) {
+            throw new RuntimeException("Config file is not valid: " + path, ex);
+        }
+    }
+
+    protected void loadSchemaFile(File config_path) throws IOException {
+        // see if package config contains schema file
+        if (mPackageConfig != null) {
+            String[] schema_files = mPackageConfig.getSchemaFiles();
+            if (schema_files != null)
+                for (int i = 0; i < schema_files.length; i++){
+                    //System.out.println(schema_files[i]);
+                    loadSchemaFileByFullPath((new File(config_path,
+                            schema_files[i])).getAbsolutePath());
+                }
+        }
         // load all schema in config directory
-        String extension = "."+SchemaManager.DEFAULT_EXTENSION;
+        String extension = "." + SchemaManager.DEFAULT_EXTENSION;
         File[] files = config_path.listFiles();
-        if(files==null)
+        if (files == null)
             return;
-        for(int i=0; i<files.length; i++){
+        for (int i = 0; i < files.length; i++) {
             String file = files[i].getName().toLowerCase();
-            if(file.endsWith(extension)){
-                try{
-                    mSchemaManager.loadSchemaByFile(files[i].getAbsolutePath());
-                }catch(Exception ex){
-                    throw new RuntimeException("Error when parsing schema file "+files[i].getAbsolutePath(), ex);                    
+            if (file.endsWith(extension)) {
+                try {
+                    loadSchemaFileByFullPath(files[i].getAbsolutePath());
+                } catch (Exception ex) {
+                    throw new RuntimeException(
+                            "Error when parsing schema file "
+                                    + files[i].getAbsolutePath(), ex);
                 }
             }
         }
         // add attached feature classes
         Collection cl = mSchemaManager.getAllTypes();
-        if(cl!=null){
-            for( Iterator it = cl.iterator(); it.hasNext(); ){
-                IType type = (IType)it.next();
-                if(type instanceof ComplexType){
-                    ComplexType complex_type = (ComplexType)type;
+        if (cl != null) {
+            for (Iterator it = cl.iterator(); it.hasNext();) {
+                IType type = (IType) it.next();
+                if (type instanceof ComplexType) {
+                    ComplexType complex_type = (ComplexType) type;
                     List lst = complex_type.getAllAttachedClasses();
-                    if(lst!=null&&lst.size()>0){
+                    if (lst != null && lst.size() > 0) {
                         QualifiedName qname = complex_type.getQName();
-                        for( Iterator tit = lst.iterator(); tit.hasNext();)
-                            mClassRegistry.attachFeature(qname, (Class)tit.next());
+                        for (Iterator tit = lst.iterator(); tit.hasNext();)
+                            mClassRegistry.attachFeature(qname, (Class) tit
+                                    .next());
                     }
                 }
             }
         }
     }
-    
-    protected void initPackage()
-        throws IOException
-    {
-        
-        OCManager       oc_manager = mOwner.getOCManager();        
-        File config_path = new File( mBasePathFile, CONFIG_PATH);
-        mPackageConfig = loadConfigFile( config_path, PACKAGE_CONFIG_FILE, false);
-        if( mPackageConfig!=null ){
-            oc_manager.populateObject(mPackageConfig, this);
-        }else{
+
+    protected void initPackage() throws IOException {
+
+        OCManager oc_manager = mOwner.getOCManager();
+        File config_path = new File(mBasePathFile, CONFIG_PATH);
+        mConfigData = loadConfigFile(config_path, PACKAGE_CONFIG_FILE, false);
+        if (mConfigData != null) {
+            oc_manager.populateObject(mConfigData, this);
+            mPackageConfig = (PackageConfig) DynamicObject.cast(mConfigData,
+                    PackageConfig.class);
+        } else {
             // Do default init work
-            setName(mBasePathFile.getName());            
+            setName(mBasePathFile.getName());
         }
-            
-        CompositeMap registry = loadConfigFile( config_path, CLASS_REGISTRY_FILE, false);
-        if(registry!=null)
-            try{
-                mClassRegistry = (ClassRegistry)oc_manager.createObject(registry);
-            }catch(ClassCastException ex){
-                throw new RuntimeException(CLASS_REGISTRY_FILE+" is not valid, the root element should be mapped to "+ClassRegistry.class.getName());
+
+        CompositeMap registry = loadConfigFile(config_path,
+                CLASS_REGISTRY_FILE, false);
+        if (registry != null)
+            try {
+                mClassRegistry = (ClassRegistry) oc_manager
+                        .createObject(registry);
+            } catch (ClassCastException ex) {
+                throw new RuntimeException(
+                        CLASS_REGISTRY_FILE
+                                + " is not valid, the root element should be mapped to "
+                                + ClassRegistry.class.getName());
             }
         mSchemaManager = new SchemaManager(oc_manager);
         loadSchemaFile(config_path);
     }
-    
+
     /**
      * @return Name of this package
      */
-    public String   getName(){
+    public String getName() {
         return mName;
     }
-    
+
     /**
-     * Version of this package 
+     * Version of this package
+     * 
      * @return
      */
-    public String   getVersion(){
+    public String getVersion() {
         return mVersion;
     }
 
@@ -157,25 +190,25 @@ public class ComponentPackage {
         return mBasePath;
     }
 
-
     /**
-     * @param basePath of this package
+     * @param basePath
+     *            of this package
      */
-    public void setBasePath(String basePath) 
-        throws FileNotFoundException
-    {
+    public void setBasePath(String basePath) throws FileNotFoundException {
         this.mBasePath = basePath;
         mBasePathFile = new File(mBasePath);
-        if( !mBasePathFile.exists() )
-            throw new FileNotFoundException("Package base path "+basePath+" does not exist");
-        if( !mBasePathFile.isDirectory() )
-            throw new IllegalArgumentException("Path "+basePath+" is not a valid directory");
-        mConfigPathFile = new File( mBasePath, CONFIG_PATH);
+        if (!mBasePathFile.exists())
+            throw new FileNotFoundException("Package base path " + basePath
+                    + " does not exist");
+        if (!mBasePathFile.isDirectory())
+            throw new IllegalArgumentException("Path " + basePath
+                    + " is not a valid directory");
+        mConfigPathFile = new File(mBasePath, CONFIG_PATH);
     }
 
     /**
      * @return ClassRegistry instance that contains class and tag mapping in
-     * this package
+     *         this package
      */
     public ClassRegistry getClassRegistry() {
         return mClassRegistry;
@@ -189,35 +222,38 @@ public class ComponentPackage {
     }
 
     /**
-     * @param description A brief package description
+     * @param description
+     *            A brief package description
      */
     public void setDescription(String description) {
         this.mDescription = description;
     }
 
     /**
-     * @param version the version of this package, such as 2.1.4
+     * @param version
+     *            the version of this package, such as 2.1.4
      */
     public void setVersion(String version) {
         this.mVersion = version;
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name) {
         this.mName = name;
     }
-    
-    public void setPackageManager( PackageManager owner ){
+
+    public void setPackageManager(PackageManager owner) {
         this.mOwner = owner;
     }
-    
-    public PackageManager getPackageManager(){
+
+    public PackageManager getPackageManager() {
         return mOwner;
     }
-    
-    public SchemaManager getSchemaManager(){
+
+    public SchemaManager getSchemaManager() {
         return mSchemaManager;
     }
 
