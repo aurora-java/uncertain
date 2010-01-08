@@ -83,7 +83,7 @@ public class PackageManager {
         initPackage(pkg);
         pkg.load(path);
         addPackage(pkg);
-        System.out.println("loaded "+path);
+        //System.out.println("loaded "+path);
         return pkg;
     }
     
