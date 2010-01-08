@@ -104,7 +104,7 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
      */
     public void registerInstanceOnce( Class type, Object instance){
         if(instance!=null)
-            if(!type.isAssignableFrom(instance.getClass()))
+            if(!type.isAssignableFrom(instance.getClass()) && !type.isPrimitive() )
                 throw new IllegalArgumentException("type "+type.getName() +" isn't compatible with "+instance.getClass().getName());
         instance_map.put(type,instance);
     } 
