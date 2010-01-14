@@ -26,7 +26,7 @@ public class DumpMap extends AbstractEntry {
                 m = "object got from ["+Path+"] is not CompositeMap but "+obj.getClass().getName()+", toString():"+obj.toString();
             }
         }
-        
+        m = "[dump-map] " + m;
         ILogger logger = runner.getLogger();//LoggingContext.getLogger(runner.getContext());
         if(logger!=null)
             logger.log(m);        
