@@ -15,7 +15,7 @@ public class DumpMap extends AbstractEntry {
 
     public void run(ProcedureRunner runner) {
         String m = null;
-        Object obj = runner.getContext().getObject(Path);
+        Object obj = Path==null?runner.getContext():runner.getContext().getObject(Path);
         if(obj==null)
             m = "["+Path+"] is null";
         else{
@@ -26,7 +26,7 @@ public class DumpMap extends AbstractEntry {
                 m = "object got from ["+Path+"] is not CompositeMap but "+obj.getClass().getName()+", toString():"+obj.toString();
             }
         }
-        m = "[dump-map] " + m;
+        m = "<dump-map path=\""+Path+"\"> " + m;
         ILogger logger = runner.getLogger();//LoggingContext.getLogger(runner.getContext());
         if(logger!=null)
             logger.log(m);        
