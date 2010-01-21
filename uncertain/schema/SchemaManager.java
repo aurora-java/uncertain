@@ -6,12 +6,13 @@ package uncertain.schema;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
 import org.xml.sax.SAXException;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
-import uncertain.composite.CompositeUtil;
 import uncertain.composite.QualifiedName;
 import uncertain.ocm.OCManager;
 
@@ -199,6 +200,10 @@ public class SchemaManager implements ISchemaManager {
     
     public void addAll( SchemaManager another ){
         mNamedObjectManager.addAll(another.mNamedObjectManager);
+    }
+    
+    public List getElementsOfType( IType parent_type ){
+        return null;
     }
 
 }
