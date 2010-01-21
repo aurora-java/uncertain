@@ -13,5 +13,9 @@ public class SimpleType extends AbstractQualifiedNamed implements IType {
     public void doAssemble(){
         
     }
+    
+    public boolean isExtensionOf( IType another ){
+        return false;    
+    }    
 
 }

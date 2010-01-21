@@ -66,7 +66,7 @@ public class ComplexType extends AbstractCategorized implements IType {
         addChilds(extensions);
     }
 
-    public boolean isExtensionOf( ComplexType another ){
+    public boolean isExtensionOf( IType another ){
         return false;    
     }
     
