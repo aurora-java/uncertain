@@ -24,7 +24,7 @@ public class GroupObjectProcessorImpl implements IGroupObjectProcessor {
     public void process(Object o){
         if(o!=null){
             BigDecimal ab = null;
-            if(o instanceof Number) ab = new BigDecimal(o.toString());
+            if(o instanceof Number || o instanceof String ) ab = new BigDecimal(o.toString());
             if(type<=IGroupObjectProcessor.COUNT)
 	            if(o instanceof String )
 	                o = new Double(o.toString());
