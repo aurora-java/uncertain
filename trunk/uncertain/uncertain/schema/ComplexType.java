@@ -67,6 +67,8 @@ public class ComplexType extends AbstractCategorized implements IType {
     }
 
     public boolean isExtensionOf( IType another ){
+    	if(getAllExtendedTypes()!= null&&getAllExtendedTypes().contains(another))
+    		return true;
         return false;    
     }
     
@@ -115,8 +117,6 @@ public class ComplexType extends AbstractCategorized implements IType {
 	    		Element ele = elements[i];
 	    		if(mObjectManager.getElement(ele.getQName()) == null){
 	    			mObjectManager.addElements(new Element[]{ele});
-	    		}else{
-//	    			System.out.println("已经存在"+ele.getQName());
 	    		}
 	    	}
     	}
@@ -126,9 +126,6 @@ public class ComplexType extends AbstractCategorized implements IType {
 	    		Array arr = arrays[i];
 	    		if(mObjectManager.getElement(arr.getQName()) == null){
 	    			mObjectManager.addElements(new Array[]{arr});
-	    		}
-	    		else{
-//	    			System.out.println("已经存在："+arr.getQName());
 	    		}
 	    	}
     	}
