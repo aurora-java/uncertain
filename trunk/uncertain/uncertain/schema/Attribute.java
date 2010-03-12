@@ -16,6 +16,8 @@ public class Attribute extends AbstractCategorized implements IReference {
     String          mUse;
     String          mDefault;
     String          mEditor;    
+    String          mDocument;
+    
     
     IValidator[]    mValidators;
 
@@ -65,6 +67,14 @@ public class Attribute extends AbstractCategorized implements IReference {
 
     public void setUse(String use) {
         this.mUse = use;
+    }
+    
+    public String getDocument() {
+        return mDocument;
+    }
+
+    public void setDocument(String document) {
+        this.mDocument = document;
     }
     
     public String toString(){
