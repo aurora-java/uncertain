@@ -80,6 +80,7 @@
 			<ss:attributes>
 				<ss:attribute name="maxOccurs" type="ss:string" default="unbounded"/>
 				<ss:attribute name="minOccurs" type="ss:string" default="0"/>
+				<ss:attribute name="displayMask" type="ss:string" />
 			</ss:attributes>			
 			<ss:extensions>
 				<ss:extension base="ss:complexType"/>
@@ -99,6 +100,7 @@
 			<ss:attributes>
 				<ss:attribute name="use"  default="optional"/>				
 				<ss:attribute name="default" type="ss:string" />
+				<ss:attribute name="document" type="ss:string" />
 			</ss:attributes>		
 			<ss:extensions>
 				<ss:extension base="ss:Categorized" />
