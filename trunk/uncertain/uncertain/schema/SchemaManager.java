@@ -4,6 +4,7 @@
 package uncertain.schema;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -203,7 +204,20 @@ public class SchemaManager implements ISchemaManager {
     }
     
     public List getElementsOfType( IType parent_type ){
-        return null;
+    	List result = new ArrayList();
+    	if(mNamedObjectManager.getObjectMap(SchemaConstant.TYPE_ITYPE).values() == null)
+    		return null;
+    	Iterator elements = mNamedObjectManager.getObjectMap(SchemaConstant.TYPE_ITYPE).values().iterator();
+    	while(elements.hasNext()){
+    		Object next = elements.next();
+    		if(next instanceof Element){
+    			Element ele = (Element)next;
+    			if(ele.isExtensionOf(parent_type)){
+    				result.add(ele);
+    			}
+    		}
+    	}
+        return result;
     }
 
 }
