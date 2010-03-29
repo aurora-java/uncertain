@@ -274,7 +274,7 @@ public class Configuration  implements Cloneable
      * @return
      */
     public List getAttachedFeatures( CompositeMap config ){
-        return (List)feature_map.get(config);
+        return feature_map==null?null:(List)feature_map.get(config);
     }
     
     /**
