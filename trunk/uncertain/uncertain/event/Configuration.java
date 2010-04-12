@@ -79,6 +79,10 @@ public class Configuration  implements Cloneable
     public Configuration(){
         this(ParticipantRegistry.defaultInstance(), OCManager.getInstance());
     }
+    
+    public Configuration( OCManager m){
+        this(ParticipantRegistry.defaultInstance(), m);
+    }
 
     /**
      * Constructor using ParticipantRegistry to lookup handle method info by class,
