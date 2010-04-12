@@ -66,9 +66,9 @@ public class Set extends AbstractEntry {
             throw new ConfigurationError("either 'SourceField' or 'Value' attribute must be set for <set> element");
         CompositeMap context = runner.getContext();
         if(sourceField!=null)
-            context.putObject(field, context.getObject(sourceField));
+            context.putObject(field, context.getObject(sourceField), true);
         else
-            context.putObject(field, TextParser.parse(value,context));
+            context.putObject(field, TextParser.parse(value,context), true);
     }
 
 }

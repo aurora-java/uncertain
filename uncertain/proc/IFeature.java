@@ -17,6 +17,15 @@ public interface IFeature {
     public static final int NO_FEATURE_INSTANCE = -1;
     public static final int NO_CONFIG = -2;
     
+    /**
+     * @param config The CompositeMap that the feature instance is associated with
+     * @param procConfig The Configuration instance that loads config data 
+     * @return A int constant to decide whether this feature instance can be attached
+     * NORMAL: this feature can be attached
+     * NO_FEATURE_INSTANCE: the feature instance should be discarded from Configuration
+     * NO_CONFIG: both feature instance and the whole CompositeMap that the feature is associated
+     * with should be discarded
+     */
     public int attachTo(CompositeMap config, Configuration procConfig );
 
 }
