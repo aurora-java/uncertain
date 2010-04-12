@@ -1,149 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ss:schema xmlns:ss="http://www.uncertain-framework.org/schema/simple-schema">
-<!--
-	<ss:namespaces>
-		<ss:namespace prefix="ss" url="http://www.uncertain-framework.org/schema/simple-schema" />
-	</ss:namespaces>
--->	
-	<ss:types>
-		
-		<ss:complexType name="ss:SchemaObject">
-		</ss:complexType>
-		
-		<ss:complexType name="ss:QualifiedNamed">
-			<ss:attributes>
-				<ss:attribute name="name" type="ss:QName" />
-			</ss:attributes>
-			<ss:extensions>
-				<ss:extension base="ss:SchemaObject"/>
-			</ss:extensions>
-		</ss:complexType>
-		
-		<ss:complexType name="ss:Categorized">
-			<ss:attributes>
-				<ss:attribute name="category" type="ss:QName" />
-			</ss:attributes>
-			<ss:extensions>
-				<ss:extension base="ss:QualifiedNamed"/>
-			</ss:extensions>				
-		</ss:complexType>
-		
-		<ss:complexType name="ss:HasSimpleType">
-			<ss:attributes>
-				<ss:attribute name="type" type="ss:string" />
-			</ss:attributes>
-		</ss:complexType>		
-		
-		<ss:complexType name="ss:Reference">
-			<ss:attributes>
-				<ss:attribute name="ref" type="ss:QName" />
-			</ss:attributes>
-		</ss:complexType>
-		
-		<ss:complexType name="ss:HasEditor">
-			<ss:attributes>
-				<ss:attribute name="editor" type="ss:string" />
-			</ss:attributes>
-		</ss:complexType>
-		
-		<ss:complexType name="ss:HasTitle">
-			<ss:attributes>
-				<ss:attribute name="title" type="ss:string" />
-				<ss:attribute name="description" type="ss:string" />				
-			</ss:attributes>
-		</ss:complexType>		
-		
-		<ss:complexType name="ss:BaseType"/>
-		
-	</ss:types>
-<!--	
-	<ss:attributes>
-	
-	</ss:attributes>
--->	
-	<ss:elements>
-	
-		<ss:element name="ss:complexType">
-			<ss:arrays>
-				<ss:array name="ss:attributes" type="ss:attribute" />
-				<ss:array name="ss:elements" type="ss:element" />				
-				<ss:array name="ss:arrays" type="ss:array" />			
-				<ss:array name="ss:extensions" type="ss:extension" />
-				<ss:array name="ss:classes" type="ss:featureClass" />	
-			</ss:arrays>
-			<ss:extensions>
-				<ss:extension base="ss:Categorized" />
-				<ss:extension base="ss:BaseType" />
-			</ss:extensions>	
-		</ss:element>
-		
-		<ss:element name="ss:element">
-			<ss:attributes>
-				<ss:attribute name="maxOccurs" type="ss:string" default="unbounded"/>
-				<ss:attribute name="minOccurs" type="ss:string" default="0"/>
-				<ss:attribute name="displayMask" type="ss:string" />
-			</ss:attributes>			
-			<ss:extensions>
-				<ss:extension base="ss:complexType"/>
-				<ss:extension base="ss:Reference" />
-				<ss:extension base="ss:HasEditor" />				
-				<ss:extension base="ss:HasSimpleType" />
-			</ss:extensions>	
-		</ss:element>
-		
-		<ss:element name="ss:array">
-			<ss:extensions>
-				<ss:extension base="ss:element"/>
-			</ss:extensions>
-		</ss:element>
-	
-		<ss:element name="ss:attribute">
-			<ss:attributes>
-				<ss:attribute name="use"  default="optional"/>				
-				<ss:attribute name="default" type="ss:string" />
-				<ss:attribute name="document" type="ss:string" />
-			</ss:attributes>		
-			<ss:extensions>
-				<ss:extension base="ss:Categorized" />
-				<ss:extension base="ss:Reference" />
-				<ss:extension base="ss:HasEditor" />
-				<ss:extension base="ss:HasSimpleType" />
-			</ss:extensions>			
-		</ss:element>
-
-		<ss:element name="ss:category">
-			<ss:attributes>
-				<ss:attribute name="parentName" type="ss:QName" />
-			</ss:attributes>			
-			<ss:extensions>
-				<ss:extension base="ss:QualifiedNamed"/>
-				<ss:extension base="ss:HasTitle"/>
-			</ss:extensions>	
-		</ss:element>
-
-		<ss:element name="ss:extension">
-			<ss:attributes>
-				<ss:attribute name="base" type="ss:QName" />
-			</ss:attributes>			
-		</ss:element>
-		
-		<ss:element name="ss:featureClass">
-			<ss:attributes>
-				<ss:attribute name="name" type="ss:string" />
-			</ss:attributes>			
-		</ss:element>	
-		
-		<ss:element name="ss:schema">
-			<ss:attributes>
-				<ss:attribute name="targetNamespace" type="ss:string" />
-			</ss:attributes>
-			<ss:arrays>
-				<ss:array name="ss:attributes" type="ss:attribute" />
-				<ss:array name="ss:elements" type="ss:element" />				
-				<ss:array name="ss:categories" type="ss:category" />			
-				<ss:array name="ss:types" type="ss:BaseType" />	
-			</ss:arrays>				
-		</ss:element>
-		
-	</ss:elements>
-	
+    <ss:types>
+        <ss:complexType name="ss:SchemaObject"><![CDATA[
+		]]></ss:complexType>
+        <ss:complexType name="ss:QualifiedNamed">
+            <ss:attributes>
+                <ss:attribute type="ss:QName" name="name"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="ss:SchemaObject"/>
+            </ss:extensions>
+        </ss:complexType>
+        <ss:complexType name="ss:Categorized">
+            <ss:attributes>
+                <ss:attribute type="ss:QName" name="category"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="ss:QualifiedNamed"/>
+            </ss:extensions>
+        </ss:complexType>
+        <ss:complexType name="ss:HasSimpleType">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="type"/>
+            </ss:attributes>
+        </ss:complexType>
+        <ss:complexType name="ss:Reference">
+            <ss:attributes>
+                <ss:attribute type="ss:QName" name="ref"/>
+            </ss:attributes>
+        </ss:complexType>
+        <ss:complexType name="ss:HasEditor">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="editor"/>
+            </ss:attributes>
+        </ss:complexType>
+        <ss:complexType name="ss:HasTitle">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="title"/>
+                <ss:attribute type="ss:string" name="description"/>
+            </ss:attributes>
+        </ss:complexType>
+        <ss:complexType name="ss:BaseType"/>
+    </ss:types>
+    <ss:elements>
+        <ss:element name="ss:complexType">
+            <ss:arrays>
+                <ss:array type="ss:attribute" name="ss:attributes"/>
+                <ss:array type="ss:element" name="ss:elements"/>
+                <ss:array type="ss:array" name="ss:arrays"/>
+                <ss:array type="ss:extension" name="ss:extensions"/>
+                <ss:array type="ss:featureClass" name="ss:classes"/>
+            </ss:arrays>
+            <ss:extensions>
+                <ss:extension base="ss:Categorized"/>
+                <ss:extension base="ss:BaseType"/>
+            </ss:extensions>
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="document"/>
+            </ss:attributes>
+        </ss:element>
+        <ss:element name="ss:element">
+            <ss:attributes>
+                <ss:attribute type="ss:string" default="unbounded" name="maxOccurs"/>
+                <ss:attribute type="ss:string" default="0" name="minOccurs"/>
+                <ss:attribute type="ss:string" name="displayMask"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="ss:complexType"/>
+                <ss:extension base="ss:Reference"/>
+                <ss:extension base="ss:HasEditor"/>
+                <ss:extension base="ss:HasSimpleType"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element name="ss:array">
+            <ss:extensions>
+                <ss:extension base="ss:element"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element name="ss:attribute">
+            <ss:attributes>
+                <ss:attribute default="optional" name="use"/>
+                <ss:attribute type="ss:string" name="default"/>
+                <ss:attribute type="ss:string" name="document"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="ss:Categorized"/>
+                <ss:extension base="ss:Reference"/>
+                <ss:extension base="ss:HasEditor"/>
+                <ss:extension base="ss:HasSimpleType"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element name="ss:category">
+            <ss:attributes>
+                <ss:attribute type="ss:QName" name="parentName"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="ss:QualifiedNamed"/>
+                <ss:extension base="ss:HasTitle"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element name="ss:extension">
+            <ss:attributes>
+                <ss:attribute type="ss:QName" name="base"/>
+            </ss:attributes>
+        </ss:element>
+        <ss:element name="ss:featureClass">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="name"/>
+            </ss:attributes>
+        </ss:element>
+        <ss:element name="ss:schema">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="targetNamespace"/>
+            </ss:attributes>
+            <ss:arrays>
+                <ss:array type="ss:attribute" name="ss:attributes"/>
+                <ss:array type="ss:element" name="ss:elements"/>
+                <ss:array type="ss:category" name="ss:categories"/>
+                <ss:array type="ss:BaseType" name="ss:types"/>
+            </ss:arrays>
+        </ss:element>
+    </ss:elements>
 </ss:schema>
