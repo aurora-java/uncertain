@@ -21,6 +21,8 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     public static final String  KEY_IS_TRACE = "__is_trace__";
     
     public static final String  KEY_TRACE_OBJECT = "__trace_object__";
+
+    public static final String KEY_SERVICE_SUCCESS = "__service_success__";
     
     public static RuntimeContext getInstance( CompositeMap map ){
         RuntimeContext context = new RuntimeContext();
@@ -124,6 +126,14 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     
     public void setTraceObject( Object obj ){
         put(KEY_TRACE_OBJECT, obj);
+    }
+
+    public boolean isSuccess() {
+        return getBoolean(KEY_SERVICE_SUCCESS, true);
+    }
+
+    public void setSuccess(boolean success) {
+        putBoolean(KEY_SERVICE_SUCCESS, success);
     }
 
 }
