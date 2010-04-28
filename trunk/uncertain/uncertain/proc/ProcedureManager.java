@@ -19,6 +19,17 @@ import uncertain.ocm.OCManager;
  */
 public class ProcedureManager implements IProcedureManager {
     
+    static final ProcedureManager DEFAULT_INSTANCE = new ProcedureManager();
+    
+    public static ProcedureManager getDefaultInstance(){
+        return DEFAULT_INSTANCE;
+    }
+    
+    public ProcedureManager(){
+        mOCManager = OCManager.getInstance();
+        mCompositeLoader = CompositeLoader.createInstanceForOCM(DEFAULT_PROC_EXTENSION);
+    }
+    
     /**
      * @param uncertainEngine
      */
@@ -61,7 +72,7 @@ public class ProcedureManager implements IProcedureManager {
     }
     
     public Configuration createConfig(){
-        return mUncertainEngine.createConfig();
+        return mUncertainEngine==null? new Configuration() : mUncertainEngine.createConfig();
     }
 
     public CompositeLoader getCompositeLoader() {
@@ -73,11 +84,13 @@ public class ProcedureManager implements IProcedureManager {
     }
     
     public void initContext( CompositeMap context ){        
-        mUncertainEngine.initContext(context);
+        if(mUncertainEngine!=null)
+            mUncertainEngine.initContext(context);
     }
     
     public void destroyContext( CompositeMap context_map ){
-        mUncertainEngine.destroyContext(context_map);
+        if(mUncertainEngine!=null)
+            mUncertainEngine.destroyContext(context_map);
     }
 
 }
