@@ -145,6 +145,7 @@ public class ProcedureRunner {
         if(procException==null) procException = thr;
         lastException = procException;
         resume_after_exception = false;
+        runtime_context.setSuccess(false);
         if(handleException(procException)){
             procException = null;
         }
@@ -153,6 +154,7 @@ public class ProcedureRunner {
     }
     
     public void throwUnhandledException(Throwable thr){
+        runtime_context.setSuccess(false);
         procException = thr.getCause();
         if(procException==null) procException = thr;
         lastException = procException;
