@@ -147,6 +147,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstanceOnce(IObjectCreator.class, mObjectRegistry);
         mObjectRegistry.registerInstanceOnce(ILoggingTopicRegistry.class, mTopicManager);
         mObjectRegistry.registerInstanceOnce(ILogger.class, mLogger);
+        mObjectRegistry.registerInstanceOnce(IProcedureManager.class, this.getProcedureManager());
     }
     
     private void setDefaultClassRegistry(){
