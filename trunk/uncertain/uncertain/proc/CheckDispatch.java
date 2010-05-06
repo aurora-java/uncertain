@@ -3,19 +3,18 @@ package uncertain.proc;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
-public class CheckCookie extends AbstractEntry {
+public class CheckDispatch extends AbstractEntry {
 	 
 	public void run(ProcedureRunner runner) throws Exception {
 		
 		
 		runner.fireEvent(this.getName(), new Object[] {this,runner.getContext()});
-		System.out.println("sss");
 	    	
 	}
 	String name;
 	String field;
 	String value;
-	String url;
+	String dispatchUrl;
 	public String getName() {
 		return name;
 	}
@@ -34,11 +33,12 @@ public class CheckCookie extends AbstractEntry {
 	public void setValue(String value) {
 		this.value = value;
 	}
-	public String getUrl() {
-		return url;
+	public String getDispatchUrl() {
+		return dispatchUrl;
 	}
-	public void setUrl(String url) {
-		this.url = url;
+	public void setDispatchUrl(String dispatchUrl) {
+		this.dispatchUrl = dispatchUrl;
 	}
+
 
 }
