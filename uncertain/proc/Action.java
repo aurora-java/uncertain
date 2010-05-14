@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 import uncertain.core.ConfigurationError;
 import uncertain.logging.ILogger;
 import uncertain.util.StringSplitter;
@@ -20,6 +21,17 @@ public class Action extends AbstractEntry {
     String   input;
     String[] output_fields;
     String   output;
+    
+    boolean  isNameDynamic = false;
+    
+
+    public void setName(String n) {
+        super.setName(n);
+        if(n.indexOf("${")>=0)
+            isNameDynamic = true;
+        else
+            isNameDynamic = false;
+    }    
     
     private String[] split(String input){
         String[] array = StringSplitter.splitToArray(input, ',', false);
@@ -135,13 +147,17 @@ public class Action extends AbstractEntry {
     public void run(ProcedureRunner runner) throws Exception {  
         Procedure proc = (Procedure)runner.getProcedure().getRootOwner();
         ILogger logger = runner.getLogger();
-        logger.log(Level.CONFIG, "[action] "+getName());
 
         CompositeMap context = runner.getContext();
         Object[] args = getFieldValues(proc, context);
-        runner.fireEvent(getName(), args);
+        
+        String event_name = isNameDynamic? TextParser.parse(getName(), context): getName();
+        logger.log(Level.CONFIG, "[action] "+event_name);
+        
+        runner.fireEvent(event_name, args);
         // Fetch return fields from participant
         getOutputFields(runner, proc);       
     }
+
      
 }
