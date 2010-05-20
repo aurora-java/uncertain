@@ -370,6 +370,7 @@ public class ProcedureRunner {
         child.setProcedure(proc);
         child.caller = this;
         child.context = context;
+        child.runtime_context = runtime_context;
         //child.config_map = config_map;
         // child.config = config;
         child.uncertainEngine = uncertainEngine;
