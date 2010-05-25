@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.json.Test;
-
 import uncertain.composite.CompositeMap;
 
 public class GroupCompositeMapWithFields {
@@ -27,7 +25,6 @@ public class GroupCompositeMapWithFields {
 		}
 		Iterator childs = data.getChildsNotNull().iterator();
 		CompositeMap preRecord = null;
-		CompositeMap nextRecord = null;
 		int rowNum = 0;
 		BreakPoints bp = new BreakPoints(data.getChildsNotNull().size(),
 				groupfields.length);
@@ -52,7 +49,7 @@ public class GroupCompositeMapWithFields {
 					}
 					if (breakbegin) {
 						bp.addPoint(rowNum, y);
-						System.out.println("rowNum:" + rowNum + " column:" + y);
+//						System.out.println("rowNum:" + rowNum + " column:" + y);
 //						breakbegin = true;
 					}
 				}
@@ -69,8 +66,8 @@ public class GroupCompositeMapWithFields {
 		int[] columnIndex;
 
 		BreakPoints(int rowCount, int columnCount) {
-			System.out.println("rowcount:" + rowCount + " columnCount:"
-					+ columnCount);
+//			System.out.println("rowcount:" + rowCount + " columnCount:"
+//					+ columnCount);
 			matric = new int[columnCount][rowCount];
 			columnIndex = new int[columnCount];
 		}
@@ -84,7 +81,6 @@ public class GroupCompositeMapWithFields {
 
 		List getMergeRange() {
 			LinkedList list = new LinkedList();
-			int[] range = new int[4];
 			for (int x = 0; x < matric.length; x++) {
 				int preValue = 0;
 				for (int y = 0; y < matric[x].length; y++) {
@@ -101,7 +97,7 @@ public class GroupCompositeMapWithFields {
 					}
 					preValue = value;
 				}
-				System.out.println();
+//				System.out.println();
 			}
 			return list;
 		}
