@@ -136,18 +136,32 @@ public class Action extends AbstractEntry {
                 Field fld = proc.getField(input_fields[i]);
                 if(fld!=null)
                     fields[i] = context.getObject(fld.getPath());
-                else 
+                else{ 
                     throw new IllegalArgumentException("Field '"+input_fields[i]+"' is not defined in procedure");
+                }
             }
         }
         return fields;
     }
+    
+    public Procedure getParentProcedure(){
+        IEntry owner = this.getOwner();
+        while(owner!=null){
+            if(owner instanceof Procedure)
+                return (Procedure)owner;
+            owner = owner.getOwner();
+        }
+        return null;
+    }
 
     
-    public void run(ProcedureRunner runner) throws Exception {  
-        Procedure proc = (Procedure)runner.getProcedure().getRootOwner();
+    public void run(ProcedureRunner runner) throws Exception {
+        // ================== to be enhanced =======================
+        Procedure proc = getParentProcedure();
+        if(proc==null)
+            proc = (Procedure)runner.getProcedure().getRootOwner();
+        // ================== end ==================================
         ILogger logger = runner.getLogger();
-
         CompositeMap context = runner.getContext();
         Object[] args = getFieldValues(proc, context);
         
