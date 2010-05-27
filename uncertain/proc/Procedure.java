@@ -133,8 +133,20 @@ public class Procedure extends EntryList {
      * @return a Field instance, or null if doesn't contain named field
      */
     public Field getField(String name){
-        if(field_map==null) return null;
-        return (Field)field_map.get(name);
+        Field f = null;
+        if(field_map!=null)
+            f = (Field)field_map.get(name);
+        if(f!=null)
+            return f;
+        else{
+            IEntry root = getRootOwner();
+            if(root==null||root==this)
+                return null;
+            if(root instanceof Procedure)
+                return ((Procedure)root).getField(name);
+            else
+                return null;
+        }
     }
     
     public Field getReturnField(){
@@ -179,6 +191,11 @@ public class Procedure extends EntryList {
             exception_handles = handles;
         else
             exception_handles.addAll(handles);
+        Iterator it = handles.iterator();
+        while(it.hasNext()){
+            IEntry entry = (IEntry)it.next();
+            entry.setOwner(this);
+        }
     }
     
     public Collection getExceptionHandles(){
