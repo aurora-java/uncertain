@@ -34,7 +34,8 @@ public class DataTypeRegistry {
         type_map.put(new Integer(Types.BIGINT),new LongType());
         type_map.put(new Integer(Types.BOOLEAN),new BooleanType());
         type_map.put(new Integer(Types.FLOAT),new FloatType());
-        type_map.put(new Integer(Types.DOUBLE),new DoubleType());        
+        type_map.put(new Integer(Types.DOUBLE),new DoubleType());
+        type_map.put(new Integer(Types.DECIMAL),new DoubleType());
         type_map.put(new Integer(Types.DATE), new DateType());
         type_map.put(new Integer(Types.TIMESTAMP), new TimestampType());
         type_map.put(new Integer(Types.CLOB), new ClobType());
