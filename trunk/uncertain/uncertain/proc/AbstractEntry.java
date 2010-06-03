@@ -51,7 +51,7 @@ public abstract class AbstractEntry implements IEntry {
      */    
     public IEntry getRootOwner(){
         if(owner!=null) return owner.getRootOwner();
-        else return this;
+        else return null;
     }
     
 
