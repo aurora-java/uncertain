@@ -140,13 +140,23 @@ public class Procedure extends EntryList {
             return f;
         else{
             IEntry root = getRootOwner();
-            if(root==null||root==this)
-                return null;
-            if(root instanceof Procedure)
-                return ((Procedure)root).getField(name);
-            else
-                return null;
+            if(root!=null && root instanceof Procedure)
+                f = ((Procedure)root).getField(name);
+            if(f==null){
+                Procedure parent_proc = getParentProcedure();
+                if(parent_proc!=null)
+                    f = parent_proc.getField(name);
+            }
+             return f;   
         }
+    }
+    
+    public Procedure getParentProcedure(){
+        for( IEntry p = getOwner(); p!=null ; p=p.getOwner()){
+            if( p instanceof Procedure)
+                return (Procedure)p;
+        }
+        return null;
     }
     
     public Field getReturnField(){
