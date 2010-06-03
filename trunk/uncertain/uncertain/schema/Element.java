@@ -25,6 +25,14 @@ public class Element extends ComplexType implements IReference {
 	IType mElementType;
 
 	String mDisplayMask;
+	String mDocument;
+	public String getDocument() {
+		return mDocument;
+	}
+
+	public void setDocument(String document) {
+		this.mDocument = document;
+	}
 
 	public String getDisplayMask() {
 		return mDisplayMask;
@@ -147,19 +155,19 @@ public class Element extends ComplexType implements IReference {
 		mMinOccurs = minOccurs;
 	}
 
-	public List getSonElements(SchemaManager manager) {
-		List sonElements = new ArrayList();
-		List sonList = getAllElements();
-		Iterator sonIterator = sonList.iterator();
-		while (sonIterator.hasNext()) {
-			Object ele = sonIterator.next();
+	public List getChildElements(SchemaManager manager) {
+		List childElements = new ArrayList();
+		List childList = getAllElements();
+		Iterator childIterator = childList.iterator();
+		while (childIterator.hasNext()) {
+			Object ele = childIterator.next();
 			ComplexType ele_ct = (ComplexType) ele;
 			if (ele_ct instanceof Element) {
-				sonElements.add(ele_ct);
+				childElements.add(ele_ct);
 			} else
-				sonElements.addAll(manager.getElementsOfType(ele_ct));
+				childElements.addAll(manager.getElementsOfType(ele_ct));
 		}
-		return sonElements;
+		return childElements;
 	}
 
 }
