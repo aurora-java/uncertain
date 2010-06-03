@@ -37,6 +37,7 @@ public class Switch extends AbstractEntry {
     
     public void addCase(Case c){
         caseList.add(c);
+        c.setOwner(this);
     }
 
     /* (non-Javadoc)
@@ -97,5 +98,14 @@ public class Switch extends AbstractEntry {
      */
     public void setTest(String test) {
         this.test = test;
+    }
+    
+    public Case getCaseByName( String name ){
+        for(Iterator it = caseList.iterator(); it.hasNext(); ){
+            Case cs = (Case)it.next();
+            if(name.equals(cs.getName()))
+                    return cs;
+        }
+        return null;
     }
 }
