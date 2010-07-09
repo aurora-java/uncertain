@@ -474,5 +474,70 @@ public class CompositeUtil {
 	public static String connectAttribute(CompositeMap root, String attrib_name) {
 		return connectAttribute(root, attrib_name, ",");
 	}
+	
+	/**
+	 * Copy all attributes, from source map to destination map. Do not override
+	 * existing attribute.
+	 */
+	public static void copyAttributes( Map source, Map dest ){
+	    Iterator it = source.entrySet().iterator();
+	    while(it.hasNext()){
+	        Map.Entry entry = (Map.Entry)it.next();
+	        if(!dest.containsKey(entry.getKey()))
+	            dest.put(entry.getKey(), entry.getValue());
+	    }
+	}
+	
+    /**
+     * Merge childs from source to destination. Every child is identified by specified key attribute
+     * Copy all childs from source.If a childs exists in destination map, all attributes that 
+     * not defined in dest map will be copied.
+     * @param source Source CompositeMap containing childs
+     * @param dest Desitination CompositeMap containg childs
+     * @param key Key attribute to identify each child CompositeMap item, such as "name", "id"
+     */	
+	public static void mergeChildsByOverride( CompositeMap source, CompositeMap dest, Object key ){
+	    //Map source_cache = new HashMap();
+        //fillMap( source_cache, source, key);
+        Iterator it = source.getChildIterator();
+        if(it==null)
+            return;
+	    Map dest_cache = new HashMap();
+	    fillMap( dest_cache, dest, key);
+	    while(it.hasNext()){
+	        CompositeMap source_item = (CompositeMap)it.next();
+	        Object value = source_item.get(key);
+	        CompositeMap dest_item = (CompositeMap)dest_cache.get(value);
+	        if(dest_item!=null)
+	            copyAttributes(source_item, dest_item);
+	        else
+	            dest.addChild((CompositeMap)source_item.clone());	        
+	    }
+	    dest_cache.clear();
+	}
+	
+    /**
+     * For each child item in destination CompositeMap, if a child item with same key exists
+     * in source CompositeMap, then copy all attributes that not defined in destination map
+     * from source.
+     * @param source Source CompositeMap containing childs
+     * @param dest Desitination CompositeMap containg childs
+     * @param key Key attribute to identify each child CompositeMap item, such as "name", "id"
+     */
+	public static void mergeChildsByReference( CompositeMap source, CompositeMap dest, Object key ){
+        Iterator it = dest.getChildIterator();
+        if(it==null)
+            return;
+        Map source_cache = new HashMap();
+        fillMap( source_cache, source, key);
+        while(it.hasNext()){
+            CompositeMap dest_item = (CompositeMap)it.next();
+            Object value = dest_item.get(key);
+            CompositeMap source_item = (CompositeMap)source_cache.get(value);
+            if(source_item!=null)
+                copyAttributes(source_item, dest_item);
+        }
+        source_cache.clear();
+	}
 
 }
