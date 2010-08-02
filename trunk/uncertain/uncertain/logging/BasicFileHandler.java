@@ -13,6 +13,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
+
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IConfigurable;
 import uncertain.util.FilePatternFilter;
@@ -129,6 +130,11 @@ public class BasicFileHandler extends Handler implements ILogPathSettable, IConf
         close();
         mCurrentLogFileName = getLogFileName();
         File logFile = new File( mBasePathFile, mCurrentLogFileName );
+        if(!logFile.exists()){
+        	String path = mCurrentLogFileName.substring(0,mCurrentLogFileName.lastIndexOf("/"));
+        	File pathFile = new File( mBasePathFile, path);
+        	if(!pathFile.exists())pathFile.mkdirs();
+        }
         mWriter = new FileWriter(logFile, mAppend);
     }
     
