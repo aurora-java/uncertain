@@ -59,6 +59,13 @@
                 <ss:attribute type="ss:string" name="document"/>
             </ss:attributes>
         </ss:element>
+        <ss:element name="ss:editor">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="type"/>
+                <ss:attribute type="ss:string" name="name"/>
+                <ss:attribute type="ss:string" name="instanceClass"/>
+            </ss:attributes>
+        </ss:element>
         <ss:element name="ss:element">
             <ss:attributes>
                 <ss:attribute type="ss:string" default="unbounded" name="maxOccurs"/>
@@ -109,6 +116,28 @@
                 <ss:attribute type="ss:string" name="name"/>
             </ss:attributes>
         </ss:element>
+        <ss:element name="ss:simpleType">
+            <ss:elements>
+                <ss:element ref="ss:restriction"/>
+            </ss:elements>
+            <ss:extensions>
+                <ss:extension base="ss:Categorized"/>
+                <ss:extension base="ss:BaseType"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element displayMask="(${@base})" name="ss:restriction">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="base"/>
+            </ss:attributes>
+            <ss:arrays>
+                <ss:array type="ss:enumeration" name="ss:enumerations"/>
+            </ss:arrays>
+        </ss:element>
+        <ss:element displayMask="(${@value})" name="ss:enumeration">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="value"/>
+            </ss:attributes>
+        </ss:element>
         <ss:element name="ss:schema">
             <ss:attributes>
                 <ss:attribute type="ss:string" name="targetNamespace"/>
@@ -118,6 +147,7 @@
                 <ss:array type="ss:element" name="ss:elements"/>
                 <ss:array type="ss:category" name="ss:categories"/>
                 <ss:array type="ss:BaseType" name="ss:types"/>
+                <ss:array type="ss:editor" name="ss:editors"/>
             </ss:arrays>
         </ss:element>
     </ss:elements>
