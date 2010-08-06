@@ -18,6 +18,7 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
     Attribute[]         mAttributes;
     Element[]           mElements;
     Category[]          mCategories;
+    Editor[]          	mEditors;
     String              mTargetNamespace;
     ISchemaManager      mSchemaManager;
 
@@ -89,6 +90,15 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
     public void addCategories(Category[] categories) {
         mCategories = categories;
         addChildArray( categories, SchemaConstant.TYPE_CATEGORIE );
+    }
+    
+    public Editor[] geEditors() {
+        return mEditors;
+    }
+
+    public void addEditors(Editor[] Editors) {
+    	mEditors = Editors;
+        addChildArray( Editors, SchemaConstant.TYPE_EDITOR );
     }
 
     public String getTargetNamespace() {
