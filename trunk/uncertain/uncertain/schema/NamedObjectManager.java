@@ -103,6 +103,9 @@ class NamedObjectManager {
     public Category getCategory( QualifiedName qname ){
         return (Category)mChildMapArray[SchemaConstant.TYPE_CATEGORIE].get(qname);
     }
+    public Editor getEditor( QualifiedName qname ){
+        return (Editor)mChildMapArray[SchemaConstant.TYPE_EDITOR].get(qname);
+    }
     
     public void addAttributes( Attribute[] attribs ){
         if(attribs!=null)
