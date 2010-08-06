@@ -104,6 +104,9 @@ public class SchemaManager implements ISchemaManager {
     public Category getCategory( QualifiedName qname ){
         return mNamedObjectManager.getCategory(qname);
     }
+    public Editor getEditor( QualifiedName qname ){
+        return mNamedObjectManager.getEditor(qname);
+    }
     
     Namespace[] getNameSpaces( CompositeMap map ){
         Map ns_map = map.getNamespaceMapping();
