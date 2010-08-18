@@ -17,7 +17,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
-import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -180,6 +179,11 @@ public class CompositeMapParser extends DefaultHandler {
 
     public void startPrefixMapping(String prefix, String uri)
             throws SAXException {
+        // do not save empty prefix mapping
+        if(prefix==null)
+            return;
+        if(prefix.length()==0)
+            return;
         uri_mapping.put(uri, prefix);
         namespace_mapping.put(prefix, uri);
         if( getCompositeLoader().getSaveNamespaceMapping()){
@@ -209,32 +213,6 @@ public class CompositeMapParser extends DefaultHandler {
         }
     }
 
-    /** end handles */
-/*
-    public CompositeMapParser() {
-
-    }
-*/
-
-    /*
-    public CompositeMapParser(CompositeMapParser prototype) {
-        this();
-        copySettings(prototype);
-    }
-    */
-
-    /*
-     * public CompositeMapParser( CompositeLoader loader){ if( loader == null)
-     * return; setCompositeLoader(loader); }
-     */
-
-    /** set a new INameProcessor */
-    /*
-    public void setNameProcessor(NameProcessor processor) {
-        this.name_processor = processor;
-    }
-    */
-    
     /** get root CompositeMap parsed */
     public CompositeMap getRoot() {
         return current_node;
@@ -277,54 +255,6 @@ public class CompositeMapParser extends DefaultHandler {
         name_processor = null;
         composite_loader = null;
     }
-    
-    /*
-    public static CompositeMapParser createInstance(CompositeLoader loader) {
-        CompositeMapParser parser = new CompositeMapParser(loader);
-        return parser;
-    }
-    */
-    
-    /*
-    public Map getNamespaceMapping(){
-        return namespace_mapping;
-    }
-    */
 
-    /*
-    public void setDocumentLocator(Locator locator) {
-        last_locator = locator;
-    }
-    */
-    
-    
-
-    /*
-     * 
-     * public static CompositeMap parse( InputStream stream, CompositeLoader
-     * loader, NameProcessor processor ) throws SAXException, IOException {
-     * CompositeMapParser parser = null; try{ parser = createInstance(loader,
-     * processor); return parser.parseStream(stream); }finally{ if(parser!=null)
-     * parser.clear(); } }
-     * 
-     * public static CompositeMap parse( InputStream stream, CompositeLoader
-     * loader) throws SAXException, IOException { return parse( stream, loader,
-     * null); }
-     * 
-     * public static CompositeMap parse( InputStream stream, NameProcessor
-     * processor ) throws SAXException, IOException { return parse(stream, null,
-     * processor); }
-     * 
-     * public static CompositeMap parse( InputStream stream) throws
-     * SAXException, IOException { return parse(stream, null, null); }
-     */
-
-    /**
-     * @todo Add element location info
-     */
-    /*
-     * public void setDocumentLocator(Locator locator){
-     * super.setDocumentLocator(locator); }
-     */
 
 }

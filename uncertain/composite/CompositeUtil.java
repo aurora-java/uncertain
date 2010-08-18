@@ -127,6 +127,9 @@ public class CompositeUtil {
 
 		public int process(CompositeMap map) {
 			String url = map.getNamespaceURI();
+			Map mapping = map.getNamespaceMapping();
+			if(mapping!=null)
+			    prefix_map.putAll(mapping);
 			if (url != null) {
 				if (!prefix_map.containsKey(url)) {
 					String prefix = map.getPrefix();
