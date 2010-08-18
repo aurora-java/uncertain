@@ -135,7 +135,6 @@ public class XMLOutputter {
      */
     String toXMLWithPrefixMapping( int level, CompositeMap map, Map namespaces, Map prefix_mapping ){
         
-        
         StringBuffer attribs = new StringBuffer();
         StringBuffer childs = new StringBuffer();
         StringBuffer xml = new StringBuffer();
