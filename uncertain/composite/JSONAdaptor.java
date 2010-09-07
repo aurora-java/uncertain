@@ -53,11 +53,12 @@ public class JSONAdaptor {
     private static CompositeMap  add_internal( CompositeMap map, final String key, final Object value)
         throws JSONException
     {
-        if(value instanceof JSONObject || value instanceof JSONArray){
+        if(JSONObject.NULL.equals(value)){
+            map.put(key, null);
+        }else if(value instanceof JSONObject || value instanceof JSONArray){
             final CompositeMap child = (CompositeMap)convert_internal(value, key);
             map.addChild(child);
-        }
-        else{
+        }else{
             map.put(key, value);
         }        
         return map;
