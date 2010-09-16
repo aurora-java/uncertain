@@ -8,12 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.Comparator;
 import java.util.logging.Level;
 
 import org.xml.sax.SAXException;
@@ -351,11 +353,21 @@ public class UncertainEngine implements IChildContainerAcceptable {
         scanConfigFiles(mConfigDir, pattern);
     }
     
-    private List getSortedList( String[] files ){
+    private List getSortedList( File[] files ){
         List lst = new LinkedList();
         for(int i=0; i<files.length; i++)
             lst.add(files[i]);
-        Collections.sort(lst);
+        Collections.sort(lst, new Comparator(){
+            
+            public int compare(Object o1, Object o2){
+                return ((File)o1).getAbsolutePath().compareTo(((File)o2).getAbsolutePath());
+            }
+            
+            public boolean equals(Object obj){
+                return obj==this;
+            }
+            
+        });
         return lst;
     }
     
@@ -367,13 +379,13 @@ public class UncertainEngine implements IChildContainerAcceptable {
      */
     public void scanConfigFiles(File dir, String file_pattern) {
         FilePatternFilter filter = new FilePatternFilter(file_pattern);
-        String cfg_files[] = dir.list(filter);
+        File cfg_files[] = dir.listFiles(filter);
         List file_list = getSortedList(cfg_files);
         if(cfg_files.length>0){
             LinkedList cfg_list = new LinkedList();
-            ListIterator fit = file_list.listIterator(cfg_files.length-1);
+            ListIterator fit = file_list.listIterator(cfg_files.length);
             while(fit.hasPrevious()){
-                String file_path = (String)fit.previous();
+                String file_path = ((File)fit.previous()).getAbsolutePath();
                 mLogger.log("Loading configuration file "+file_path);
                 try{
                     CompositeMap config_map = mCompositeLoader.loadByFullFilePath(file_path);
