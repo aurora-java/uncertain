@@ -31,5 +31,7 @@ public interface IParticipantManager {
      * adds all participants
      */
     public Configuration getParticipantsAsConfig( String category );
+    
+    public void addIServiceParticipant( IServiceParticipant participant );
 
 }
