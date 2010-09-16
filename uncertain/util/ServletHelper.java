@@ -60,7 +60,7 @@ public class ServletHelper {
               os.registerParamOnce(TransactionFactory.class, application.transaction_factory);
           } 
           */           
-        LoggingUtil.setHandleLevels(uncertainEngine.getLogger().getParent(), Level.INFO);
+        //LoggingUtil.setHandleLevels(uncertainEngine.getLogger().getParent(), Level.INFO);
         //uncertainEngine.getLogger().setLevel(Level.INFO);
         //uncertainEngine.getCompositeLoader().setCaseInsensitive(true);            
         uncertainEngine.scanConfigFiles(pattern);
