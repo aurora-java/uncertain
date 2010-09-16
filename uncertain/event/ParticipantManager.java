@@ -14,6 +14,10 @@ import java.util.Map;
 import uncertain.composite.CompositeMap;
 import uncertain.core.ConfigurationError;
 import uncertain.core.IGlobalInstance;
+import uncertain.core.UncertainEngine;
+import uncertain.logging.ILogger;
+import uncertain.logging.ILoggerProvider;
+import uncertain.logging.LoggingContext;
 import uncertain.ocm.IConfigurable;
 import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.IObjectRegistry;
@@ -34,6 +38,9 @@ public class ParticipantManager implements IParticipantManager, IGlobalInstance,
         mObjectCreator = objectCreator;
         mParticipantsListMap = new HashMap();
         mParticipantConfigMap = new HashMap();
+        
+        ILoggerProvider p = LoggingContext.getLoggerProvider(mObjectRegistry);
+        mLogger = p.getLogger(UncertainEngine.UNCERTAIN_LOGGING_TOPIC);
     }
 
     static final List   EMPTY_LIST =  Collections.unmodifiableList(new LinkedList());
@@ -44,28 +51,13 @@ public class ParticipantManager implements IParticipantManager, IGlobalInstance,
     Map                 mParticipantConfigMap;
     IObjectRegistry     mObjectRegistry;
     IObjectCreator      mObjectCreator;
+    ILogger             mLogger;
 
     /** Lazy load participant instance */
     protected List getParticipantInstanceList( String category)
         throws Exception
     {
         List lst = (List)mParticipantsListMap.get(category);
-        if(lst==null){            
-            List cls_list = (List)mParticipantConfigMap.get(category);
-            if(cls_list==null)
-                return null;
-            lst = new LinkedList();
-            for(Iterator it = cls_list.iterator(); it.hasNext(); ){
-                Class cls = (Class)it.next();
-                Object participant = mObjectRegistry.getInstanceOfType(cls);
-                if(participant == null)
-                    participant = mObjectCreator.createInstance(cls);
-                if(participant==null)
-                    throw new RuntimeException("Can't create instance of "+cls);
-                lst.add(participant);
-            }
-            mParticipantsListMap.put(category, lst);
-        }
         return lst;        
     }
     
@@ -156,5 +148,41 @@ public class ParticipantManager implements IParticipantManager, IGlobalInstance,
     
     public void endConfigure(){
         
+    }
+
+    public void addIServiceParticipant(IServiceParticipant participant) {
+        String scope = participant.getScope();
+        List lst = getParticipantConfigList(scope);
+        lst.add(participant);
+    }
+    
+    public void onInitialize()
+        throws Exception
+    {        
+        Iterator cit = mParticipantConfigMap.entrySet().iterator();
+        while(cit.hasNext()){
+            int num = 1;
+            Map.Entry entry = (Map.Entry)cit.next();
+            String category = entry.getKey().toString();
+            List cls_list = (List)entry.getValue();
+            mLogger.info("=========== Loading participant in {"+category+"} scope =============" );
+            List lst = new LinkedList();
+            for(Iterator it = cls_list.iterator(); it.hasNext(); ){
+                Class cls = (Class)it.next();
+                mLogger.info("No."+num+" type="+cls.getName());
+                Object participant = mObjectRegistry.getInstanceOfType(cls);
+                if(participant == null){
+                    participant = mObjectCreator.createInstance(cls);
+                    mLogger.info("New instance created");
+                }
+                else
+                    mLogger.info("Got from global instance registry");
+                if(participant==null)
+                    throw new RuntimeException("Can't create instance of "+cls);
+                lst.add(participant);
+                num++;
+            }
+            mParticipantsListMap.put(category, lst);            
+        }
     }
 }
