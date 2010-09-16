@@ -7,13 +7,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.xml.sax.SAXException;
 
@@ -25,14 +26,13 @@ import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
 import uncertain.logging.BasicConsoleHandler;
 import uncertain.logging.BasicFileHandler;
-import uncertain.logging.LoggerProvider;
-import uncertain.logging.DefaultLogger;
 import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogPathSettable;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
 import uncertain.logging.ILoggerProviderGroup;
 import uncertain.logging.ILoggingTopicRegistry;
+import uncertain.logging.LoggerProvider;
 import uncertain.logging.LoggingConfig;
 import uncertain.logging.LoggingTopic;
 import uncertain.logging.TopicManager;
@@ -351,6 +351,14 @@ public class UncertainEngine implements IChildContainerAcceptable {
         scanConfigFiles(mConfigDir, pattern);
     }
     
+    private List getSortedList( String[] files ){
+        List lst = new LinkedList();
+        for(int i=0; i<files.length; i++)
+            lst.add(files[i]);
+        Collections.sort(lst);
+        return lst;
+    }
+    
     /**
      * Scan a directory for files that matches certain pattern, and load these file
      * to perform configuration task
@@ -359,11 +367,13 @@ public class UncertainEngine implements IChildContainerAcceptable {
      */
     public void scanConfigFiles(File dir, String file_pattern) {
         FilePatternFilter filter = new FilePatternFilter(file_pattern);
-        File cfg_files[] = dir.listFiles(filter);
+        String cfg_files[] = dir.list(filter);
+        List file_list = getSortedList(cfg_files);
         if(cfg_files.length>0){
             LinkedList cfg_list = new LinkedList();
-            for(int i=cfg_files.length-1; i>=0; i--){
-                String file_path = cfg_files[i].getPath();
+            ListIterator fit = file_list.listIterator(cfg_files.length-1);
+            while(fit.hasPrevious()){
+                String file_path = (String)fit.previous();
                 mLogger.log("Loading configuration file "+file_path);
                 try{
                     CompositeMap config_map = mCompositeLoader.loadByFullFilePath(file_path);
@@ -572,6 +582,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     /**
      * @return Returns the logger.
      */
+    /*
     public Logger getLogger() {
         //return mLogger;
         if(mLogger instanceof DefaultLogger)
@@ -580,6 +591,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
             return Logger.getAnonymousLogger();
     
     }
+    */
     /**
      * @return Returns the config_dir.
      */
