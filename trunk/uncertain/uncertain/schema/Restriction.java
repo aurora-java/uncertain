@@ -12,16 +12,13 @@ public class Restriction extends AbstractQualifiedNamed implements IType {
 	}
     
 	public void setBase(String base) {
-//		System.out.println("base:"+base);
 		this.mBase = base;
 	}
 	public boolean isComplex() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	public boolean isExtensionOf(IType another) {
-		// TODO Auto-generated method stub
 		return false;
 	}
     public Enumeration[] getEnumerations() {
@@ -33,9 +30,7 @@ public class Restriction extends AbstractQualifiedNamed implements IType {
         addChilds( mEnumerations);
     }
     public void resolveQName( IQualifiedNameResolver resolver ){    
-//    	System.out.println("restir ");
         mBaseType = resolver.getQualifiedName(mBase);
-//        System.out.println(mBaseType);
     }
     public QualifiedName getBaseType(){
         return mBaseType;
