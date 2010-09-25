@@ -61,7 +61,6 @@
         </ss:element>
         <ss:element name="ss:editor">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="type"/>
                 <ss:attribute type="ss:string" name="name"/>
                 <ss:attribute type="ss:string" name="instanceClass"/>
             </ss:attributes>
@@ -119,13 +118,14 @@
         <ss:element name="ss:simpleType">
             <ss:elements>
                 <ss:element ref="ss:restriction"/>
+                <ss:element ref="ss:editor"/>
             </ss:elements>
             <ss:extensions>
                 <ss:extension base="ss:Categorized"/>
                 <ss:extension base="ss:BaseType"/>
             </ss:extensions>
         </ss:element>
-        <ss:element displayMask="(${@base})" name="ss:restriction">
+        <ss:element name="ss:restriction" displayMask="(${@base})">
             <ss:attributes>
                 <ss:attribute type="ss:string" name="base"/>
             </ss:attributes>
@@ -133,7 +133,7 @@
                 <ss:array type="ss:enumeration" name="ss:enumerations"/>
             </ss:arrays>
         </ss:element>
-        <ss:element displayMask="(${@value})" name="ss:enumeration">
+        <ss:element name="ss:enumeration" displayMask="(${@value})">
             <ss:attributes>
                 <ss:attribute type="ss:string" name="value"/>
             </ss:attributes>
