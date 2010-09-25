@@ -14,9 +14,8 @@ public class Attribute extends AbstractCategorized implements IReference {
 	String mType;
 	String mUse;
 	String mDefault;
-	String mEditor;
 	String mDocument;
-	QualifiedName mEditorQName;
+
 
 	IValidator[] mValidators;
 
@@ -137,28 +136,7 @@ public class Attribute extends AbstractCategorized implements IReference {
 				throw new SchemaError("Can't resolve ref qualified name:"
 						+ mRef);
 		}
-		if (mEditor != null && !mEditor.equals("")) {
-			mEditorQName = resolver.getQualifiedName(mEditor);
-			if (mEditorQName == null)
-				throw new SchemaError("Can't resolve editor qualified name:"
-						+ mEditor);
-		}
-	}
 
-	public String getEditor() {
-		return mEditor;
-	}
-
-	public void setEditor(String editor) {
-		mEditor = editor;
-	}
-
-	public QualifiedName getEditorQName() {
-		return mEditorQName;
-	}
-
-	public void setEditorQName(QualifiedName editorQName) {
-		this.mEditorQName = editorQName;
 	}
 
 	public IType getAttributeType() {
