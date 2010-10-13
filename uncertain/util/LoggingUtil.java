@@ -3,9 +3,13 @@
  */
 package uncertain.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import uncertain.logging.ILogger;
 
 /**
  * LoggingUtil
@@ -49,4 +53,15 @@ public class LoggingUtil {
         for(int i=0; i<handlers.length; i++)
             handlers[i].setLevel(l);
     }
+    
+    public static void logException( Throwable thr, ILogger logger, Level level ){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        thr.printStackTrace(new PrintStream(baos));
+        String str = baos.toString();
+        logger.log(level, str);
+    }
+    
+    public static void logException( Throwable thr, ILogger logger ){
+        logException(thr, logger, Level.SEVERE );
+    }    
 }
