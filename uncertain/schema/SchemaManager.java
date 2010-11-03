@@ -28,6 +28,7 @@ public class SchemaManager implements ISchemaManager {
     
     static SchemaManager        DEFAULT_INSTANCE = new SchemaManager();
     static Schema               SCHEMA_FOR_SCHEMA;
+    SchemaManager parent;
     
     static void loadBuiltInSchema()
         throws IOException, SAXException
@@ -82,30 +83,57 @@ public class SchemaManager implements ISchemaManager {
     
     
     public Attribute    getAttribute( QualifiedName qname ){
-        return mNamedObjectManager.getAttribute(qname);
+    	Attribute attrbute= mNamedObjectManager.getAttribute(qname);
+    	if(attrbute == null && parent != null)
+    		attrbute= parent.getAttribute(qname);
+        return attrbute;
     }
     
     public Element      getElement( QualifiedName qname ){
-        return mNamedObjectManager.getElement(qname);
+    	Element element= mNamedObjectManager.getElement(qname);
+    	if(element == null && parent != null)
+    		element= parent.getElement(qname);
+        return element;
     }
     
     public ComplexType  getComplexType( QualifiedName qname ){
-        return mNamedObjectManager.getComplexType(qname);
+    	ComplexType complexType= mNamedObjectManager.getComplexType(qname);
+    	if(complexType == null && parent != null)
+    		complexType= parent.getComplexType(qname);
+        return complexType;
     }
     
     public SimpleType  getSimpleType( QualifiedName qname ){
-        return mNamedObjectManager.getSimpleType(qname);
+    	SimpleType simpleType= mNamedObjectManager.getSimpleType(qname);
+    	if(simpleType == null && parent != null)
+    		simpleType= parent.getSimpleType(qname);
+        return simpleType;
     }
     
     public IType    getType( QualifiedName qname ){
-        return mNamedObjectManager.getType(qname);
+    	IType type= mNamedObjectManager.getType(qname);
+    	if(type == null && parent != null )
+    		type= parent.getType(qname);
+        return type;
     }
     
     public Category getCategory( QualifiedName qname ){
-        return mNamedObjectManager.getCategory(qname);
+    	Category category= mNamedObjectManager.getCategory(qname);
+    	if(category == null && parent != null )
+    		category= parent.getCategory(qname);
+        return category;
     }
     public Editor getEditor( QualifiedName qname ){
-        return mNamedObjectManager.getEditor(qname);
+    	Editor editor= mNamedObjectManager.getEditor(qname);
+    	if(editor == null && parent != null)
+    		editor= parent.getEditor(qname);
+        return editor;
+    }
+    public Wizard getWizard( QualifiedName qname ){
+    	Wizard wizard= mNamedObjectManager.getWizard(qname);
+    	if(wizard == null && parent != null )
+    		wizard= parent.getWizard(qname);
+        return wizard;
     }
     
     Namespace[] getNameSpaces( CompositeMap map ){
@@ -205,8 +233,14 @@ public class SchemaManager implements ISchemaManager {
     public void addAll( SchemaManager another ){
         mNamedObjectManager.addAll(another.mNamedObjectManager);
     }
-    
-    public List getElementsOfType( IType parent_type ){
+    public void setParent( SchemaManager parent ){
+    	this.parent = parent;
+    }
+    public SchemaManager getParent(){
+        return parent;
+    }
+
+	public List getElementsOfType( IType parent_type ){
     	List result = new ArrayList();
     	if(mNamedObjectManager.getObjectMap(SchemaConstant.TYPE_ITYPE).values() == null)
     		return null;
