@@ -19,6 +19,7 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
     Element[]           mElements;
     Category[]          mCategories;
     Editor[]          	mEditors;
+    Wizard[]          	mWizards;
     String              mTargetNamespace;
     ISchemaManager      mSchemaManager;
 
@@ -99,6 +100,15 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
     public void addEditors(Editor[] Editors) {
     	mEditors = Editors;
         addChildArray( Editors, SchemaConstant.TYPE_EDITOR );
+    }
+    
+    public Wizard[] geWizards() {
+        return mWizards;
+    }
+
+    public void addWizards(Wizard[] Wizards) {
+    	mWizards = Wizards;
+        addChildArray( Wizards, SchemaConstant.TYPE_WIZARD );
     }
 
     public String getTargetNamespace() {
