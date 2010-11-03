@@ -26,6 +26,8 @@ public class Element extends ComplexType implements IReference {
 
 	String mDisplayMask;
 	String mDocument;
+	String mWizard;
+	QualifiedName mWizardQName;
 	public String getDocument() {
 		return mDocument;
 	}
@@ -121,6 +123,12 @@ public class Element extends ComplexType implements IReference {
 						+ mRef);
 		} else
 			super.resolveQName(resolver);
+		if (mWizard != null && !mWizard.equals("")) {
+			mWizardQName = resolver.getQualifiedName(mWizard);
+			if (mWizardQName == null)
+				throw new SchemaError("Can't resolve wizard qualified name:"
+						+ mWizard);
+		}
 	}
 
 	public String getEditor() {
@@ -169,5 +177,18 @@ public class Element extends ComplexType implements IReference {
 		}
 		return childElements;
 	}
+	public String getWizard() {
+		return mWizard;
+	}
 
+	public void setWizard(String wizard) {
+		mWizard = wizard;
+	}
+	public QualifiedName getWizardQName() {
+		return mWizardQName;
+	}
+
+	public void setWizardQName(QualifiedName wizardQName) {
+		this.mWizardQName = wizardQName;
+	}
 }
