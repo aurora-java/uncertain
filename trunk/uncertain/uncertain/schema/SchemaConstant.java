@@ -12,6 +12,7 @@ public final class SchemaConstant {
     public static final int TYPE_ATTRIBUTE = 1;
     public static final int TYPE_CATEGORIE = 2;
     public static final int TYPE_EDITOR = 3;
+    public static final int TYPE_WIZARD = 4;
     
     public static final String USAGE_REQUIRED = "required";
     public static final String USAGE_OPTIONAL = "optional";
