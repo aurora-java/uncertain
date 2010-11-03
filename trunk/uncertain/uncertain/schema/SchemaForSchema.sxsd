@@ -65,11 +65,18 @@
                 <ss:attribute type="ss:string" name="instanceClass"/>
             </ss:attributes>
         </ss:element>
+        <ss:element name="ss:wizard">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="name"/>
+                <ss:attribute type="ss:string" name="instanceClass"/>
+            </ss:attributes>
+        </ss:element>
         <ss:element name="ss:element">
             <ss:attributes>
                 <ss:attribute type="ss:string" default="unbounded" name="maxOccurs"/>
                 <ss:attribute type="ss:string" default="0" name="minOccurs"/>
                 <ss:attribute type="ss:string" name="displayMask"/>
+                <ss:attribute type="ss:string" name="wizard"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:complexType"/>
@@ -116,9 +123,11 @@
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:simpleType">
+            <ss:attributes>
+                <ss:attribute type="ss:string" name="editor"/>
+            </ss:attributes>
             <ss:elements>
                 <ss:element ref="ss:restriction"/>
-                <ss:element ref="ss:editor"/>
             </ss:elements>
             <ss:extensions>
                 <ss:extension base="ss:Categorized"/>
@@ -148,6 +157,7 @@
                 <ss:array type="ss:category" name="ss:categories"/>
                 <ss:array type="ss:BaseType" name="ss:types"/>
                 <ss:array type="ss:editor" name="ss:editors"/>
+                <ss:array type="ss:wizard" name="ss:wizards"/>
             </ss:arrays>
         </ss:element>
     </ss:elements>
