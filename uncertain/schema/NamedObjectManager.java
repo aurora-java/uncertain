@@ -106,6 +106,9 @@ class NamedObjectManager {
     public Editor getEditor( QualifiedName qname ){
         return (Editor)mChildMapArray[SchemaConstant.TYPE_EDITOR].get(qname);
     }
+    public Wizard getWizard( QualifiedName qname ){
+        return (Wizard)mChildMapArray[SchemaConstant.TYPE_WIZARD].get(qname);
+    }
     
     public void addAttributes( Attribute[] attribs ){
         if(attribs!=null)
