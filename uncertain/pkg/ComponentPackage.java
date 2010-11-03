@@ -164,6 +164,7 @@ public class ComponentPackage {
                                 + ClassRegistry.class.getName());
             }
         mSchemaManager = new SchemaManager(oc_manager);
+        mSchemaManager.setParent(mOwner.getSchemaManager());
         loadSchemaFile(config_path);
     }
 
