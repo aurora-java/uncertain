@@ -1,0 +1,5 @@
+<package name="org.lwap.buitin">
+	<schema-files>
+		<schema-file path="uncertain_proc.sxsd"/>
+	</schema-files>
+</package>
