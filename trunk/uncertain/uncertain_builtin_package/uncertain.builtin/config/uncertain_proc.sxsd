@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ss:schema xmlns:p="uncertain.proc" xmlns:ss="http://www.uncertain-framework.org/schema/simple-schema">
+    <ss:types>
+        <ss:complexType name="p:AbstractAction"><![CDATA[
+		]]></ss:complexType>
+        <ss:complexType name="p:UncertainBuiltinAction">
+            <ss:extensions>
+                <ss:extension base="p:AbstractAction"/>
+            </ss:extensions>
+            <ss:attributes>
+                <ss:attribute document="节点的名称，在整个流程中必须唯一" name="name"/>
+            </ss:attributes>
+        </ss:complexType>
+        <ss:complexType name="p:UncertainBuiltinCompositeAction">
+            <ss:extensions>
+                <ss:extension base="p:AbstractAction"/>
+            </ss:extensions>
+            <ss:elements>
+                <ss:element ref="p:AbstractAction"/>
+            </ss:elements>
+        </ss:complexType>
+    </ss:types>
+    <ss:elements>
+        <ss:element document="在web server的输出终端或log文件中输出一段信息，用于调试" name="p:echo">
+            <ss:attributes>
+                <ss:attribute document="需要输出的内容，可包含${}标记。如果不设置，就把整个context内容以xml形式输出" name="message"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="设置context中某个字段的值" name="p:set">
+            <ss:attributes>
+                <ss:attribute document="要设置的字段的XPath路径" name="field"/>
+                <ss:attribute document="如果是从另一个字段复制，来源字段的XPath路径" name="sourceField"/>
+                <ss:attribute document="要设置的值，可包含${}标记" name="value"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="定义一个被命名的过程节点，作为流程中可被切入的控制入口。此标记本身并不完成任何实际的工作，主要是由参与到流程的某个feature class通过方法命名约定，来截获此节点的控制，完成特定功能" name="p:action">
+            <ss:attributes>
+                <ss:attribute document="输入参数，这些参数会被传递给java class对应的方法。参数名必须首先在流程中定义，多个参数可以用逗号分隔" name="input"/>
+                <ss:attribute document="输出参数，action执行完毕后，会通过参与该action的java class的getter来获取，放置到context中" name="output"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="对某个条件进行判断，如果不满足，就抛出异常，终止流程的执行" name="p:assert">
+            <ss:attributes>
+                <ss:attribute document="需要进行判断的字段，在context中的XPath路径，如/parameter/@head_id" name="field"/>
+                <ss:attribute document="进行判断的操作符，可以是以下之一：null,not null,=,==,!=,&lt;&gt;,&gt;,&lt;,&gt;=,&lt;=" name="operator"/>
+                <ss:attribute document="进行判断的值，可使用${}标记" name="Value"/>
+                <ss:attribute document="如果不满足指定的条件，抛出异常时显示的信息" name="message"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="将context中的某个CompositeMap以XML的形式输出，用于调试" name="p:dump-map">
+            <ss:attributes>
+                <ss:attribute document="需要输出的CompositeMap所在的路径" name="path"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="对context中的Collection进行循环，对其中的每条数据，依次调用自身包含的子节点加以执行" name="p:loop">
+            <ss:attributes>
+                <ss:attribute document="进行循环的数据来源的XPath路径。必须是一个java.util.Collection的实现。" name="source"/>
+                <ss:attribute document="source指定的路径是否可为空。如果设置为false，并且通过source取到的数据为空，就会抛出一个异常。" name="nullable" type="xs:boolean"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinCompositeAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="捕获流程执行中抛出的异常" name="p:catch">
+            <ss:attributes>
+                <ss:attribute document="要捕获的异常的名称，*代表所有异常" name="Exception" use="required"/>
+                <ss:attribute document="发生指定的异常后，在catch所包含的子流程执行完毕后，要跳转到流程中的节点的名称" name="nextStep"/>
+                <ss:attribute document="将捕获的异常放到指定的XPath路径中" name="destination"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinCompositeAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="定义一个分支" name="p:case">
+            <ss:attributes>
+                <ss:attribute document="本分支所对应的值，*代表任意值，null代表空" name="value" use="required"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinCompositeAction"/>
+            </ss:extensions>
+        </ss:element>
+        <ss:element document="根据表达式的值，进行流程执行的分支选择" name="p:switch">
+            <ss:attributes>
+                <ss:attribute document="要进行判断的值所在的XPath路径" name="test" use="required"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinAction"/>
+            </ss:extensions>
+            <ss:elements>
+                <ss:element ref="p:case"/>
+            </ss:elements>
+        </ss:element>
+        <ss:element document="定义流程的context中一个被命名的字段，用于参数的输入输出" name="p:field">
+            <ss:attributes>
+                <ss:attribute document="字段的名称，在全流程中必须唯一" name="name" use="required"/>
+                <ss:attribute document="字段在context中的XPath路径，如果不设置，缺省就是以name为key" name="path"/>
+                <ss:attribute document="字段的数据类型，在java环境下，就是java的class名，对于java原生类型可以省略java.lang前缀，如int" name="type"/>
+                <ss:attribute document="字段的用途。input: 输入参数 return: 输出参数" name="usage"/>
+                <ss:attribute document="字段的说明" name="description"/>
+            </ss:attributes>
+        </ss:element>
+        <ss:element document="执行依次过程调用" name="p:procedure">
+            <ss:attributes>
+                <ss:attribute document="参与该流程的java class，多个class用逗号分隔" name="participants"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:UncertainBuiltinCompositeAction"/>
+            </ss:extensions>
+            <ss:arrays>
+                <ss:array name="p:exception-handles" type="p:catch"/>
+                <ss:array name="p:fields" type="p:field"/>
+            </ss:arrays>
+        </ss:element>
+    </ss:elements>
+</ss:schema>
