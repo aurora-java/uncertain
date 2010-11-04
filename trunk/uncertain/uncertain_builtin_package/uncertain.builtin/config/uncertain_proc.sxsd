@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ss:schema xmlns:p="uncertain.proc" xmlns:ss="http://www.uncertain-framework.org/schema/simple-schema">
     <ss:types>
-        <ss:complexType name="p:AbstractAction"><![CDATA[
-		]]></ss:complexType>
+        <ss:complexType name="p:AbstractAction"/>
         <ss:complexType name="p:UncertainBuiltinAction">
             <ss:extensions>
                 <ss:extension base="p:AbstractAction"/>
