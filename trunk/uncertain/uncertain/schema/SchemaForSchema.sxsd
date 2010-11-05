@@ -5,7 +5,7 @@
 		]]></ss:complexType>
         <ss:complexType name="ss:QualifiedNamed">
             <ss:attributes>
-                <ss:attribute type="ss:QName" name="name"/>
+                <ss:attribute name="name" type="ss:QName"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:SchemaObject"/>
@@ -13,7 +13,7 @@
         </ss:complexType>
         <ss:complexType name="ss:Categorized">
             <ss:attributes>
-                <ss:attribute type="ss:QName" name="category"/>
+                <ss:attribute name="category" type="ss:QName"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:QualifiedNamed"/>
@@ -21,23 +21,23 @@
         </ss:complexType>
         <ss:complexType name="ss:HasSimpleType">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="type"/>
+                <ss:attribute name="type" type="ss:string"/>
             </ss:attributes>
         </ss:complexType>
         <ss:complexType name="ss:Reference">
             <ss:attributes>
-                <ss:attribute type="ss:QName" name="ref"/>
+                <ss:attribute name="ref" type="ss:QName"/>
             </ss:attributes>
         </ss:complexType>
         <ss:complexType name="ss:HasEditor">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="editor"/>
+                <ss:attribute name="editor" type="ss:string"/>
             </ss:attributes>
         </ss:complexType>
         <ss:complexType name="ss:HasTitle">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="title"/>
-                <ss:attribute type="ss:string" name="description"/>
+                <ss:attribute name="title" type="ss:string"/>
+                <ss:attribute name="description" type="ss:string"/>
             </ss:attributes>
         </ss:complexType>
         <ss:complexType name="ss:BaseType"/>
@@ -45,38 +45,38 @@
     <ss:elements>
         <ss:element name="ss:complexType">
             <ss:arrays>
-                <ss:array type="ss:attribute" name="ss:attributes"/>
-                <ss:array type="ss:element" name="ss:elements"/>
-                <ss:array type="ss:array" name="ss:arrays"/>
-                <ss:array type="ss:extension" name="ss:extensions"/>
-                <ss:array type="ss:featureClass" name="ss:classes"/>
+                <ss:array name="ss:attributes" type="ss:attribute"/>
+                <ss:array name="ss:elements" type="ss:element"/>
+                <ss:array name="ss:arrays" type="ss:array"/>
+                <ss:array name="ss:extensions" type="ss:extension"/>
+                <ss:array name="ss:classes" type="ss:featureClass"/>
             </ss:arrays>
             <ss:extensions>
                 <ss:extension base="ss:Categorized"/>
                 <ss:extension base="ss:BaseType"/>
             </ss:extensions>
             <ss:attributes>
-                <ss:attribute type="ss:string" name="document"/>
+                <ss:attribute name="document" type="ss:string"/>
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:editor">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="name"/>
-                <ss:attribute type="ss:string" name="instanceClass"/>
+                <ss:attribute name="name" type="ss:string"/>
+                <ss:attribute name="instanceClass" type="ss:string"/>
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:wizard">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="name"/>
-                <ss:attribute type="ss:string" name="instanceClass"/>
+                <ss:attribute name="name" type="ss:string"/>
+                <ss:attribute name="instanceClass" type="ss:string"/>
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:element">
             <ss:attributes>
-                <ss:attribute type="ss:string" default="unbounded" name="maxOccurs"/>
-                <ss:attribute type="ss:string" default="0" name="minOccurs"/>
-                <ss:attribute type="ss:string" name="displayMask"/>
-                <ss:attribute type="ss:string" name="wizard"/>
+                <ss:attribute default="unbounded" name="maxOccurs" type="ss:string"/>
+                <ss:attribute default="0" name="minOccurs" type="ss:string"/>
+                <ss:attribute name="displayMask" type="ss:string"/>
+                <ss:attribute name="wizard" type="ss:string"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:complexType"/>
@@ -93,8 +93,8 @@
         <ss:element name="ss:attribute">
             <ss:attributes>
                 <ss:attribute default="optional" name="use"/>
-                <ss:attribute type="ss:string" name="default"/>
-                <ss:attribute type="ss:string" name="document"/>
+                <ss:attribute name="default" type="ss:string"/>
+                <ss:attribute name="document" type="ss:string"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:Categorized"/>
@@ -105,26 +105,26 @@
         </ss:element>
         <ss:element name="ss:category">
             <ss:attributes>
-                <ss:attribute type="ss:QName" name="parentName"/>
+                <ss:attribute name="parentName" type="ss:QName"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:QualifiedNamed"/>
                 <ss:extension base="ss:HasTitle"/>
             </ss:extensions>
         </ss:element>
-        <ss:element name="ss:extension">
+        <ss:element displayMask="(${@base})" name="ss:extension">
             <ss:attributes>
-                <ss:attribute type="ss:QName" name="base"/>
+                <ss:attribute name="base" type="ss:QName"/>
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:featureClass">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="name"/>
+                <ss:attribute name="name" type="ss:string"/>
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:simpleType">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="editor"/>
+                <ss:attribute name="editor" type="ss:string"/>
             </ss:attributes>
             <ss:elements>
                 <ss:element ref="ss:restriction"/>
@@ -134,30 +134,30 @@
                 <ss:extension base="ss:BaseType"/>
             </ss:extensions>
         </ss:element>
-        <ss:element name="ss:restriction" displayMask="(${@base})">
+        <ss:element displayMask="(${@base})" name="ss:restriction">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="base"/>
+                <ss:attribute name="base" type="ss:string"/>
             </ss:attributes>
             <ss:arrays>
-                <ss:array type="ss:enumeration" name="ss:enumerations"/>
+                <ss:array name="ss:enumerations" type="ss:enumeration"/>
             </ss:arrays>
         </ss:element>
-        <ss:element name="ss:enumeration" displayMask="(${@value})">
+        <ss:element displayMask="(${@value})" name="ss:enumeration">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="value"/>
+                <ss:attribute name="value" type="ss:string"/>
             </ss:attributes>
         </ss:element>
         <ss:element name="ss:schema">
             <ss:attributes>
-                <ss:attribute type="ss:string" name="targetNamespace"/>
+                <ss:attribute name="targetNamespace" type="ss:string"/>
             </ss:attributes>
             <ss:arrays>
-                <ss:array type="ss:attribute" name="ss:attributes"/>
-                <ss:array type="ss:element" name="ss:elements"/>
-                <ss:array type="ss:category" name="ss:categories"/>
-                <ss:array type="ss:BaseType" name="ss:types"/>
-                <ss:array type="ss:editor" name="ss:editors"/>
-                <ss:array type="ss:wizard" name="ss:wizards"/>
+                <ss:array name="ss:attributes" type="ss:attribute"/>
+                <ss:array name="ss:elements" type="ss:element"/>
+                <ss:array name="ss:categories" type="ss:category"/>
+                <ss:array name="ss:types" type="ss:BaseType"/>
+                <ss:array name="ss:editors" type="ss:editor"/>
+                <ss:array name="ss:wizards" type="ss:wizard"/>
             </ss:arrays>
         </ss:element>
     </ss:elements>
