@@ -18,7 +18,7 @@ import uncertain.util.XMLWritter;
 
 /**
  *
- * @author  Administrator
+ * @author  Zhou Fan
  * @version 
  */
 public class XMLOutputter {
@@ -28,13 +28,13 @@ public class XMLOutputter {
     public static final String DEFAULT_INDENT = "    ";
     
     /** whether print new line for each XML part */
-    boolean useNewLine;
+    boolean mUseNewLine;
     
     /** space predicates each tag */
-    String    indentString;
+    String    mIndentString;
     
     /** whether create CDATA tag for text */
-    boolean generateCdata = true;
+    boolean mGenerateCdata = true;
     
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
  
@@ -43,16 +43,21 @@ public class XMLOutputter {
     public static XMLOutputter defaultInstance(){
         return default_inst;
     }
+    
+    public XMLOutputter(){
+        mIndentString = DEFAULT_INDENT;
+        mUseNewLine = true;        
+    }
    
     /** Creates new XMLOutputter */
     public XMLOutputter(String _indent, boolean _new_line) {
-        indentString = _indent ;
-        useNewLine = _new_line;
+        mIndentString = _indent ;
+        mUseNewLine = _new_line;
     }
     
     String getIndentString( int level){
         StringBuffer pre_indent = new StringBuffer();
-        if( indentString != null) for (int i=0; i<level; i++) pre_indent.append(indentString);
+        if( mIndentString != null) for (int i=0; i<level; i++) pre_indent.append(mIndentString);
         return pre_indent.toString();      
     }
     
@@ -149,7 +154,7 @@ public class XMLOutputter {
         String namespace_uri = map.getNamespaceURI();
         StringBuffer xmlns_declare = null;
         
-        boolean need_new_line_local = useNewLine;
+        boolean need_new_line_local = mUseNewLine;
         
         if(prefix_mapping==null){
             if(namespace_uri != null ){
@@ -170,7 +175,7 @@ public class XMLOutputter {
         if(map.getChilds()==null){
             if(map.getText()!=null){
                 need_new_line_local = false;
-                if(generateCdata)
+                if(mGenerateCdata)
                     childs.append(CDATA_BEGIN).append(map.getText()).append(CDATA_END);
                 else
                     childs.append(XMLWritter.escape(map.getText()) );
@@ -211,7 +216,7 @@ public class XMLOutputter {
             xml.append(XMLWritter.endTag(elm));
         }
         else xml.append("/>");
-        if( useNewLine) xml.append( LINE_SEPARATOR);
+        if( mUseNewLine) xml.append( LINE_SEPARATOR);
         return xml.toString();        
     }
     
@@ -239,27 +244,27 @@ public class XMLOutputter {
     }
 
     public boolean isUseNewLine() {
-        return useNewLine;
+        return mUseNewLine;
     }
 
     public void setUseNewLine(boolean useNewLine) {
-        this.useNewLine = useNewLine;
+        this.mUseNewLine = useNewLine;
     }
 
     public String getIndentString() {
-        return indentString;
+        return mIndentString;
     }
 
     public void setIndentString(String indentString) {
-        this.indentString = indentString;
+        this.mIndentString = indentString;
     }
 
     public boolean isGenerateCdata() {
-        return generateCdata;
+        return mGenerateCdata;
     }
 
     public void setGenerateCdata(boolean generateCdata) {
-        this.generateCdata = generateCdata;
+        this.mGenerateCdata = generateCdata;
     }
 
 }
