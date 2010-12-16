@@ -35,14 +35,23 @@ public class TagCreatorRegistry implements ITagCreatorRegistry {
     }
     
     public ITagCreator getTagCreator( String name_space ){
-        if(name_space==null)
-            return mDefaultCreator;
         ITagCreator creator = (ITagCreator)mCreatorMap.get(name_space);
         if(creator!=null)
             return creator;
-        else
-            if(mParent!=null)
+        else{
+            if(name_space==null && mDefaultCreator != null)
+                return mDefaultCreator;
+            else if(mParent!=null)
                 return mParent.getTagCreator(name_space);
+        }
+        return null;
+    }
+    
+    public ITagCreator getDefaultCreator(){
+        if( mDefaultCreator !=null )
+            return mDefaultCreator;
+        if( mParent !=null )
+            return mParent.getTagCreator(null);
         return null;
     }
     
