@@ -7,6 +7,14 @@ import uncertain.composite.CompositeMap;
 
 public class CompositeMapAccessTag implements ITagContent {
     
+    /**
+     * @param accessPath
+     */
+    public CompositeMapAccessTag(String accessPath) {
+        super();
+        mAccessPath = accessPath;
+    }
+
     String      mAccessPath;
 
     public String getContent(CompositeMap context) {
