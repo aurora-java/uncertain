@@ -35,6 +35,7 @@ public class TagCreatorRegistry implements ITagCreatorRegistry {
     }
     
     public ITagCreator getTagCreator( String name_space ){
+        /*
         ITagCreator creator = (ITagCreator)mCreatorMap.get(name_space);
         if(creator!=null)
             return creator;
@@ -44,6 +45,19 @@ public class TagCreatorRegistry implements ITagCreatorRegistry {
             else if(mParent!=null)
                 return mParent.getTagCreator(name_space);
         }
+        return null;
+        */
+        
+        // First check if namespace is null
+        if(name_space==null&&mDefaultCreator!=null)
+            return mDefaultCreator;
+        // Then see if this namespace is registered
+        ITagCreator creator = (ITagCreator)mCreatorMap.get(name_space);
+        if(creator!=null)
+            return creator;
+        // Then goto parent
+        if(mParent!=null)
+            return mParent.getTagCreator(name_space);
         return null;
     }
     
