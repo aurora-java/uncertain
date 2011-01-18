@@ -27,6 +27,7 @@ SOFTWARE.
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -92,11 +93,12 @@ public class JSONObject {
     
     /* ---------- Added by Zhou Fan on 2008-06-18 to enhance Date output ---------------------- */
     //static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS");
-    static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
+    static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     public static String convertDate( Date date ){
         return DEFAULT_DATE_FORMAT.format(date);
     }
+    
     /* ---------- End ------------------------------------------------------------------------- */    
     
     /**
@@ -1185,6 +1187,12 @@ public class JSONObject {
             return value.toString();
         }
         /* ---------- Added by Zhou Fan on 2008-06-18 to enhance Date output ---------------------- */
+        if (value instanceof Timestamp){
+        	Timestamp t = (Timestamp)value;
+        	long lms = t.getTime();  
+        	Date date = new Date(lms); 
+        	return quote(convertDate(date));
+        } 	
         if (value instanceof Date)
             return quote(convertDate((Date)value));
         /* ---------- End ------------------------------------------------------------------------- */
