@@ -218,4 +218,8 @@ public class TypedHashMap extends HashMap {
         return parsed_object == null?  default_value: ((Byte)parsed_object).byteValue();
     }
     
+    
+    public int hashCode() {
+    	return System.identityHashCode(this);
+    }
 }
