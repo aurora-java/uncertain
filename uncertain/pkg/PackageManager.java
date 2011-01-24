@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.jar.JarInputStream;
@@ -193,7 +194,7 @@ public class PackageManager {
         } else {
             // from directory
             try {
-                loadPackage(new File(url.toURI()).getAbsolutePath());
+                loadPackage(new File(new URI (url.toString())).getAbsolutePath());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
