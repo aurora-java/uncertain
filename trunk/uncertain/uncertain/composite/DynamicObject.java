@@ -144,10 +144,28 @@ public class DynamicObject {
         
     }
     
+    
     public List getChilds( String name ){
-        CompositeMap child = object_context.getChild("name");
+        CompositeMap child = object_context.getChild(name);
         if(child==null) return null;
         return child.getChilds();
+    }
+    
+    /**
+     * Find a direct child with specified name. If not found, create a new one
+     * *** NOTE *** name_space will be ignored when finding child. This parameter 
+     * is for setting new created child's namespace
+     * @param name_space
+     * @param name
+     * @return
+     */
+    public CompositeMap getChildNotNull(String name_space, String name){
+        CompositeMap child = object_context.getChild(name);
+        if(child==null){
+            child = object_context.createChild(name);
+            child.setNameSpace(null, name_space);          
+        }
+        return child;
     }
 	
 	
