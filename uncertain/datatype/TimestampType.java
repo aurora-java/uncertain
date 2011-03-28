@@ -15,10 +15,15 @@ import java.util.Date;
 
 public class TimestampType extends AbstractDataType implements DataType {
     
-    String mDateFormat = "yyyy-MM-dd HH:mm:ss";
+    String mDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+    String mDateFormat2 = "yyyy-MM-dd";
     
     public Object convert(Object value)throws ConvertionException  {
-        return convert(value, mDateFormat);
+    	try {
+    		return convert(value, mDateTimeFormat);
+    	}catch(ConvertionException e){
+    		return convert(value, mDateFormat2);
+    	}
     }
 
     public Object convert(Object value, String fmt ) throws ConvertionException {
