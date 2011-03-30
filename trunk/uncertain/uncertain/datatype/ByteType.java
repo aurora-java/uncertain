@@ -43,7 +43,7 @@ public class ByteType extends AbstractDataType implements DataType {
         try{
             return convert( stmt.getObject(id));
         }catch(ConvertionException ex){
-            throw new SQLException("Error when converting data from Statement to Byte for field No."+id, ex);
+            throw new SQLException("Error when converting data from Statement to Byte for field No."+id);
         }
 	}
 
@@ -54,7 +54,7 @@ public class ByteType extends AbstractDataType implements DataType {
 	      try{
 	            return convert( rs.getObject(id));
 	        }catch(ConvertionException ex){
-	            throw new SQLException("Error when converting data from ResultSet to Byte for field No."+id, ex);
+	            throw new SQLException("Error when converting data from ResultSet to Byte for field No."+id);
 	        }
 	}
 
