@@ -40,15 +40,22 @@ public class FloatType extends AbstractDataType implements DataType {
 	 */
 	public Object getObject(CallableStatement stmt, int id)
 		throws SQLException {
-		return new Float(stmt.getFloat(id));
-	}
+        try{
+            return convert( stmt.getObject(id));
+        }catch(ConvertionException ex){
+            throw new SQLException("Error when converting data from Statement to Float for field No."+id, ex);
+        }	}
 
 	/**
 	 * @see uncertain.datatype.DataType#getObject(ResultSet, int)
 	 */
 	public Object getObject(ResultSet rs, int id) throws SQLException {
-		return new Float(rs.getFloat(id));
-	}
+        try{
+            return convert( rs.getObject(id));
+        }catch(ConvertionException ex){
+            throw new SQLException("Error when converting data from ResultSet to Float for field No."+id, ex);
+        }	
+    }
 
 	/**
 	 * @see uncertain.datatype.DataType#registerParameter(CallableStatement, int)
@@ -70,6 +77,10 @@ public class FloatType extends AbstractDataType implements DataType {
 	public Object convert(Object value) 
         throws ConvertionException
     {
+	    if( value==null)
+	        return null;
+	    if( value instanceof Float)
+	        return value;
 		if( value instanceof String){
             if(((String)value).length()==0)
                 return null;            

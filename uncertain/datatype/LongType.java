@@ -40,14 +40,22 @@ public class LongType extends AbstractDataType implements DataType {
 	 */
 	public Object getObject(CallableStatement stmt, int id)
 		throws SQLException {
-		return new Long(stmt.getLong(id));
+        try{
+            return convert( stmt.getObject(id));
+        }catch(ConvertionException ex){
+            throw new SQLException("Error when converting data from Statement to long for field No."+id, ex);
+        }
 	}
 
 	/**
 	 * @see uncertain.datatype.DataType#getObject(ResultSet, int)
 	 */
 	public Object getObject(ResultSet rs, int id) throws SQLException {
-		return new Long(rs.getLong(id));
+	    try{
+	        return convert( rs.getObject(id));
+	    }catch(ConvertionException ex){
+	        throw new SQLException("Error when converting data from ResultSet to long for field No."+id, ex);
+	    }
 	}
 
 	/**
@@ -70,6 +78,10 @@ public class LongType extends AbstractDataType implements DataType {
 	public Object convert(Object value)
         throws ConvertionException
     {
+	    if( value==null)
+	        return null;
+	    if( value instanceof Long)
+	        return value;
 		if( value instanceof String){
             if(((String)value).length()==0)
                 return null;            

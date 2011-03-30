@@ -40,14 +40,21 @@ public class DoubleType extends AbstractDataType implements DataType {
 	 */
 	public Object getObject(CallableStatement stmt, int id)
 		throws SQLException {
-		return new Double(stmt.getDouble(id));
-	}
+        try{
+            return convert( stmt.getObject(id));
+        }catch(ConvertionException ex){
+            throw new SQLException("Error when converting data from Statement to Double for field No."+id, ex);
+        }	}
 
 	/**
 	 * @see uncertain.datatype.DataType#getObject(ResultSet, int)
 	 */
 	public Object getObject(ResultSet rs, int id) throws SQLException {
-		return new Double(rs.getDouble(id));
+        try{
+            return convert( rs.getObject(id));
+        }catch(ConvertionException ex){
+            throw new SQLException("Error when converting data from ResultSet to Double for field No."+id, ex);
+        }
 	}
 
 	/**
@@ -71,6 +78,10 @@ public class DoubleType extends AbstractDataType implements DataType {
 	public Object convert(Object value) 
         throws ConvertionException
     {
+	    if( value==null)
+	        return null;
+	    if( value instanceof Double)
+	        return value;
 		if( value instanceof String){
             if(((String)value).length()==0)
                 return null;            
