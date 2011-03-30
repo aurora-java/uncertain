@@ -40,14 +40,22 @@ public class ByteType extends AbstractDataType implements DataType {
 	 */
 	public Object getObject(CallableStatement stmt, int id)
 		throws SQLException {
-		return new Byte(stmt.getByte(id));
+        try{
+            return convert( stmt.getObject(id));
+        }catch(ConvertionException ex){
+            throw new SQLException("Error when converting data from Statement to Byte for field No."+id, ex);
+        }
 	}
 
 	/**
 	 * @see uncertain.datatype.DataType#getObject(ResultSet, int)
 	 */
 	public Object getObject(ResultSet rs, int id) throws SQLException {
-		return new Byte(rs.getByte(id));
+	      try{
+	            return convert( rs.getObject(id));
+	        }catch(ConvertionException ex){
+	            throw new SQLException("Error when converting data from ResultSet to Byte for field No."+id, ex);
+	        }
 	}
 
 	/**
@@ -62,7 +70,7 @@ public class ByteType extends AbstractDataType implements DataType {
         if(value==null)
             stmt.setNull(id, getSqlType());
         else
-            stmt.setByte(id, ((Number)value).byteValue());
+            stmt.setByte(id, ((Number)value).byteValue());        
     }     
 	/**
 	 * @see uncertain.datatype.DataType#convert(Object)
@@ -70,6 +78,10 @@ public class ByteType extends AbstractDataType implements DataType {
 	public Object convert(Object value) 
         throws ConvertionException
     {
+	    if( value==null )
+	        return null;
+	    if( value instanceof Byte)
+	        return value;
 		if( value instanceof String){
             if(((String)value).length()==0)
                 return null;
