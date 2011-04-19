@@ -5,7 +5,6 @@ package uncertain.core;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,11 +14,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
-import java.util.Comparator;
 import java.util.logging.Level;
 
 import org.xml.sax.SAXException;
 
+import uncertain.cache.ICache;
+import uncertain.cache.ICacheFactory;
+import uncertain.cache.INamedCacheFactory;
+import uncertain.cache.MapBasedCacheFactory;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
@@ -75,18 +77,19 @@ public class UncertainEngine implements IChildContainerAcceptable {
     CompositeMap            mGlobalContext;
     DirectoryConfig         mDirectoryConfig;
     ProcedureManager        mProcedureManager;
-    
     Set                     mContextListenerSet;
     LinkedList				mExtraConfig = new LinkedList();
     File					mConfigDir;    
     boolean                 mIsRunning = true;
-
     /* =========== logging related members =================== */
     String                  mLogPath;
     String                  mDefaultLogLevel = "WARNING";
     ILogger                 mLogger;    
     TopicManager            mTopicManager;
-    
+    /* =========== cache ===================================== */
+    INamedCacheFactory      mNamedCacheFactory;
+    boolean                 mCacheConfigFiles = false;
+
     public static UncertainEngine createInstance(){
         UncertainEngine     engine = new UncertainEngine();
         engine.initialize(null);
@@ -94,16 +97,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
     
     /* ================== Constructors ======================================= */
-    
-    public UncertainEngine(InputStream config_stream) throws IOException {
-        //mCompositeParser = OCManager.defaultParser();
-        try{
-	        CompositeMap config = mCompositeLoader.loadFromStream(config_stream);
-	        initialize(config);
-        } catch(SAXException ex){
-            throw new IOException(ex.getMessage());
-        }
-    }
     
     public UncertainEngine(CompositeMap config){
         bootstrap();
@@ -150,6 +143,8 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstanceOnce(ILoggingTopicRegistry.class, mTopicManager);
         mObjectRegistry.registerInstanceOnce(ILogger.class, mLogger);
         mObjectRegistry.registerInstanceOnce(IProcedureManager.class, this.getProcedureManager());
+        mObjectRegistry.registerInstance(ICacheFactory.class, mNamedCacheFactory);
+        mObjectRegistry.registerInstance(INamedCacheFactory.class, mNamedCacheFactory);
     }
     
     private void setDefaultClassRegistry(){
@@ -187,6 +182,8 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
     
     protected void bootstrap(){
+        // create default cache factory
+        mNamedCacheFactory = new MapBasedCacheFactory();
         // create internal CompositeMapLoader 
         mCompositeLoader = CompositeLoader.createInstanceForOCM();
         mDirectoryConfig = (DirectoryConfig)DynamicObject.cast(this.mGlobalContext, DirectoryConfig.class);
@@ -413,7 +410,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return conf;
     }
     
-    public CompositeMap loadCompositeMap(String class_path)
+    private CompositeMap loadCompositeMap(String class_path)
     {
         try{
 
@@ -433,11 +430,19 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return config;
     }    
     
-    public Procedure loadProcedure(String class_path){
+    private Procedure loadProcedure(String class_path)
+    {
+        /*
         CompositeMap m = loadCompositeMap(class_path);
         if(m==null) return null;
         Procedure proc = (Procedure)mOcManager.createObject(m);
         return proc;
+        */
+        try{
+            return mProcedureManager.loadProcedure(class_path);
+        }catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
     }
 
     public ProcedureRunner createProcedureRunner(){
@@ -461,13 +466,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return runner;
     }
     
-    public ProcedureRunner createProcedureRunner(String proc_path, String config_path){
-        ProcedureRunner runner = createProcedureRunner(proc_path);
-        Configuration config = loadConfig(config_path);
-        if(config!=null) runner.addConfiguration(config);
-        else throw new IllegalArgumentException("Can't load " + config_path);
-        return runner;
-    }
+
     
     public void initContext( CompositeMap context ){
         //mLogger.log(mContextListenerSet.size()+" listeners");
@@ -501,26 +500,21 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public void addClassRegistry(ClassRegistry reg, boolean override){
         mClassRegistry.addAll(reg, override);
     }
-    
+
+    /*
     public void addDocumentLoader(CompositeLoader loader){
         if(mCompositeLoader==null) mCompositeLoader = loader;
         else mCompositeLoader.addExtraLoader(loader);
     }
-    
+    */
+
     /**
      * @return Returns the classRegistry.
      */
     public ClassRegistry getClassRegistry() {
         return mClassRegistry;
     }
-    /**
-     * @param classRegistry The classRegistry to set.
-     */
-    /*
-    public void setClassRegistry(ClassRegistry classRegistry) {
-        this.classRegistry = classRegistry;
-    }
-    */
+
     /**
      * @return Returns the compositeLoader.
      */
@@ -528,22 +522,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return mCompositeLoader;
     }
 
-    /**
-     * @return Returns the compositeParser.
-     */
-    /*
-    public CompositeMapParser getCompositeParser() {
-        return mCompositeParser;
-    }
-    */
-    /**
-     * @param compositeParser The compositeParser to set.
-     */
-    /*
-    public void setCompositeParser(CompositeMapParser compositeParser) {
-        this.mCompositeParser = compositeParser;
-    }
-    */
     /**
      * @return Returns the ocManager.
      */
@@ -611,7 +589,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return mConfigDir;
     }
     
-    public boolean isRunning(){
+    public boolean getIsRunning(){
         return mIsRunning;
     }
     
@@ -641,6 +619,15 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return mName;
     }
     
+    public String getMBeanName( String category, String sub_name ){
+        String name = "org.uncertain:instance="+getName();
+        if(category!=null)
+            name = name + ",category="+category;
+        if(sub_name!=null)
+            name = name +","+sub_name;
+        return name;
+    }
+    
     public void setName( String name ){
         mName = name;
     }
@@ -664,4 +651,43 @@ public class UncertainEngine implements IChildContainerAcceptable {
         Level.parse(defaultLogLevel);
         mDefaultLogLevel = defaultLogLevel;
     }
+    
+    
+    public INamedCacheFactory getNamedCacheFactory() {
+        return mNamedCacheFactory;
+    }
+
+    public void setNamedCacheFactory(INamedCacheFactory mCacheFactory) {
+        this.mNamedCacheFactory = mCacheFactory;
+    }
+    
+    
+    public boolean getCacheConfigFiles() {
+        return mCacheConfigFiles;
+    }
+
+    public void setCacheConfigFiles(boolean mCacheConfigFiles) {
+        this.mCacheConfigFiles = mCacheConfigFiles;
+        if(mProcedureManager!=null)
+            mProcedureManager.setIsCache(mCacheConfigFiles);
+    }
+    
+    public ICache createNamedCache( String name ){
+        if(getCacheConfigFiles()){
+            String mbean_name = getMBeanName("cache", "name="+name);
+            if(mNamedCacheFactory!=null)
+                return mNamedCacheFactory.getNamedCache(mbean_name);
+            else
+                return null;
+        }else
+            return null;
+    }
+    
+    public void prepareCacheSettings( CompositeLoader loader, String name ){
+        name = getMBeanName("cache","name="+name);
+        ICache cache = mNamedCacheFactory.getNamedCache(name);
+        loader.setCache(cache);
+        loader.setCacheEnabled(true);
+    }
+    
 }
