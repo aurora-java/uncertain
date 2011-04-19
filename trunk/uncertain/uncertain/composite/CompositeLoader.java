@@ -10,14 +10,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.xml.sax.SAXException;
 
+import uncertain.cache.ICache;
+import uncertain.cache.MapBasedCache;
 import uncertain.composite.decorate.ElementModifier;
 
 /**
@@ -63,21 +63,15 @@ public class CompositeLoader {
 	String				mDefaultExt;
 	boolean				mSupportXinclude = true;
 	boolean				mCaseInsensitive = false;
-	//boolean             mCreateLocator = false;
 	NameProcessor       mNameProcessor = null;
+	//INamedCacheFactory  mNamedCacheFactory;
 	ClassLoader         mClassLoader = Thread.currentThread().getContextClassLoader();
-	
-	LinkedList			extra_path_list = null;
-	//CompositeMapParser  parser;
-	
+	LinkedList			mExtraPathList = null;
 	// cache feature
-	HashMap				composite_map_cache = null;
-	boolean				cache_enabled = false;
-	
+	ICache              mCache;
+	boolean				mCacheEnabled = false;
 	// CompositeMap merge, so that a CompositeMap can be declared to 'extend' a base 
 	boolean            mSupportFileMerge = false;
-	
-	//
 	boolean            mSaveNamespaceMapping = false;
 	
 	
@@ -95,22 +89,19 @@ public class CompositeLoader {
 		return m;
 	}
 	
-	public CompositeMap getCachedMap(Object key){
-	    return composite_map_cache == null?null:(CompositeMap)composite_map_cache.get(key);
+	protected CompositeMap getCachedMap(Object key){
+	    return mCache == null?null:(CompositeMap)mCache.getValue(key);
 	}
-	
+	/*
 	public void clearCache(){
-	    if(composite_map_cache!=null)
-	        composite_map_cache.clear();
+	    if(mCache!=null)
+	        mCache.clear();
 	}
+    */
 	
-	protected Map getCache(){
-	    return composite_map_cache;
-	}
-	
-	public void saveCachedMap(Object key, CompositeMap map){
-	    if(composite_map_cache!=null&&map!=null)
-	        composite_map_cache.put(key,map);
+	protected void saveCachedMap(Object key, CompositeMap map){
+	    if(mCache!=null&&map!=null)
+	        mCache.setValue(key,map);
 	}
 
 	public CompositeLoader(){
@@ -124,8 +115,8 @@ public class CompositeLoader {
 	}
 
 	public void addExtraLoader( CompositeLoader loader ){
-		if( extra_path_list == null) extra_path_list = new LinkedList();
-		extra_path_list.add(loader);
+		if( mExtraPathList == null) mExtraPathList = new LinkedList();
+		mExtraPathList.add(loader);
 	}
 	
 	public void addDocumentPath( CompositeLoader loader ){
@@ -133,7 +124,7 @@ public class CompositeLoader {
 	}
 	
 	public List getExtraLoader(){
-		return this.extra_path_list;
+		return this.mExtraPathList;
 	}
 	
 	
@@ -182,20 +173,34 @@ public class CompositeLoader {
 	        m = loadByURL_NC(url);
 	        saveCachedMap(url, m);
 	    }
-	    return m;
+	    return (CompositeMap)m.clone();
 	}
+	
+
+    public CompositeMap loadByFullFilePath_NC( String file_name) throws IOException, SAXException {
+        FileInputStream fis = null;        
+        try{
+            fis = new FileInputStream(file_name);
+            CompositeMap map =  parse(fis);
+            map.setSourceFile(file_name);
+            return map;
+        } finally{
+            if( fis != null) fis.close();
+        }    
+    }
+    
 
 	public CompositeMap loadByFullFilePath( String file_name) throws IOException, SAXException {
-		FileInputStream fis = null;
-		try{
-			fis = new FileInputStream(file_name);
-			CompositeMap map =  parse(fis);
-			map.setSourceFile(file_name);
-			return map;
-		} finally{
-			if( fis != null) fis.close();
-		}
-			
+	    
+	    if(!getCacheEnabled())
+	        return loadByFullFilePath_NC( file_name );
+	    CompositeMap m = getCachedMap(file_name);
+        if(m==null) {
+            m = loadByFullFilePath_NC(file_name);
+            saveCachedMap(file_name, m);
+        }
+        return (CompositeMap)m.clone();
+        //return m;
 	}
 
 	String getFullPath( String file_name){
@@ -213,9 +218,9 @@ public class CompositeLoader {
 		File file = new File(getFullPath(file_name));
 		if( file.exists()) return file;
 		else{
-			if( this.extra_path_list == null) return null;
+			if( this.mExtraPathList == null) return null;
 			else{
-				Iterator it = this.extra_path_list.iterator();
+				Iterator it = this.mExtraPathList.iterator();
 				while( it.hasNext()){
 					CompositeLoader ld = (CompositeLoader) it.next();
 					file =  ld.getFile(file_name);
@@ -233,9 +238,9 @@ public class CompositeLoader {
 		try{
 			return loadByFullFilePath( full_name);	
 		} catch(IOException ex){
-			if( this.extra_path_list == null) throw ex;
+			if( this.mExtraPathList == null) throw ex;
 			else{
-				Iterator it = this.extra_path_list.iterator();
+				Iterator it = this.mExtraPathList.iterator();
 				while( it.hasNext()){
 					CompositeLoader ld = (CompositeLoader) it.next();					
 					try{
@@ -256,39 +261,42 @@ public class CompositeLoader {
 		}
 	}
 	
+	/*
 	protected CompositeMap loadNC( String resource_name) throws IOException, SAXException {
 		if( resource_name == null) return null;
 		// First try to load by URL
 		if( resource_name.indexOf(':')>0)
-			return loadByURL( resource_name);
+			return loadByURL_NC( resource_name);
 		return loadByFile( resource_name);	
 		
 	}
-	
+	*/
 
 	public CompositeMap load( String resource_name) throws IOException, SAXException {
-	    if(!getCacheEnabled())
-	        return loadNC(resource_name);
-	    CompositeMap m = getCachedMap(resource_name);
-	    if(m==null) {
-	        m = loadNC(resource_name);
-	        if(m!=null){
-//	            System.out.println("caching "+resource_name);
-	            saveCachedMap(resource_name, m);
-	        }
-	    }
-	    return m==null?null:(CompositeMap)m.clone();	
+        if( resource_name == null) return null;
+        // First try to load by URL
+        if( resource_name.indexOf(':')>0)
+            return loadByURL( resource_name);
+        return loadByFile( resource_name);  
 	}
 	
     public CompositeMap loadFromClassPath( String full_name) throws IOException, SAXException {
-        return loadFromClassPath(full_name, mDefaultExt, false);
+        return loadFromClassPath(full_name, mDefaultExt);
     }
     
     public CompositeMap loadFromClassPath( String full_name, String file_ext ) throws IOException, SAXException {
-        return loadFromClassPath(full_name, file_ext, false);
+        if(!mCacheEnabled || mCache==null)
+            return loadFromClassPath_NC(full_name, file_ext);
+        String name = full_name +'#' +file_ext;
+        CompositeMap m = (CompositeMap)mCache.getValue(name);
+        if(m==null){
+            m = loadFromClassPath_NC(full_name, file_ext);
+            saveCachedMap(name, m);
+        }
+        return (CompositeMap)m.clone();
     }
-	
-	private CompositeMap loadFromClassPath( String full_name, String file_ext, boolean cache ) throws IOException, SAXException {
+
+	private CompositeMap loadFromClassPath_NC( String full_name, String file_ext ) throws IOException, SAXException {
         if(full_name==null) throw new IllegalArgumentException("path to load CompositeMap is null");
 		InputStream stream = null;
         String path = convertResourcePath(full_name, file_ext);
@@ -311,19 +319,8 @@ public class CompositeLoader {
                     throw new IOException("Can't get resource from "+path);
                 return parse(stream);                
             }else{
-                return loadByFullFilePath(file);                
+                return loadByFullFilePath_NC(file);                
             }
-            /*
-            if(cache){
-                stream = mClassLoader.getResourceAsStream(path);
-                return parse(stream);
-            }else{
-                URL url = mClassLoader.getResource(path);                
-                if(url==null) throw new IOException("Can't get resource from "+path);
-                String file = url.getFile(); 
-                return loadByFullFilePath(file);    
-            }
-            */
 		}finally{
 			if(stream != null) stream.close();
 		}
@@ -406,19 +403,21 @@ public class CompositeLoader {
      * @return Returns the cache_enabled.
      */
     public boolean getCacheEnabled() {
-        return cache_enabled;
+        return mCacheEnabled;
     }
     /**
      * @param cache_enabled The cache_enabled to set.
      */
     public void setCacheEnabled(boolean cache_enabled) {
-        this.cache_enabled = cache_enabled;
-        if(cache_enabled && composite_map_cache==null) 
-            composite_map_cache = new HashMap();
-        if(extra_path_list!=null){
-            Iterator it = extra_path_list.iterator();
+        this.mCacheEnabled = cache_enabled;
+        if(mCacheEnabled && mCache==null) 
+            mCache = new MapBasedCache();
+        if(mExtraPathList!=null){
+            Iterator it = mExtraPathList.iterator();
             while(it.hasNext()){
                 CompositeLoader l = (CompositeLoader)it.next();
+                if(mCacheEnabled)
+                    l.setCache(mCache);
                 l.setCacheEnabled(cache_enabled);
             }
         }
@@ -473,4 +472,12 @@ public class CompositeLoader {
     public void setSaveNamespaceMapping(boolean saveNamespaceMapping) {
         mSaveNamespaceMapping = saveNamespaceMapping;
     }    
+    
+    public ICache getCache() {
+        return mCache;
+    }
+
+    public void setCache(ICache cache) {
+        mCache = cache;
+    }
 }
