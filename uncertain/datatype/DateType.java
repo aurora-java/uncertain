@@ -50,8 +50,14 @@ public class DateType extends AbstractDataType implements DataType {
     public void setParameter (PreparedStatement stmt, int id, Object value ) throws SQLException{
         if(value==null)
             stmt.setNull(id, getSqlType());
-        else
-            stmt.setDate(id, (java.sql.Date)value);
+        else{
+            if( value instanceof java.util.Date)
+                stmt.setDate(id, new java.sql.Date(((java.util.Date)value).getTime()));
+            else if( value instanceof java.sql.Date)
+                stmt.setDate(id, (java.sql.Date)value);
+            else
+                throw new IllegalArgumentException("Parameter No."+id+" is not instance or derived type of java.util.Date");
+        }
     }
 
     public int getSqlType() {
