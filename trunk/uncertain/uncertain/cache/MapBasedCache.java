@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import uncertain.mbean.MBeanUtil;
+
 public class MapBasedCache implements ICache, MapBasedCacheMBean {
     
     public static final int DEFAULT_CACHE_SIZE = 1000;
@@ -96,15 +98,7 @@ public class MapBasedCache implements ICache, MapBasedCacheMBean {
     }
     
     public String dumpMappings(){
-        StringBuffer buf = new StringBuffer();
-        Iterator it = mCacheMap.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry entry = (Map.Entry)it.next();
-            String key = entry.getKey()==null?"null":entry.getKey().toString();
-            String value = entry.getValue()==null?"null":entry.getValue().toString();
-            buf.append(key).append("=").append(value).append("\r\n");
-        }
-        return buf.toString();
+        return MBeanUtil.dumpMap(mCacheMap);
     }
 
 }
