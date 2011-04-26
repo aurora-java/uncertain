@@ -5,6 +5,8 @@
 package uncertain.mbean;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.Map;
 
 import uncertain.cache.INamedCacheFactory;
 import uncertain.composite.CompositeMap;
@@ -15,6 +17,7 @@ import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
+import uncertain.ocm.ObjectRegistryImpl;
 import uncertain.proc.ParticipantRegistry;
 
 public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
@@ -107,6 +110,12 @@ public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
 
     public void setCacheConfigFiles(boolean mCacheConfigFiles) {
         mEngine.setCacheConfigFiles(mCacheConfigFiles);
+    }
+    
+    public String dumpInstanceMapping(){
+        ObjectRegistryImpl or =  (ObjectRegistryImpl)mEngine.getObjectRegistry();
+        Map mapping = or.getInstanceMapping();
+        return MBeanUtil.dumpMap(mapping);
     }
 
 
