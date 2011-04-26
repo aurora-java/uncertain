@@ -31,6 +31,8 @@ public interface UncertainEngineWrapperMBean {
     //public void shutdown();
     
     public File getConfigDirectory();
+    
+    public String dumpInstanceMapping();
 
 
 }
