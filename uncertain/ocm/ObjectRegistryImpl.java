@@ -298,7 +298,7 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
         }
     }
     
-    public Map getParameters(){
+    public Map getInstanceMapping(){
         return instance_map;
     }
     
