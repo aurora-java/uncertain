@@ -3,12 +3,23 @@
  */
 package uncertain.core;
 
+import uncertain.composite.CompositeMap;
+
 /**
  * Indicate a runtime error that configuration is incorrect
  * @author Zhou Fan
  * 
  */
 public class ConfigurationError extends Error {
+    
+    //TODO Append location info
+    public ConfigurationError( CompositeMap source, String message ){
+        super(message);
+    }
+    
+    public ConfigurationError( CompositeMap source, String message, Throwable cause ){
+        super(message, cause);
+    }
 
     /**
      * 
