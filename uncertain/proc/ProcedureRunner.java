@@ -123,6 +123,11 @@ public class ProcedureRunner {
         return is_continue;
     }
     
+    
+    public void setResumeAfterException( boolean flag ){
+        resume_after_exception = flag;
+    }
+    
     /**
      * Locate to a specific named entry, this entry will be the next one to execute in procedure
      * @param entry_name the name of entry to locate to
