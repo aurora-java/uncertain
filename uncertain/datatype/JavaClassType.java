@@ -27,7 +27,7 @@ public class JavaClassType extends StringType {
                 {
                     return Class.forName((String)value);
                 }catch(ClassNotFoundException ex){
-                    throw new IllegalArgumentException(ex.getMessage());
+                    throw new RuntimeException("Can't find class "+ex.getMessage());
                 }
         return null;
     }    
