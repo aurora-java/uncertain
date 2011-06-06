@@ -6,6 +6,8 @@
 
 package uncertain.composite;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,7 +15,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.xml.sax.Locator;
+import uncertain.util.resource.ISourceFile;
 
 /** A Map with a list of child maps, and a name and namespace
  * for xml creation
@@ -37,7 +39,8 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     protected List   childs;
     
     /** source file where this CompositeMap is parsed from */
-    protected String  source_file;
+    protected File  source;
+    //protected URL   source_url;
     
     /** Map<url,prefix> of namespace declare */
     protected Map   namespace_mapping;
@@ -176,7 +179,7 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         putAll( another);
         addChilds( another.childs); 
         this.text = another.text;
-        this.source_file = another.source_file;
+        this.source = another.source;
         return this;
     }
  
@@ -577,7 +580,7 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         prefix = null;
 		childs = null;
 		parent = null;
-		source_file = null;
+		source = null;
 	}
 	
 	public QualifiedName getQName(){
@@ -602,13 +605,13 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         return m;
     }
     
-    public String getSourceFile(){
-        return source_file;
+    public File getSourceFile(){
+        return source;
     }
     
     /** source file path where this CompositeMap is parsed from */
-    public void setSourceFile( String file ){
-        source_file = file;
+    public void setSourceFile( File source ){
+        this.source = source;
     }
     
     /** get a Map containing namespace mapping, with namespace url as key, 
