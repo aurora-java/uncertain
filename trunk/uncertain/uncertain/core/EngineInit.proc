@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pr:procedure xmlns:pr="uncertain.proc">
+	<pr:action Name="ValidateConfig" />
+	<pr:action Name="Assemble" />
 	<pr:action Name="Initialize" />
+	<pr:action Name="Start" />
 </pr:procedure>
