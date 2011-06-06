@@ -18,10 +18,6 @@ import java.util.logging.Level;
 
 import org.xml.sax.SAXException;
 
-import uncertain.cache.ICache;
-import uncertain.cache.ICacheFactory;
-import uncertain.cache.INamedCacheFactory;
-import uncertain.cache.MapBasedCacheFactory;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
@@ -52,6 +48,8 @@ import uncertain.proc.Procedure;
 import uncertain.proc.ProcedureManager;
 import uncertain.proc.ProcedureRunner;
 import uncertain.util.FilePatternFilter;
+import uncertain.util.resource.ISourceFileManager;
+import uncertain.util.resource.SourceFileManager;
 
 /**
  * The facade class of uncertain object collaboration framework
@@ -60,14 +58,12 @@ import uncertain.util.FilePatternFilter;
  */
 public class UncertainEngine implements IChildContainerAcceptable {
 
-    public static final String UNCERTAIN_NAMESPACE = "http://engine.uncertain.org/defaultns";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
     public static final String DEFAULT_ENGINE_NAME = "uncertain_engine";
     public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
     //public static final String UNCERTAIN_ERROR_TOPIC = "error";
     
     String                  mName = DEFAULT_ENGINE_NAME;
-    //CompositeMapParser		mCompositeParser;
     CompositeLoader			mCompositeLoader = CompositeLoader.createInstanceForOCM();
     OCManager				mOcManager;
     ObjectRegistryImpl		mObjectRegistry;
@@ -80,15 +76,13 @@ public class UncertainEngine implements IChildContainerAcceptable {
     Set                     mContextListenerSet;
     LinkedList				mExtraConfig = new LinkedList();
     File					mConfigDir;    
+    ISourceFileManager      mSourceFileManager;
     boolean                 mIsRunning = true;
     /* =========== logging related members =================== */
     String                  mLogPath;
     String                  mDefaultLogLevel = "WARNING";
     ILogger                 mLogger;    
     TopicManager            mTopicManager;
-    /* =========== cache ===================================== */
-    INamedCacheFactory      mNamedCacheFactory;
-    boolean                 mCacheConfigFiles = false;
 
     public static UncertainEngine createInstance(){
         UncertainEngine     engine = new UncertainEngine();
@@ -143,8 +137,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstanceOnce(ILoggingTopicRegistry.class, mTopicManager);
         mObjectRegistry.registerInstanceOnce(ILogger.class, mLogger);
         mObjectRegistry.registerInstanceOnce(IProcedureManager.class, this.getProcedureManager());
-        mObjectRegistry.registerInstance(ICacheFactory.class, mNamedCacheFactory);
-        mObjectRegistry.registerInstance(INamedCacheFactory.class, mNamedCacheFactory);
+        mObjectRegistry.registerInstanceOnce(ISourceFileManager.class, mSourceFileManager);
     }
     
     private void setDefaultClassRegistry(){
@@ -155,6 +148,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mClassRegistry.registerPackage("uncertain.core");
         mClassRegistry.registerPackage("uncertain.core.admin");
         mClassRegistry.registerPackage("uncertain.event");
+        mClassRegistry.registerPackage("uncertain.cache");
         
         //mClassRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
         //mClassRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
@@ -183,7 +177,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     protected void bootstrap(){
         // create default cache factory
-        mNamedCacheFactory = new MapBasedCacheFactory();
+        // mNamedCacheFactory = new MapBasedCacheFactory(this);
         // create internal CompositeMapLoader 
         mCompositeLoader = CompositeLoader.createInstanceForOCM();
         mDirectoryConfig = (DirectoryConfig)DynamicObject.cast(this.mGlobalContext, DirectoryConfig.class);
@@ -199,9 +193,14 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mParticipantRegistry = new ParticipantRegistry();    
         mGlobalContext = new CompositeMap("global");
         mTopicManager = new TopicManager();
+        mSourceFileManager = SourceFileManager.getInstance();
         registerBuiltinInstances();
         loadBuiltinLoggingTopic();
         // load internal registry
+
+        //mConfig = createConfig();
+        //mConfig.addParticipant(mProcedureManager);
+    
     } 
 
     public void initialize(CompositeMap config){
@@ -244,16 +243,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
             mOcManager.setLoggerProvider(logger_provider);            
         }
         mLogger = logger_provider.getLogger(UNCERTAIN_LOGGING_TOPIC);
-        /*
-        if(mErrorLogger==null)
-            mErrorLogger = logger_provider.getLogger(UNCERTAIN_ERROR_TOPIC);
-        if(mErrorLogger==DummyLogger.getInstance()){
-            DefaultLogger l =new DefaultLogger("error");
-            l.addHandler( new BasicConsoleHandler());
-            mErrorLogger = l;
-        }
-        */
-        //mLogger.info("Logging provider set to "+logger_provider);
     }
     
     public void addLoggingConfig( ILoggerProvider logging_config ){
@@ -319,7 +308,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         }
         // run  procedure
         Procedure proc = loadProcedure("uncertain.core.EngineInit");
-        if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineInit.xml from class loader");
+        if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineInit from class loader");
         ProcedureRunner runner = createProcedureRunner(proc);
         runner.addConfiguration(mConfig);
         runner.run();  
@@ -432,12 +421,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     private Procedure loadProcedure(String class_path)
     {
-        /*
-        CompositeMap m = loadCompositeMap(class_path);
-        if(m==null) return null;
-        Procedure proc = (Procedure)mOcManager.createObject(m);
-        return proc;
-        */
         try{
             return mProcedureManager.loadProcedure(class_path);
         }catch(Exception ex){
@@ -501,12 +484,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mClassRegistry.addAll(reg, override);
     }
 
-    /*
-    public void addDocumentLoader(CompositeLoader loader){
-        if(mCompositeLoader==null) mCompositeLoader = loader;
-        else mCompositeLoader.addExtraLoader(loader);
-    }
-    */
 
     /**
      * @return Returns the classRegistry.
@@ -556,11 +533,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         this.mParticipantRegistry = participantRegistry;
     }
 
-/*    
-    public void setObjectSpace(ObjectSpace objectSpace) {
-        this.mObjectSpace = objectSpace;
-    }    
-*/
+
     public CompositeMap getGlobalContext(){
         return mGlobalContext;
     }
@@ -569,19 +542,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         return mTopicManager;
     }
 
-    /**
-     * @return Returns the logger.
-     */
-    /*
-    public Logger getLogger() {
-        //return mLogger;
-        if(mLogger instanceof DefaultLogger)
-            return ((DefaultLogger)mLogger);
-        else
-            return Logger.getAnonymousLogger();
-    
-    }
-    */
     /**
      * @return Returns the config_dir.
      */
@@ -651,43 +611,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         Level.parse(defaultLogLevel);
         mDefaultLogLevel = defaultLogLevel;
     }
-    
-    
-    public INamedCacheFactory getNamedCacheFactory() {
-        return mNamedCacheFactory;
-    }
 
-    public void setNamedCacheFactory(INamedCacheFactory mCacheFactory) {
-        this.mNamedCacheFactory = mCacheFactory;
-    }
-    
-    
-    public boolean getCacheConfigFiles() {
-        return mCacheConfigFiles;
-    }
-
-    public void setCacheConfigFiles(boolean mCacheConfigFiles) {
-        this.mCacheConfigFiles = mCacheConfigFiles;
-        if(mProcedureManager!=null)
-            mProcedureManager.setIsCache(mCacheConfigFiles);
-    }
-    
-    public ICache createNamedCache( String name ){
-        if(getCacheConfigFiles()){
-            String mbean_name = getMBeanName("cache", "name="+name);
-            if(mNamedCacheFactory!=null)
-                return mNamedCacheFactory.getNamedCache(mbean_name);
-            else
-                return null;
-        }else
-            return null;
-    }
-    
-    public void prepareCacheSettings( CompositeLoader loader, String name ){
-        name = getMBeanName("cache","name="+name);
-        ICache cache = mNamedCacheFactory.getNamedCache(name);
-        loader.setCache(cache);
-        loader.setCacheEnabled(true);
-    }
     
 }
