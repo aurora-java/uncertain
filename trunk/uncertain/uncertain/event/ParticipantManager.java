@@ -81,6 +81,7 @@ public class ParticipantManager implements IParticipantManager, IGlobalInstance,
     public Configuration getParticipantsAsConfig( String category ){
         Configuration config = new Configuration();
         List participants = getParticipantList(category);
+        if(participants!=null)
         for(Iterator it = participants.iterator(); it.hasNext(); ){
             config.addParticipant(it.next());
         }
@@ -173,6 +174,7 @@ public class ParticipantManager implements IParticipantManager, IGlobalInstance,
                 Object participant = mObjectRegistry.getInstanceOfType(cls);
                 if(participant == null){
                     participant = mObjectCreator.createInstance(cls);
+                    mObjectRegistry.registerInstance(cls, participant);
                     mLogger.info("New instance created");
                 }
                 else
