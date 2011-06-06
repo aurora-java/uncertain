@@ -19,6 +19,10 @@ import org.xml.sax.SAXException;
 import uncertain.cache.ICache;
 import uncertain.cache.MapBasedCache;
 import uncertain.composite.decorate.ElementModifier;
+import uncertain.util.resource.CachedSourceFileCleaner;
+import uncertain.util.resource.ISourceFile;
+import uncertain.util.resource.ISourceFileManager;
+import uncertain.util.resource.SourceFileManager;
 
 /**
  *  load Composite from xml files stored in specified path
@@ -64,12 +68,14 @@ public class CompositeLoader {
 	boolean				mSupportXinclude = true;
 	boolean				mCaseInsensitive = false;
 	NameProcessor       mNameProcessor = null;
-	//INamedCacheFactory  mNamedCacheFactory;
+
 	ClassLoader         mClassLoader = Thread.currentThread().getContextClassLoader();
 	LinkedList			mExtraPathList = null;
 	// cache feature
-	ICache              mCache;
-	boolean				mCacheEnabled = false;
+	ICache                  mCache;
+	ISourceFileManager      mSourceFileManager;
+    boolean				    mCacheEnabled = false;
+    
 	// CompositeMap merge, so that a CompositeMap can be declared to 'extend' a base 
 	boolean            mSupportFileMerge = false;
 	boolean            mSaveNamespaceMapping = false;
@@ -99,9 +105,16 @@ public class CompositeLoader {
 	}
     */
 	
-	protected void saveCachedMap(Object key, CompositeMap map){
+	protected void saveCachedMap(Object key, CompositeMap map ){
 	    if(mCache!=null&&map!=null)
 	        mCache.setValue(key,map);
+	    if(mSourceFileManager!=null){
+	        File source = map.getSourceFile();
+	        if(source!=null){
+	            ISourceFile sf = mSourceFileManager.addSourceFile(source);
+	            sf.addUpdateListener( new CachedSourceFileCleaner(mCache, key));
+	        }
+	    }
 	}
 
 	public CompositeLoader(){
@@ -182,7 +195,7 @@ public class CompositeLoader {
         try{
             fis = new FileInputStream(file_name);
             CompositeMap map =  parse(fis);
-            map.setSourceFile(file_name);
+            map.setSourceFile(new File(file_name));
             return map;
         } finally{
             if( fis != null) fis.close();
@@ -443,15 +456,7 @@ public class CompositeLoader {
     public void setClassLoader(ClassLoader classLoader) {
         mClassLoader = classLoader;
     }
-/*
-    public boolean getCreateLocator() {
-        return mCreateLocator;
-    }
 
-    public void setCreateLocator(boolean createLocator) {
-        mCreateLocator = createLocator;
-    }
-*/
 
     public boolean getSupportFileMerge() {
         return mSupportFileMerge;
@@ -479,5 +484,15 @@ public class CompositeLoader {
 
     public void setCache(ICache cache) {
         mCache = cache;
+        if(mSourceFileManager==null)
+            mSourceFileManager = SourceFileManager.getInstance();
     }
+  
+    public ISourceFileManager getSourceFileManager() {
+        return mSourceFileManager;
+    }
+
+    public void setSourceFileManager(ISourceFileManager mSourceFileManager) {
+        this.mSourceFileManager = mSourceFileManager;
+    }    
 }
