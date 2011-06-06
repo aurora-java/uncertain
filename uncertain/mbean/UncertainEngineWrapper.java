@@ -100,10 +100,7 @@ public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
         mEngine.setDefaultLogLevel(defaultLogLevel);
     }
 
-    public INamedCacheFactory getNamedCacheFactory() {
-        return mEngine.getNamedCacheFactory();
-    }
-
+/*
     public boolean getCacheConfigFiles() {
         return mEngine.getCacheConfigFiles();
     }
@@ -111,7 +108,7 @@ public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
     public void setCacheConfigFiles(boolean mCacheConfigFiles) {
         mEngine.setCacheConfigFiles(mCacheConfigFiles);
     }
-    
+    */
     public String dumpInstanceMapping(){
         ObjectRegistryImpl or =  (ObjectRegistryImpl)mEngine.getObjectRegistry();
         Map mapping = or.getInstanceMapping();

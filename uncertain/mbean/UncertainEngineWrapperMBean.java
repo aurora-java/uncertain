@@ -18,9 +18,9 @@ public interface UncertainEngineWrapperMBean {
     
     public void setLogPath(String path);
     
-    public boolean getCacheConfigFiles();  
+   // public boolean getCacheConfigFiles();  
 
-    public void setCacheConfigFiles(boolean cacheConfigFiles);
+   // public void setCacheConfigFiles(boolean cacheConfigFiles);
     
     public String getDefaultLogLevel();
 
