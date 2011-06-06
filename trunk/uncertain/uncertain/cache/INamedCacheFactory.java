@@ -6,8 +6,13 @@ package uncertain.cache;
 
 public interface INamedCacheFactory extends ICacheFactory {
     
+    /** name of this factory. Every cache factory must has a name for assignment */
+    public String   getName();
+    
+    public boolean isCacheEnabled( String name );
+    
     public ICache   getNamedCache( String name );
     
-    public void setNamedCache( String name, ICache cache );
+    //public void setNamedCache( String name, ICache cache );
 
 }

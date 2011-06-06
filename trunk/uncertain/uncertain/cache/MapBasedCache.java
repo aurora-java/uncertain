@@ -49,7 +49,7 @@ public class MapBasedCache implements ICache, MapBasedCacheMBean {
         return true;
     }
 
-    public boolean setValue(Object key, long timeout, Object value) {
+    public boolean setValue(Object key, int timeout, Object value) {
         setValue(key, value);
         return true;
     }
