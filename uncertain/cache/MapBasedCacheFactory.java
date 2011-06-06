@@ -7,12 +7,16 @@ package uncertain.cache;
 import java.util.HashMap;
 import java.util.Map;
 
+import uncertain.core.UncertainEngine;
 import uncertain.mbean.MBeanRegister;
 
 public class MapBasedCacheFactory implements INamedCacheFactory {
     
     Map             mNamedCacheMap = new HashMap(1000);
     MapBasedCache   mDefaultCache = new MapBasedCache();
+    boolean         mRegisterMBean = true;
+    UncertainEngine mEngine;
+    String          mName;
     
     /*
     String          mBeanName;
@@ -30,7 +34,25 @@ public class MapBasedCacheFactory implements INamedCacheFactory {
         return name;
     }
     */
+    
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String name) {
+        this.mName = name;
+    }
+
     public MapBasedCacheFactory(){
+        this("MapBasedCacheFactory");
+    }
+    
+    public MapBasedCacheFactory( String name){
+        setName(name);
+    }
+    
+    public MapBasedCacheFactory( UncertainEngine engine){
+        this.mEngine = engine;
     }
 
     public ICacheReader getCacheReader() {
@@ -46,11 +68,14 @@ public class MapBasedCacheFactory implements INamedCacheFactory {
     }
 
     public ICache getNamedCache(String name) {
+        if(name==null)
+            throw new IllegalArgumentException("Cache name can't be null");
         ICache cache = (ICache)mNamedCacheMap.get(name);
         if(cache==null){
             cache = new MapBasedCache();
             try{
-                MBeanRegister.resiterMBean(name, cache);
+                String mbean_name = mEngine==null?"name="+name:mEngine.getMBeanName("cache", "name="+name);
+                MBeanRegister.resiterMBean(mbean_name, cache);
             }catch(Exception ex){
                 ex.printStackTrace();
             }
@@ -61,6 +86,10 @@ public class MapBasedCacheFactory implements INamedCacheFactory {
 
     public void setNamedCache(String name, ICache cache) {
         mNamedCacheMap.put(name, cache);
+    }
+
+    public boolean isCacheEnabled(String name) {
+        return true;
     }
 
 }
