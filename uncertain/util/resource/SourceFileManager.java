@@ -1,0 +1,88 @@
+/*
+ * Created on 2011-6-1 ÏÂÎç09:58:48
+ * $Id$
+ */
+package uncertain.util.resource;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+public class SourceFileManager implements ISourceFileManager {
+
+    static SourceFileManager DEFAULT_INSTANCE = new SourceFileManager();
+
+    public static SourceFileManager getInstance() {
+        return DEFAULT_INSTANCE;
+    }
+
+    public static final int INITIAL_SIZE = 6000;
+
+    // File.getAbsolutePath() -> ISourceFile
+    Map                 mSourceFileMap = new HashMap(INITIAL_SIZE);
+    FileCheckThread     mCheckThread = new FileCheckThread();
+    long                mCheckInterval = 1000;
+
+    public SourceFileManager() {
+        mCheckThread.start();
+    }
+
+    public ISourceFile getSourceFile(String resource_url) {
+        File file = new File(resource_url);
+        if (!file.exists())
+            return null;
+        return getSourceFile(file);
+    }
+
+    public ISourceFile getSourceFile(File file) {
+        ISourceFile source = (ISourceFile) mSourceFileMap.get(file
+                .getAbsolutePath());
+        return source;
+    }
+
+    public synchronized ISourceFile addSourceFile(File file) {
+        ISourceFile source = getSourceFile(file);
+        if (source != null)
+            return source;
+        source = new SourceFile(file);
+        mSourceFileMap.put(file.getAbsolutePath(), source);
+        return source;
+    }
+
+    public class FileCheckThread extends Thread {
+
+        boolean isContinue = true;
+
+        public void run() {
+            while (isContinue) {
+                long time = System.currentTimeMillis();
+                if (mSourceFileMap.size() > 0) {
+                    Object[] entries = null;
+                    
+                    synchronized (mSourceFileMap) {
+                        entries = mSourceFileMap.values().toArray();
+                    }
+                    for (int i = 0; i < entries.length && isContinue; i++) {
+                        ISourceFile source = (ISourceFile) entries[i];
+                        source.checkModified();
+                    }
+
+                } 
+                time = System.currentTimeMillis() - time;
+                if(mCheckInterval>time)
+                try {
+                    sleep(mCheckInterval-time);
+                } catch (InterruptedException ex) {
+                    isContinue = false;
+                    return;
+                }
+           }
+        }
+
+        public void shutdown() {
+            isContinue = false;
+        }
+
+    };
+
+}
