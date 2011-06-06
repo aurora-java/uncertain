@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.xml.sax.SAXException;
 
+import uncertain.cache.CacheFactoryConfig;
 import uncertain.cache.ICache;
 import uncertain.cache.MapBasedCache;
 import uncertain.composite.CompositeLoader;
@@ -21,6 +22,8 @@ import uncertain.ocm.OCManager;
  */
 public class ProcedureManager implements IProcedureManager {
     
+    public static final String CACHE_NAME = "ProcedureConfig";
+
     static final ProcedureManager DEFAULT_INSTANCE = new ProcedureManager();
     
     public static ProcedureManager getDefaultInstance(){
@@ -50,18 +53,6 @@ public class ProcedureManager implements IProcedureManager {
     CompositeLoader mCompositeLoader;
     boolean         mIsCache = false;
     ICache          mCache;
-    
-    private void createCache(){
-        if(mCache!=null){
-            mCache.clear();
-            mCache=null;
-        }
-        if(mUncertainEngine!=null){
-            mCache = mUncertainEngine.createNamedCache("ProcedureConfig");
-        }else{
-            mCache = new MapBasedCache();
-        }
-    }
 
     public boolean getIsCache() {
         return mIsCache;
@@ -69,15 +60,6 @@ public class ProcedureManager implements IProcedureManager {
 
     public void setIsCache(boolean isCache) {
         mIsCache = isCache;
-        if(mIsCache)
-            createCache();
-        else{
-            if(mCache!=null){
-                mCache.clear();
-                mCache = null;
-            }
-        }
-        
     }
 
     public ICache getCache() {
@@ -135,6 +117,15 @@ public class ProcedureManager implements IProcedureManager {
 
     public OCManager getOCManager() {
         return mOCManager;
+    }
+    
+    public void onInitialize(){
+        mCache = CacheFactoryConfig.getNamedCache(mUncertainEngine.getObjectRegistry(), CACHE_NAME);
+        if(mCache!=null){
+            setCache(mCache);
+            setIsCache(true);
+        }else
+            setIsCache(false);
     }
     
     public void initContext( CompositeMap context ){        
