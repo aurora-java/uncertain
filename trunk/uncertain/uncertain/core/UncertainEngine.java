@@ -56,6 +56,9 @@ import uncertain.util.resource.SourceFileManager;
  * @author Zhou Fan
  * 
  */
+
+//TODO Refactor needed
+
 public class UncertainEngine implements IChildContainerAcceptable {
 
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
@@ -83,6 +86,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
     String                  mDefaultLogLevel = "WARNING";
     ILogger                 mLogger;    
     TopicManager            mTopicManager;
+    
+    // exception during init process
+    Throwable               mInitException;
 
     public static UncertainEngine createInstance(){
         UncertainEngine     engine = new UncertainEngine();
@@ -123,7 +129,12 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
         
     
-    /* ================== Initialize methods ======================================= */    
+    /* ================== Initialize methods ======================================= */  
+    
+    private void setInitError(Throwable thr){
+        this.mIsRunning = false;
+        this.mInitException = thr;
+    }
     
     private void registerBuiltinInstances(){
         //objectSpace.registerParameter(compositeParser);
@@ -211,7 +222,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mLogger.log("Uncertain engine startup");
         // perform configuration
         doConfigure(mExtraConfig);
-        mIsRunning = true;
         
     }
     
@@ -290,7 +300,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
      *
      */
     public void doConfigure(Collection cfg){
-        //if(config!=null) 
+        mIsRunning = false;
         mConfig = createConfig();
         mConfig.setLogger(mLogger);
         //logger.info("Attached:"+this.ocManager.getClassRegistry().getFeatures(new ElementIdentifier(null,"class-registry")));
@@ -316,9 +326,12 @@ public class UncertainEngine implements IChildContainerAcceptable {
         if(thr!=null){
             mLogger.log(Level.SEVERE, "An error happened during initialize process");
             logException("Error when running procedure", thr);
+            setInitError(thr);
+            return;
         }
         // update logger instance if new LoggerProvider generated
         checkLogger();        
+        mIsRunning = true;
     }
     
     public void scanConfigFiles(){
@@ -364,6 +377,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
      * @param file_pattern regular expression string to specify file name pattern 
      */
     public void scanConfigFiles(File dir, String file_pattern) {
+        mIsRunning = true;
+        mInitException = null;
+        
         FilePatternFilter filter = new FilePatternFilter(file_pattern);
         File cfg_files[] = dir.listFiles(filter);
         List file_list = getSortedList(cfg_files);
@@ -379,6 +395,8 @@ public class UncertainEngine implements IChildContainerAcceptable {
                 }catch(Throwable thr){
                     mLogger.log(Level.SEVERE, "Can't load initialize config file "+file_path);
                     logException("Error when loading configuration file "+file_path, thr);
+                    setInitError(thr);
+                    return;
                 }
             }
             if(cfg_list.size()>0)
@@ -468,7 +486,15 @@ public class UncertainEngine implements IChildContainerAcceptable {
     }
 
     /* ================== get/set methods ======================================= */
-
+    
+    public Throwable getInitializeException(){
+        return mInitException;
+    }
+    
+    public boolean isRunning(){
+        return mIsRunning;
+    }
+    
     public void setConfigDirectory(File dir){
         mConfigDir = dir;
         if(mDirectoryConfig==null)
