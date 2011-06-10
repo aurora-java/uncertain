@@ -31,4 +31,13 @@ public class StackTraceUtil {
         }
     }
     
+    public static String toString(StackTraceElement[] trace){
+        StringBuffer buf = new StringBuffer();
+        for(int i=0; i<trace.length; i++){
+            StackTraceElement elm = trace[i];
+            buf.append(elm.toString()).append("\n");
+        }
+        return buf.toString();
+    }
+    
 }
