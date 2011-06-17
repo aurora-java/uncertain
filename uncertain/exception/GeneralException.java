@@ -7,15 +7,7 @@ package uncertain.exception;
 import java.util.Locale;
 
 public class GeneralException extends RuntimeException implements ICodedException {
- 
-    /**
-     * 
-     */
-    public GeneralException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-    
+
     public GeneralException(String code ){
 
     }
