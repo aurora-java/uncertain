@@ -4,14 +4,16 @@
  */
 package uncertain.exception;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 public class MessageFactory {
 
-    
-    public static void loadResource( String path ){
+    static Locale   locale=Locale.getDefault();
+
+    public synchronized static void loadResource( String path ){
 
     }
     
@@ -28,6 +30,7 @@ public class MessageFactory {
     }   
     
     public static String getMessage( String msg_code, Locale locale, Object[] args){
+        //MessageFormat.format(msg, args);
         return null;
     }
     
