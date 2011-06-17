@@ -4,8 +4,12 @@
  */
 package uncertain.exception;
 
+/**
+ *  Invoked by framework to save exception info.  
+ */
 public interface IExceptionListener {
     
+    /** This method must guarantee no more exception would be thrown */ 
     public void onException( Throwable exception );
 
 }
