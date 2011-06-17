@@ -10,7 +10,7 @@ import uncertain.composite.CompositeMap;
  * @author Zhou Fan
  * 
  */
-public class ConfigurationError extends Error {
+public class ConfigurationError extends RuntimeException {
     
     //TODO Append location info
     public ConfigurationError( CompositeMap source, String message ){
