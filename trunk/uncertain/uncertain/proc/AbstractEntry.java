@@ -3,15 +3,24 @@
  */
 package uncertain.proc;
 
+import java.io.File;
+
+import uncertain.composite.CompositeMap;
+import uncertain.ocm.IConfigurable;
+
 /**
  * Provides a basic implementation of IEntry, leave run() method abstract
  * @author Zhou Fan
  * 
  */
-public abstract class AbstractEntry implements IEntry {
+public abstract class AbstractEntry implements IEntry, IConfigurable {
     
-    String name;
-    IEntry owner;
+    String  name;
+    IEntry  owner;
+    
+    
+    File    source;
+    // Location  location;
 
     /**
      * @see uncertain.proc.IEntry#run(uncertain.proc.ProcedureRunner)
@@ -52,6 +61,14 @@ public abstract class AbstractEntry implements IEntry {
     public IEntry getRootOwner(){
         if(owner!=null) return owner.getRootOwner();
         else return null;
+    }
+    
+    public void beginConfigure(CompositeMap config){
+        // set source & location
+    }
+    
+    public void endConfigure(){
+        
     }
     
 
