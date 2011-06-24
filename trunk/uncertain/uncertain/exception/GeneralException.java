@@ -4,12 +4,16 @@
  */
 package uncertain.exception;
 
-import java.util.Locale;
 
 public class GeneralException extends RuntimeException implements ICodedException {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 929894246500504136L;
+	private String code;
     public GeneralException(String code ){
-
+    	this.code = code;
     }
 
     /**
@@ -18,7 +22,7 @@ public class GeneralException extends RuntimeException implements ICodedExceptio
      */
     public GeneralException(String code, String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
+        this.code = code;
     }
 
     /**
@@ -26,7 +30,7 @@ public class GeneralException extends RuntimeException implements ICodedExceptio
      */
     public GeneralException(String code, String message) {
         super(message);
-        // TODO Auto-generated constructor stub
+        this.code = code;
     }
 
     /**
@@ -34,12 +38,16 @@ public class GeneralException extends RuntimeException implements ICodedExceptio
      */
     public GeneralException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
     public String getCode() {
-        // TODO Auto-generated method stub
-        return null;
+        return code;
+    }
+    public String getMessage() {
+        if( code!=null )
+            return code + ":"+super.getMessage();
+        else
+            return super.getMessage();
     }
 
 }

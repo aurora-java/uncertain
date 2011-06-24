@@ -1,7 +1,7 @@
 /*
  * CompositeMap.java
  *
- * Created on 2002Äê1ÔÂ5ÈÕ, ÉÏÎç1:40
+ * Created on 2002ï¿½ï¿½1ï¿½ï¿½5ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½1:40
  */
 
 package uncertain.composite;
@@ -16,6 +16,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import uncertain.util.resource.ISourceFile;
+import uncertain.util.resource.Location;
 
 /** A Map with a list of child maps, and a name and namespace
  * for xml creation
@@ -45,11 +46,9 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     /** Map<url,prefix> of namespace declare */
     protected Map   namespace_mapping;
     
-    
-    //protected Locator locator;
-    
-    
-    /** Creates new CompositeMap
+    Location location;
+
+	/** Creates new CompositeMap
      */
     public CompositeMap() {
         super(DEFAULT_HASHMAP_SIZE);
@@ -635,4 +634,16 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         this.locator = locator;
     }
     */
+    public Location getLocationNotNull() {
+    	if(location == null)
+    		location = new Location();
+		return location;
+	}
+    public Location getLocation() {
+		return location;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
+	}
 }
