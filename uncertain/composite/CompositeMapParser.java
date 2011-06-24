@@ -1,7 +1,7 @@
 /*
  * CompositeMapHandle.java
  *
- * Created on 2002Äê1ÔÂ5ÈÕ, ÉÏÎç2:12
+ * Created on 2002ï¿½ï¿½1ï¿½ï¿½5ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½2:12
  */
 
 package uncertain.composite;
@@ -17,6 +17,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -65,6 +66,7 @@ public class CompositeMapParser extends DefaultHandler {
     //boolean support_xinclude = false;
     
     // the default SAXParserFactory instance
+	Locator locator;
     static SAXParserFactory parser_factory = SAXParserFactory.newInstance();
     static {
         try {
@@ -146,6 +148,7 @@ public class CompositeMapParser extends DefaultHandler {
         else
             node = new CompositeMap((String) uri_mapping.get(namespaceURI),
                     namespaceURI, localName);
+        node.getLocationNotNull().setStartPoint(locator.getLineNumber(), locator.getColumnNumber());
         addAttribs(node, atts);
         /*
         if(last_locator!=null)
@@ -167,6 +170,7 @@ public class CompositeMapParser extends DefaultHandler {
         //last_locator = null;
 
         // test if this is an xinclude instruction
+    	current_node.getLocationNotNull().setEndPoint(locator.getLineNumber(), locator.getColumnNumber());
         if ( getCompositeLoader().getSupportXInclude() )
             if (localName.equals(INCLUDE_INSTRUCTION) && uri != null)
                 if (uri.equals(XINCLUDE_URI)) {
@@ -255,6 +259,9 @@ public class CompositeMapParser extends DefaultHandler {
         name_processor = null;
         composite_loader = null;
     }
-
+	public void setDocumentLocator(Locator locator) {
+		this.locator = locator;
+		super.setDocumentLocator(locator);
+	}
 
 }
