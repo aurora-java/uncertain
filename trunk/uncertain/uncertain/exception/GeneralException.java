@@ -7,11 +7,11 @@ package uncertain.exception;
 
 public class GeneralException extends RuntimeException implements ICodedException {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 929894246500504136L;
+	
 	private String code;
+	
+	
     public GeneralException(String code ){
     	this.code = code;
     }
@@ -33,16 +33,11 @@ public class GeneralException extends RuntimeException implements ICodedExceptio
         this.code = code;
     }
 
-    /**
-     * @param cause
-     */
-    public GeneralException(Throwable cause) {
-        super(cause);
-    }
 
     public String getCode() {
         return code;
     }
+    
     public String getMessage() {
         if( code!=null )
             return code + ":"+super.getMessage();
