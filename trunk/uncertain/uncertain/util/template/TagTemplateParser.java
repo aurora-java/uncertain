@@ -1,5 +1,5 @@
 /*
- * Created on 2007-8-13 обнГ09:41:55
+ * Created on 2007-8-13 О©╫О©╫О©╫О©╫09:41:55
  */
 package uncertain.util.template;
 
@@ -66,10 +66,11 @@ public class TagTemplateParser {
             mBuf.append(ch);
             return -1; 
         }
-        
+        /*
         public StringBuffer getBuffer(){
             return mBuf;
         }
+        */
         
         public void finish(){
             if(mBuf!=null)
