@@ -9,8 +9,8 @@ import java.io.File;
 
 public interface ILocatable {
     
-    public Location getLocation();
+    public Location getOriginLocation();
     
-    public String   getSource();
+    public String   getOriginSource();
 
 }
