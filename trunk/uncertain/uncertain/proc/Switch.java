@@ -7,7 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import uncertain.composite.CompositeMap;
-import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.ocm.IChildContainerAcceptable;
 
 /**
  * implements <code><switch></code> tag
@@ -30,7 +31,7 @@ import uncertain.core.ConfigurationError;
  * @author Zhou Fan
  * 
  */
-public class Switch extends AbstractEntry {
+public class Switch extends AbstractEntry implements IChildContainerAcceptable {
     
     String			test;
     LinkedList		caseList = new LinkedList();
@@ -44,7 +45,8 @@ public class Switch extends AbstractEntry {
      * @see uncertain.proc.IEntry#run(uncertain.proc.ProcedureRunner)
      */
     public void run(ProcedureRunner runner) throws Exception {
-        if(test==null) throw new ConfigurationError("Test Attribute not set for <switch> element");
+        if(test==null) 
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "Test");
         CompositeMap context = runner.getContext();
 		Object obj = context.getObject(test);
 //		System.err.println(caseList);
@@ -107,5 +109,9 @@ public class Switch extends AbstractEntry {
                     return cs;
         }
         return null;
+    }
+    
+    public void addChild( CompositeMap config ){
+        throw BuiltinExceptionFactory.createUnknownChild(config);
     }
 }

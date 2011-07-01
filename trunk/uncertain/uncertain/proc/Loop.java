@@ -9,6 +9,8 @@ import java.util.Iterator;
 
 import uncertain.composite.CompositeMap;
 import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.exception.ConfigurationFileException;
 import uncertain.ocm.OCManager;
 
 public class Loop extends Procedure {
@@ -65,7 +67,8 @@ public class Loop extends Procedure {
         if(obj==null){
             if(nullable)
                 return;
-            else throw new IllegalStateException("loop: required source object '"+source+"' is null");
+            else throw 
+                BuiltinExceptionFactory.createDataFromXPathIsNull(this,source);
         }
         Iterator source_it = null;
         if(obj instanceof CompositeMap){
@@ -74,8 +77,11 @@ public class Loop extends Procedure {
         else if (obj instanceof Collection){
             source_it = ((Collection)obj).iterator();
         }
-        else
-            throw new IllegalStateException("loop: source object is not instance of Collection or CompositeMap");
+        else{
+            String type = obj==null?"(null)":obj.getClass().getName();
+            ConfigurationFileException ex = new ConfigurationFileException("uncertain.proc.loop_source_not_collection", new Object[]{source,type}, this  );
+            throw ex;
+        }
         if(source_it!=null){
             CompositeMap old_context = runner.getContext();
             while(source_it.hasNext()){
