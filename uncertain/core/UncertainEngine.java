@@ -80,7 +80,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     Set                     mContextListenerSet;
     LinkedList				mExtraConfig = new LinkedList();
     File					mConfigDir;    
-    ISourceFileManager      mSourceFileManager;
+    SourceFileManager       mSourceFileManager;
     boolean                 mIsRunning = true;
     /* =========== logging related members =================== */
     String                  mLogPath;
@@ -207,7 +207,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mParticipantRegistry = new ParticipantRegistry();    
         mGlobalContext = new CompositeMap("global");
         mTopicManager = new TopicManager();
-        mSourceFileManager = SourceFileManager.getInstance();
+        mSourceFileManager = new SourceFileManager();
         
         mExceptionNotice = new ExceptionNotice(this);
         registerBuiltinInstances();
@@ -591,6 +591,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
     
     public void shutdown(){
         mIsRunning = false;
+        mSourceFileManager.shutdown();
         mLogger.log("Uncertain engine shutdown");        
         Procedure proc = loadProcedure("uncertain.core.EngineShutdown");
         if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineShutdown.xml from class loader");
