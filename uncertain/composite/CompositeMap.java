@@ -179,6 +179,7 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
         addChilds( another.childs); 
         this.text = another.text;
         this.source = another.source;
+        this.location = another.location;
         return this;
     }
  
@@ -605,7 +606,11 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     }
     
     public File getSourceFile(){
-        return source;
+        if(source!=null)
+            return source;
+        if(parent!=null)
+            return parent.getSourceFile();
+        return null;
     }
     
     /** source file path where this CompositeMap is parsed from */
