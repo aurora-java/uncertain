@@ -1,5 +1,5 @@
 /*
- * Created on 2011-5-5 ÏÂÎç10:30:42
+ * Created on 2011-5-5 ï¿½ï¿½ï¿½ï¿½10:30:42
  * $Id$
  */
 package uncertain.cache;
@@ -9,6 +9,7 @@ import java.util.Map;
 
 import uncertain.core.ConfigurationError;
 import uncertain.core.IGlobalInstance;
+import uncertain.core.IStartable;
 import uncertain.ocm.IObjectRegistry;
 
 public class CacheFactoryConfig implements INamedCacheFactory, IGlobalInstance {
@@ -133,6 +134,18 @@ public class CacheFactoryConfig implements INamedCacheFactory, IGlobalInstance {
                 return false;
             else
                 return true;
+        }
+    }
+    
+    public void onShutdown(){
+        if(mNamedCacheFactoryArray==null)
+            return;
+        for(int i=0; i<mNamedCacheFactoryArray.length; i++){
+            Object o = mNamedCacheFactoryArray[i];
+            if(o instanceof IStartable){
+                IStartable s = (IStartable)o;
+                s.shutdown();
+            }
         }
     }
 
