@@ -10,6 +10,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.ocm.IChildContainerAcceptable;
 
 /**
@@ -108,8 +109,11 @@ public abstract class EntryList extends AbstractEntry implements IChildContainer
         addEntry(a);
     }
     
+    /**
+     * Sub instance must override this method if can accept unknown config
+     */
     public void addChild(CompositeMap child){
-        
+        throw BuiltinExceptionFactory.createUnknownChild(child);
     }
     
     public void clear(){
