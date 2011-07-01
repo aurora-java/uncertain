@@ -6,6 +6,7 @@ package uncertain.proc;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
 
 /**
  * implements <code><set></code> 
@@ -60,10 +61,10 @@ public class Set extends AbstractEntry {
     }
     
     public void run(ProcedureRunner runner) {
-        if(field==null) 
-            throw new ConfigurationError("'Field' attribute must be set for <set> element");
+        if(field==null)
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "field");
         if(sourceField==null && value==null)
-            throw new ConfigurationError("either 'SourceField' or 'Value' attribute must be set for <set> element");
+            throw BuiltinExceptionFactory.createOneAttributeMissing(this, "sourceField,value");
         CompositeMap context = runner.getContext();
         if(sourceField!=null)
             context.putObject(field, context.getObject(sourceField), true);
