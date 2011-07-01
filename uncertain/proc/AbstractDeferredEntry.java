@@ -34,6 +34,7 @@ public abstract class AbstractDeferredEntry extends AbstractEntry implements ICo
     }
     
     public void beginConfigure(CompositeMap config){
+        super.beginConfigure(config);
         this.mEntryConfig = config;
     }
     

@@ -3,24 +3,25 @@
  */
 package uncertain.proc;
 
-import java.io.File;
-
 import uncertain.composite.CompositeMap;
+import uncertain.exception.ConfigurationFileException;
 import uncertain.ocm.IConfigurable;
+import uncertain.util.resource.ILocatable;
+import uncertain.util.resource.Location;
 
 /**
  * Provides a basic implementation of IEntry, leave run() method abstract
  * @author Zhou Fan
  * 
  */
-public abstract class AbstractEntry implements IEntry, IConfigurable {
+public abstract class AbstractEntry implements IEntry, IConfigurable, ILocatable {
     
-    String  name;
-    IEntry  owner;
+    protected String  name;
+    protected IEntry  owner;
     
     
-    File    source;
-    // Location  location;
+    protected String    source;
+    protected Location  location;
 
     /**
      * @see uncertain.proc.IEntry#run(uncertain.proc.ProcedureRunner)
@@ -64,12 +65,30 @@ public abstract class AbstractEntry implements IEntry, IConfigurable {
     }
     
     public void beginConfigure(CompositeMap config){
-        // set source & location
+        source = config.getSourceFile()==null?null:config.getSourceFile().getAbsolutePath();
+        location = config.getLocation();
     }
     
     public void endConfigure(){
         
     }
     
+    public Location getOriginLocation(){
+        return location;
+    }
+    
+    public String getOriginSource(){
+        return source;
+    }
+    /*
+    public ConfigurationFileException createException( String code, Object[] args, Throwable cause ){
+        ConfigurationFileException exp = new ConfigurationFileException(code, args, cause, this);
+        return exp;
+    }
+    
+    public ConfigurationFileException createException( String code, Object[] args ){
+        return createException( code, args, null);
+    }
+    */
 
 }
