@@ -1,5 +1,5 @@
 /*
- * Created on 2011-6-1 ÏÂÎç09:58:48
+ * Created on 2011-6-1 ï¿½ï¿½ï¿½ï¿½09:58:48
  * $Id$
  */
 package uncertain.util.resource;
@@ -8,7 +8,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SourceFileManager implements ISourceFileManager {
+import uncertain.core.IStartable;
+
+public class SourceFileManager implements ISourceFileManager , IStartable {
 
     static SourceFileManager DEFAULT_INSTANCE = new SourceFileManager();
 
@@ -20,8 +22,10 @@ public class SourceFileManager implements ISourceFileManager {
 
     // File.getAbsolutePath() -> ISourceFile
     Map                 mSourceFileMap = new HashMap(INITIAL_SIZE);
-    FileCheckThread     mCheckThread = new FileCheckThread();
+    FileCheckThread     mCheckThread = new FileCheckThread("SourceFileManager.FileCheckThread");
     long                mCheckInterval = 1000;
+    
+    boolean isContinue = true;    
 
     public SourceFileManager() {
         mCheckThread.start();
@@ -51,7 +55,9 @@ public class SourceFileManager implements ISourceFileManager {
 
     public class FileCheckThread extends Thread {
 
-        boolean isContinue = true;
+        public FileCheckThread(String name){
+            super(name);
+        }
 
         public void run() {
             while (isContinue) {
@@ -73,16 +79,24 @@ public class SourceFileManager implements ISourceFileManager {
                 try {
                     sleep(mCheckInterval-time);
                 } catch (InterruptedException ex) {
-                    isContinue = false;
                     return;
                 }
            }
-        }
 
-        public void shutdown() {
-            isContinue = false;
         }
+        
+        
 
     };
+    
+    public boolean startup(){
+        isContinue = true;
+        mCheckThread.start();
+        return true;
+    }
+    
+    public void shutdown(){
+        isContinue = false;
+    }
 
 }
