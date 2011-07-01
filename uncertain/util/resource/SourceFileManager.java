@@ -25,10 +25,11 @@ public class SourceFileManager implements ISourceFileManager , IStartable {
     FileCheckThread     mCheckThread = new FileCheckThread("SourceFileManager.FileCheckThread");
     long                mCheckInterval = 1000;
     
-    boolean isContinue = true;    
+    boolean isContinue = true;
+    boolean isStarted = false;
 
     public SourceFileManager() {
-
+        startup();
     }
 
     public ISourceFile getSourceFile(String resource_url) {
@@ -90,14 +91,18 @@ public class SourceFileManager implements ISourceFileManager , IStartable {
     };
     
     public boolean startup(){
+        if(isStarted)
+            return true;
         isContinue = true;
         mCheckThread.start();
+        isStarted = true;
         return true;
     }
     
     public void shutdown(){
         isContinue = false;
         mCheckThread.interrupt();
+        isStarted = false;
     }
 
 }
