@@ -207,7 +207,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mParticipantRegistry = new ParticipantRegistry();    
         mGlobalContext = new CompositeMap("global");
         mTopicManager = new TopicManager();
-        mSourceFileManager = new SourceFileManager();
+
+        mSourceFileManager = SourceFileManager.getInstance();
+        mSourceFileManager.startup();
         
         mExceptionNotice = new ExceptionNotice(this);
         registerBuiltinInstances();
