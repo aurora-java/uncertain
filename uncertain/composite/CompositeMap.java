@@ -7,7 +7,6 @@
 package uncertain.composite;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import uncertain.util.resource.ISourceFile;
+import uncertain.util.resource.ILocatable;
 import uncertain.util.resource.Location;
 
 /** A Map with a list of child maps, and a name and namespace
@@ -650,5 +649,19 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
 
 	public void setLocation(Location location) {
 		this.location = location;
+	}
+	
+	public ILocatable asLocatable(){
+	    return new ILocatable(){
+	        
+	        public String getOriginSource(){
+	            File source = getSourceFile();
+	            return source==null?null:source.getAbsolutePath();
+	        }
+	        
+	        public Location getOriginLocation(){
+	            return location;
+	        }
+	    };
 	}
 }
