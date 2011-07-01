@@ -15,5 +15,10 @@ public class BuiltinExceptionFactory {
     public static ConfigurationFileException createOneAttributeMissing( ILocatable locatable, String attribs ){
         return new ConfigurationFileException("uncertain.exception.validation.attribute_missing2", new Object[]{attribs}, null, locatable);
     }
+    
+    public static ConfigurationFileException createUnknownChild( ILocatable locatable, String config_text ){
+        return new ConfigurationFileException("uncertain.exception.validation.unknown_child", new Object[]{config_text}, null, locatable);
+    }
+    
 
 }
