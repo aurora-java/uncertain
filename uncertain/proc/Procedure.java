@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import uncertain.composite.CompositeMap;
+import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.exception.ConfigurationFileException;
 import uncertain.logging.ILogger;
 import uncertain.ocm.OCManager;
 
@@ -103,12 +105,16 @@ public class Procedure extends EntryList {
             return;
         }
         if(!oc_manager.canCreateInstance(child)) {
-            return;
+            throw BuiltinExceptionFactory.createUnknownChild(child);
         }        
         Object o = oc_manager.createObject(child);
         if(o != null)
             if(o instanceof IEntry){
                 addEntry((IEntry)o);
+            }else{
+                String text = child.toXML();
+                ConfigurationFileException ex = new ConfigurationFileException("uncertain.proc.child_not_entry",new Object[]{text}, null, child);
+                throw ex;
             }
     }    
     /**
