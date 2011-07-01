@@ -28,7 +28,7 @@ public class SourceFileManager implements ISourceFileManager , IStartable {
     boolean isContinue = true;    
 
     public SourceFileManager() {
-        mCheckThread.start();
+
     }
 
     public ISourceFile getSourceFile(String resource_url) {
@@ -97,6 +97,7 @@ public class SourceFileManager implements ISourceFileManager , IStartable {
     
     public void shutdown(){
         isContinue = false;
+        mCheckThread.interrupt();
     }
 
 }
