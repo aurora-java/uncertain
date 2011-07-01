@@ -36,5 +36,9 @@ public class ConfigurationFileException extends
     public ConfigurationFileException( String code, Object[] args, Throwable cause, ILocatable location ){
         this(code,args,cause,location.getOriginSource(), location.getOriginLocation());
     }
+    
+    public ConfigurationFileException( String code, Object[] args,ILocatable location ){
+        this(code,args,null,location);
+    }
 
 }
