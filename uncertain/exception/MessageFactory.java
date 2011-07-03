@@ -9,13 +9,19 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
+import uncertain.util.resource.ILocatable;
+import uncertain.util.resource.Location;
 
 public class MessageFactory {
 
-	public static final String DEFAULT_EXCEPTION_CONFIG_FILE_NAME = "exception_config";
+	public static final String RESOURCES_UNCERTAIN_BUILTIN_EXCEPTIONS = "resources.UncertainBuiltinExceptions";
+    public static final String DEFAULT_EXCEPTION_CONFIG_FILE_NAME = "exception_config";
     private static Locale locale = Locale.getDefault();
 	private static Map messages = new HashMap();
+	
 
 	public synchronized static void loadResource(String path) {
 		loadResource(path, locale);
@@ -27,7 +33,17 @@ public class MessageFactory {
     }
 	
 	public static void loadResource(String path, Locale locale) {
-		ResourceBundle resourceBundle = ResourceBundle.getBundle(path, locale);
+		ResourceBundle resourceBundle = null;
+        resourceBundle = ResourceBundle.getBundle(path, locale);
+/*
+		try{
+		    resourceBundle = ResourceBundle.getBundle(path, locale);
+		}catch(MissingResourceException ex){
+		    resourceBundle = ResourceBundle.getBundle(path);
+		}
+*/		
+		if(resourceBundle==null)
+		    throw new RuntimeException("Can't load resource "+path);
 		Enumeration keys = resourceBundle.getKeys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
@@ -47,7 +63,7 @@ public class MessageFactory {
 
 	public static GeneralException createException(String message_code,
 			Throwable cause, Object[] args) {
-		return new GeneralException(message_code,getMessage(message_code,args),cause);
+		return new GeneralException(message_code,args,cause);
 	}
 
 	public static String getMessage(String msg_code, Locale locale,
@@ -73,10 +89,43 @@ public class MessageFactory {
 	public static void setLocale(Locale locale) {
 		MessageFactory.locale = locale;
 	}
+
+    public static String getLocationMessage( String source, int line, int row ){
+        return getMessage(MessageFactory.KEY_UNCERTAIN_EXCEPTION_SOURCE_FILE, new Object[]{source, new Integer(line), new Integer(row)} );
+    }
+    
+    public static String getLocationMessage( ILocatable locate ){
+        Location l = locate.getOriginLocation();
+        if(l!=null)
+            return getLocationMessage(locate.getOriginSource(), l.getStartLine(), l.getStartColumn());
+        else
+            return null;
+    }
+	
+	public static String   getExceptionMessage( Throwable exp, String origin_message ){
+	    StringBuffer result = new StringBuffer();
+	    if(exp instanceof ICodedException){
+	        ICodedException cexp = (ICodedException)exp;
+	        String code = cexp.getCode();
+	        if(code!=null)
+	            result.append( getMessage("uncertain.exception.code", new Object[]{code}));
+	    }
+	    if(exp instanceof ILocatable ){
+	        ILocatable lcb = (ILocatable)exp;
+	        if(lcb!=null)
+	            if(lcb.getOriginLocation()!=null)
+	                result.append(getLocationMessage(lcb));
+	    }
+	    result.append(origin_message);
+	    return result.toString();
+	}
 	
 	static
 	{
-	    loadResource("resources.UncertainBuiltinExceptions");
+	    loadResource(RESOURCES_UNCERTAIN_BUILTIN_EXCEPTIONS);
 	}
+
+    public static final String KEY_UNCERTAIN_EXCEPTION_SOURCE_FILE = "uncertain.exception.source_file";
+
 
 }
