@@ -65,6 +65,11 @@ public class MessageFactory {
 			Throwable cause, Object[] args) {
 		return new GeneralException(message_code,args,cause);
 	}
+	
+	public static GeneralException createException(String message_code,
+            Throwable cause, Object[] args, ILocatable source) {
+	    return new GeneralException(message_code, args, cause, source);
+	}
 
 	public static String getMessage(String msg_code, Locale locale,
 			Object[] args) {
@@ -102,6 +107,14 @@ public class MessageFactory {
             return null;
     }
 	
+    /**
+     * Get rich exception message, add source file, code info. to origin exception message
+     * @param exp Exception to format
+     * @param origin_message Origin exception message. Since exception class itself may invoke
+     * MessageFactory.getExceptionMessage(), to avoid dead loop, origin exception must be passed
+     * as parameter.
+     * @return
+     */
 	public static String   getExceptionMessage( Throwable exp, String origin_message ){
 	    StringBuffer result = new StringBuffer();
 	    if(exp instanceof ICodedException){
