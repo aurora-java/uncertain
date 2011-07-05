@@ -24,5 +24,12 @@ public class BuiltinExceptionFactory {
     public static ConfigurationFileException createDataFromXPathIsNull(ILocatable locatable, String path){
         return new ConfigurationFileException("uncertain.exception.data_from_xpath_is_null", new Object[]{path}, null, locatable );
     }
-
+    
+    public static ConfigurationFileException createNodeMissing( ILocatable locatable, String node_name ){
+        return new ConfigurationFileException("uncertain.exception.validation.node_missing", new Object[]{node_name}, null, locatable);
+    }
+    
+    public static ConfigurationFileException createCDATAMissing( ILocatable locatable, String node_name ){
+        return new ConfigurationFileException("uncertain.exception.validation.cdata_missing", new Object[]{node_name}, null, locatable);
+    }
 }
