@@ -8,3 +8,4 @@ uncertain.proc.child_not_entry=标记{0}无法被映射为IEntry的实例。此�
 uncertain.proc.loop_source_not_collection=通过XPath路径{0}获取的对象不是Collection或CompositeMap的实例, 实际类型为{1}。请检查<loop>标记的"source"所指定的路径，该路径必须能获取一个Collection或CompositeMap实例。
 uncertain.exception.validation.node_missing=缺少"{0}"节点。请检查源文件，添加这个节点。
 uncertain.exception.validation.cdata_missing=节点"{0}"的CDATA不能为空。请检查源文件，为这个节点添加CDATA。
+uncertain.exception.classnotfoundexception=找不到"{0}"类。
