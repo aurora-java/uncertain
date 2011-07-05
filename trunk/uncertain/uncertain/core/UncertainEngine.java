@@ -24,7 +24,7 @@ import uncertain.composite.DynamicObject;
 import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
-import uncertain.exception.ExceptionNotice;
+import uncertain.exception.IExceptionListener;
 import uncertain.logging.BasicConsoleHandler;
 import uncertain.logging.BasicFileHandler;
 import uncertain.logging.DummyLogger;
@@ -87,7 +87,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
     String                  mDefaultLogLevel = "WARNING";
     ILogger                 mLogger;    
     TopicManager            mTopicManager;
-    ExceptionNotice         mExceptionNotice;
     
     // exception during init process
     Throwable               mInitException;
@@ -151,7 +150,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstanceOnce(ILogger.class, mLogger);
         mObjectRegistry.registerInstanceOnce(IProcedureManager.class, this.getProcedureManager());
         mObjectRegistry.registerInstanceOnce(ISourceFileManager.class, mSourceFileManager);
-        mObjectRegistry.registerInstanceOnce(ExceptionNotice.class, mExceptionNotice);
     }
     
     private void setDefaultClassRegistry(){
@@ -211,7 +209,6 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mSourceFileManager = SourceFileManager.getInstance();
         mSourceFileManager.startup();
         
-        mExceptionNotice = new ExceptionNotice(this);
         registerBuiltinInstances();
         loadBuiltinLoggingTopic();
         // load internal registry
@@ -298,6 +295,9 @@ public class UncertainEngine implements IChildContainerAcceptable {
 
     public void logException(String message, Throwable thr){
         mLogger.log(Level.SEVERE, message, thr);
+        IExceptionListener exceptionListener = (IExceptionListener)mObjectRegistry.getInstanceOfType(IExceptionListener.class);
+        if(exceptionListener != null)
+        	exceptionListener.onException(thr);       
     }
 
     
