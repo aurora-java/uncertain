@@ -32,4 +32,13 @@ public class BuiltinExceptionFactory {
     public static ConfigurationFileException createCDATAMissing( ILocatable locatable, String node_name ){
         return new ConfigurationFileException("uncertain.exception.validation.cdata_missing", new Object[]{node_name}, null, locatable);
     }
+    
+    public static ConfigurationFileException createDataTypeUnknown( ILocatable locatable, String error_data_type){
+        return new ConfigurationFileException("uncertain.exception.unknown_data_type", new Object[]{error_data_type}, null, locatable);
+    }
+    
+    public static ConfigurationFileException createChildDuplicate( ILocatable locatable, String tag_name, String attribute_name, String attribute_value ){
+        return new ConfigurationFileException("uncertain.exception.duplicate_named_node", new Object[]{tag_name, attribute_name, attribute_value}, null, locatable);        
+    }
+    
 }
