@@ -40,5 +40,10 @@ public class BuiltinExceptionFactory {
     public static ConfigurationFileException createChildDuplicate( ILocatable locatable, String tag_name, String attribute_name, String attribute_value ){
         return new ConfigurationFileException("uncertain.exception.duplicate_named_node", new Object[]{tag_name, attribute_name, attribute_value}, null, locatable);        
     }
+
+    /** Can't find a node with specified attribute value */
+    public static ConfigurationFileException createUnknownNodeWithName( ILocatable locatable, String tag_name, String attribute_name, String attribute_value ){
+        return new ConfigurationFileException("uncertain.exception.cannot_find_named_node", new Object[]{tag_name, attribute_name, attribute_value}, null, locatable);        
+    }
     
 }
