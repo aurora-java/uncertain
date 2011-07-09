@@ -8,6 +8,7 @@ uncertain.exception.validation.node_missing=缺少"{0}"节点。请检查源文�
 uncertain.exception.validation.cdata_missing=节点"{0}"的CDATA不能为空。请检查源文件，为这个节点添加CDATA。
 uncertain.exception.classnotfoundexception=找不到"{0}"类。
 uncertain.exception.unknown_data_type=Unknown data type:{0}. Please check data type spelling.
-uncertain.exception.duplicate_named_node=Node "{0}" with {1}="{2}" already defined. Please use a unique name.
+uncertain.exception.duplicate_named_node=设置了属性{1}="{2}"的节点{0}已经存在，请检查源文件，对同级的每一个{0}节点使用唯一的{1}属性值。
+uncertain.exception.cannot_find_named_node=无法找到{1}="{2}"的节点{0}，请检查拼写是否有误。
 uncertain.proc.child_not_entry=标记{0}无法被映射为IEntry的实例。此处的标记必须能被映射为实现了IEntry接口的Java对象。
 uncertain.proc.loop_source_not_collection=通过XPath路径{0}获取的对象不是Collection或CompositeMap的实例, 实际类型为{1}。请检查<loop>标记的"source"所指定的路径，该路径必须能获取一个Collection或CompositeMap实例。
