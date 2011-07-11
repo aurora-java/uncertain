@@ -3,10 +3,8 @@
  */
 package uncertain.util.template;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -118,7 +116,12 @@ public class TagTemplateParser {
     {
         FileInputStream fis = new FileInputStream(template_file);
         InputStreamReader reader = new InputStreamReader(fis, "utf-8");
-        return buildTemplate( template_file.getPath(), reader, registry);
+        try{
+            return buildTemplate( template_file.getPath(), reader, registry);
+        }finally{
+            if(fis!=null)
+                fis.close();
+        }
     }
     
     public TextTemplate buildTemplate( File template_file )
