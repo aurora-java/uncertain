@@ -8,6 +8,8 @@ import java.util.HashMap;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.exception.ConfigurationFileException;
 
 /**
  * Implements <assert> tag
@@ -18,16 +20,7 @@ import uncertain.core.ConfigurationError;
  */
 public class Assert extends AbstractEntry {
     
-//    public static final String OP_NULL = "null";
-//    public static final String OP_NOTNULL = "not null";
-//    public static final String OP_EQUAL = "==";
-//    public static final String OP_NOTEQUAL = "!=";   
-//    public static final String OP_GREAT_THAN = ">";
-//    public static final String OP_LESS_THAN = "<";    
-//    public static final String OP_GOE = ">=";
-//    public static final String OP_LOE = "<=";    
-
-//    public static final String[] OPERATORS = {OP_NULL,OP_NOTNULL,OP_EQUAL,OP_NOTEQUAL,OP_GREAT_THAN,OP_LESS_THAN,OP_GOE,OP_LOE};
+public static final String UNCERTAIN_PROC_ASSERT_UNKNOWN_OPERATOR = "uncertain.proc.assert_unknown_operator";
     public static final int NULL = 0;
     public static final int NOTNULL = 1;
     public static final int EQUAL = 2;
@@ -52,10 +45,10 @@ public class Assert extends AbstractEntry {
         _operator_map.put("<=", new Integer(LOE));
     }
     
-    public String   Field;
-    public String   Operator;
-    public String   Value;
-    public String   Message;
+    public String   field;
+    public String   operator;
+    public String   value;
+    public String   message;
     
     public int operatorID(String op){
         Integer id = (Integer)_operator_map.get(op.toLowerCase());
@@ -63,48 +56,57 @@ public class Assert extends AbstractEntry {
     }
     
     public void run(ProcedureRunner runner) {
-        if( Field == null ) throw new ConfigurationError("assert: 'field' property must be set");
-        if( Operator == null ) throw new ConfigurationError("assert: 'operator' property must be set");
-        int opid = operatorID(Operator);
-        if(opid<0) throw new ConfigurationError("assert: unknown operator "+Operator);
+        if( field == null ) 
+            //throw new ConfigurationError("assert: 'field' property must be set");
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "field");
+        if( operator == null ) 
+            //throw new ConfigurationError("assert: 'operator' property must be set");
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "operator");
+        int opid = operatorID(operator);
+        if(opid<0) 
+            //throw new ConfigurationError("assert: unknown operator "+Operator);
+            throw new ConfigurationFileException(UNCERTAIN_PROC_ASSERT_UNKNOWN_OPERATOR, new Object[]{operator}, this);
         CompositeMap    context = runner.getContext();
-        Object test_field = context.getObject(Field);
+        Object test_field = context.getObject(field);
         
         // First, test for expression without operant
         switch(opid){
                 
             case NULL:
                 if(test_field!=null) 
-                    throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be null":Message);
+                    throw new AssertionError(message==null?"Field '"+field+"' is expected to be null":message);
                 break;
             case NOTNULL:                
                 if(test_field==null) 
-                    throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be not null":Message);
+                    throw new AssertionError(message==null?"Field '"+field+"' is expected to be not null":message);
                 break;
             // Then test for expression that must specify 'value'
             case EQUAL:
             case NOTEQUAL:
-                if(Value==null) throw new ConfigurationError("assert: 'value' property must be set");
-                Value = TextParser.parse(Value, context);                
+                if(value==null) throw new ConfigurationError("assert: 'value' property must be set");
+                value = TextParser.parse(value, context);                
                 if(opid==EQUAL){
-                    if(!Value.equals(test_field))
-                        throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be "+Value+", but actual value is "+test_field:Message);
+                    if(!value.equals(test_field))
+                        throw new AssertionError(message==null?"Field '"+field+"' is expected to be "+value+", but actual value is "+test_field:message);
                 }
                 else{
-                    if(Value.equals(test_field))
-                        throw new AssertionError(Message==null?"Field '"+Field+"' is not expected to be "+Value:Message);
+                    if(value.equals(test_field))
+                        throw new AssertionError(message==null?"Field '"+field+"' is not expected to be "+value:message);
                 }
                 break;
              // Here we got numeric expressions                
             default:
-                if(Value==null) throw new ConfigurationError("assert: 'value' property must be set");
-                String parsed_value = TextParser.parse(Value, context);             
+                if(value==null) 
+                    //throw new ConfigurationError("assert: 'value' property must be set");
+                    throw BuiltinExceptionFactory.createAttributeMissing(this, "value");
+                String parsed_value = TextParser.parse(value, context);             
                 Double d_value = null;
-                if(test_field==null) throw new AssertionError("Field '"+Field+"' is null, can't be compared as number");
+                if(test_field==null) throw new AssertionError("Field '"+field+"' is null, can't be compared as number");
                 try{
                     d_value = new Double(Double.parseDouble(parsed_value));
                 }catch(NumberFormatException ex){
-                    throw new ConfigurationError("specified value '"+parsed_value+"' can't be parsed as number");
+                    //throw new ConfigurationError("specified value '"+parsed_value+"' can't be parsed as number");
+                    throw BuiltinExceptionFactory.createValueNotNumberException(this, parsed_value);
                 }
                 Number d_test_field = null;
                 // parse field to test into number
@@ -115,29 +117,60 @@ public class Assert extends AbstractEntry {
                     d_test_field = (Number)test_field;
                 }
                 else
-                    throw new AssertionError("Field '"+Field+"' is not a number");
+                    throw new AssertionError("Field '"+field+"' is not a number");
                 // perform comparation
                 switch(opid){
                     case GREAT_THAN:
                         if(d_test_field.doubleValue()<=d_value.doubleValue())
-                            throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be >"+Value+", but actual value is "+test_field:Message);
+                            throw new AssertionError(message==null?"Field '"+field+"' is expected to be >"+value+", but actual value is "+test_field:message);
                         break;
                     case LESS_THAN:
                         if(d_test_field.doubleValue()>=d_value.doubleValue())
-                            throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be <"+Value+", but actual value is "+test_field:Message);
+                            throw new AssertionError(message==null?"Field '"+field+"' is expected to be <"+value+", but actual value is "+test_field:message);
                         break;
                     case GOE:
                         if(d_test_field.doubleValue()<d_value.doubleValue())
-                            throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be >="+Value+", but actual value is "+test_field:Message);
+                            throw new AssertionError(message==null?"Field '"+field+"' is expected to be >="+value+", but actual value is "+test_field:message);
                         break;
                     case LOE:
                         if(d_test_field.doubleValue()>d_value.doubleValue())
-                            throw new AssertionError(Message==null?"Field '"+Field+"' is expected to be <="+Value+", but actual value is "+test_field:Message);
+                            throw new AssertionError(message==null?"Field '"+field+"' is expected to be <="+value+", but actual value is "+test_field:message);
                         break;
                  }  // end inner switch
              }  // end outter switch
 
         } // end function
     
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
 }

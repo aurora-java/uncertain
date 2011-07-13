@@ -438,15 +438,11 @@ public class ProcedureRunner {
     }
     
 
-    /**
-     * @return Returns the uncertainEngine.
-     */
+    //TODO remove in future
     public UncertainEngine getUncertainEngine() {
         return uncertainEngine;
     }
-    /**
-     * @param uncertainEngine The uncertainEngine to set.
-     */
+
     public void setUncertainEngine(UncertainEngine uncertainEngine) {
         this.uncertainEngine = uncertainEngine;
         createDefaultConfig();
