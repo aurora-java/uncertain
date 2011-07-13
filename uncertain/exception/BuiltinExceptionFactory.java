@@ -46,4 +46,14 @@ public class BuiltinExceptionFactory {
         return new ConfigurationFileException("uncertain.exception.cannot_find_named_node", new Object[]{tag_name, attribute_name, attribute_value}, null, locatable);        
     }
     
+    /** Can't load specified resource file */
+    public static ConfigurationFileException createResourceLoadException( ILocatable locatable, String resource_name, Throwable cause ){
+        return new ConfigurationFileException("uncertain.exception.cannot_load_resource", new Object[]{resource_name}, cause, locatable);        
+    }
+    
+    /** value not number */
+    public static ConfigurationFileException createValueNotNumberException( ILocatable locatable, String value ){
+        return new ConfigurationFileException("uncertain.exception.value_not_number", new Object[]{value}, locatable );
+    }
+    
 }
