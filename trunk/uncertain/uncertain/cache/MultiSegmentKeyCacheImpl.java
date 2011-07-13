@@ -1,5 +1,5 @@
 /*
- * Created on 2011-4-28 обнГ04:56:56
+ * Created on 2011-4-28 О©╫О©╫О©╫О©╫04:56:56
  * $Id$
  */
 package uncertain.cache;
@@ -19,13 +19,14 @@ public class MultiSegmentKeyCacheImpl implements IMultiSegmentKeyCache {
         }
         return full_key.toString();
     }
-    
+    /*
     private void associateKey( Object segment, Object full_key ){
         Collection cl = (Collection)mSegmentIndex.getValue(segment);
         if(cl==null){
             //synchronized()
         }
     }
+    */
     
     public void setValueMSK(Object[] segments, Object value) {
         // TODO Auto-generated method stub
