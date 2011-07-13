@@ -30,7 +30,7 @@ import uncertain.proc.ProcedureRunner;
  * from configuration data
  * @author Zhou Fan
  */
-public class Configuration  implements Cloneable
+public class Configuration  implements Cloneable, IEventDispatcher
 //implements IMappingHandle
 {
     
