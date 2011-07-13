@@ -23,6 +23,7 @@ import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
 import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
+import uncertain.event.IEventDispatcher;
 import uncertain.event.RuntimeContext;
 import uncertain.exception.IExceptionListener;
 import uncertain.logging.BasicConsoleHandler;
@@ -44,6 +45,7 @@ import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.ocm.ObjectRegistryImpl;
 import uncertain.proc.IProcedureManager;
+import uncertain.proc.IProcedureRegistry;
 import uncertain.proc.ParticipantRegistry;
 import uncertain.proc.Procedure;
 import uncertain.proc.ProcedureManager;
@@ -60,8 +62,9 @@ import uncertain.util.resource.SourceFileManager;
 
 //TODO Refactor needed
 
-public class UncertainEngine implements IChildContainerAcceptable {
+public class UncertainEngine implements IContainer, IChildContainerAcceptable {
 
+    public static final String PROCEDURE_NAME_APPLICATION_START = "application-start";
     public static final String DEFAULT_CONFIG_FILE_PATTERN = ".*\\.config";
     public static final String DEFAULT_ENGINE_NAME = "uncertain_engine";
     public static final String UNCERTAIN_LOGGING_TOPIC = "uncertain.core";
@@ -143,6 +146,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mObjectRegistry.registerInstance(mClassRegistry);
         mObjectRegistry.registerInstance(mParticipantRegistry);
         mObjectRegistry.registerInstance(mOcManager);           
+        mObjectRegistry.registerInstanceOnce(IContainer.class, this);
         mObjectRegistry.registerInstanceOnce(UncertainEngine.class,this);
         mObjectRegistry.registerInstanceOnce(IObjectRegistry.class, mObjectRegistry);  
         mObjectRegistry.registerInstanceOnce(IObjectCreator.class, mObjectRegistry);
@@ -161,7 +165,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mClassRegistry.registerPackage("uncertain.core.admin");
         mClassRegistry.registerPackage("uncertain.event");
         mClassRegistry.registerPackage("uncertain.cache");
-        
+        mClassRegistry.registerPackage("uncertain.cache.action");
         //mClassRegistry.registerClass("document-loader","uncertain.composite","CompositeLoader");
         //mClassRegistry.registerClass("document-path","uncertain.composite","CompositeLoader");
         mClassRegistry.registerClass("class-registry","uncertain.ocm","ClassRegistry");
@@ -299,13 +303,30 @@ public class UncertainEngine implements IChildContainerAcceptable {
         if(exceptionListener != null)
         	exceptionListener.onException(thr);       
     }
-
     
+    private boolean runInitProcedure( Procedure proc ){
+        return runInitProcedure( proc, null);
+    }
+    
+    private boolean runInitProcedure( Procedure proc, CompositeMap context ){
+        ProcedureRunner runner = createProcedureRunner(proc);
+        if(context!=null)
+            runner.setContext(context);
+        runner.addConfiguration(mConfig);
+        runner.run();  
+        Throwable thr = runner.getException();
+        if(thr!=null){
+            mLogger.log(Level.SEVERE, "An error happened during initialize process");
+            logException("Error when running procedure "+proc.getOriginSource()==null?"":proc.getOriginSource(), thr);
+            setInitError(thr);
+            return false;
+        }
+        return true;
+    }
+  
     /**
-     * 
-     * UncertainEngine
-     * @author Zhou Fan
-     *
+     * Do configuration and startup works
+     * @param cfg collection of  CompositeMap containing configuration data.
      */
     public void doConfigure(Collection cfg){
         mIsRunning = false;
@@ -327,18 +348,25 @@ public class UncertainEngine implements IChildContainerAcceptable {
         // run  procedure
         Procedure proc = loadProcedure("uncertain.core.EngineInit");
         if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineInit from class loader");
-        ProcedureRunner runner = createProcedureRunner(proc);
-        runner.addConfiguration(mConfig);
-        runner.run();  
-        Throwable thr = runner.getException();
-        if(thr!=null){
-            mLogger.log(Level.SEVERE, "An error happened during initialize process");
-            logException("Error when running procedure", thr);
-            setInitError(thr);
+        if(!runInitProcedure(proc))
             return;
-        }
+        
         // update logger instance if new LoggerProvider generated
-        checkLogger();        
+        checkLogger();
+        
+        // run application defined initial procedures
+        IProcedureRegistry proc_reg = (IProcedureRegistry)mObjectRegistry.getInstanceOfType(IProcedureRegistry.class);
+        if(proc_reg!=null){
+            Procedure app_proc = proc_reg.getProcedure(PROCEDURE_NAME_APPLICATION_START);
+            if(app_proc!=null){
+                String source = app_proc.getOriginSource()==null?"":app_proc.getOriginSource();
+                mLogger.info("Running application startup procedure from "+ source);
+                CompositeMap map = new CompositeMap();
+                runInitProcedure(app_proc, map);
+                map.clear();
+            }
+        }
+  
         mIsRunning = true;
     }
     
@@ -454,28 +482,15 @@ public class UncertainEngine implements IChildContainerAcceptable {
         }
     }
 
-    public ProcedureRunner createProcedureRunner(){
-        ProcedureRunner runner = new ProcedureRunner();
-        //initContext(runner.getContext());
-        runner.setUncertainEngine(this);
-        return runner;        
-    }
-
-    public ProcedureRunner createProcedureRunner(Procedure proc){
+    private ProcedureRunner createProcedureRunner(Procedure proc){
         if(proc==null) return null;
-        ProcedureRunner runner = createProcedureRunner();
+        ProcedureRunner runner = new ProcedureRunner();
+        runner.setContext(mGlobalContext);
+        runner.setUncertainEngine(this);
         runner.setProcedure(proc);
+        runner.setLogger(mLogger);
         return runner;       
     }
-    
-    public ProcedureRunner createProcedureRunner(String proc_path){
-        Procedure proc = loadProcedure(proc_path);
-        if(proc==null) return null;
-        ProcedureRunner runner = createProcedureRunner(proc);
-        return runner;
-    }
-    
-
     
     public void initContext( CompositeMap context ){
         //mLogger.log(mContextListenerSet.size()+" listeners");
@@ -547,6 +562,10 @@ public class UncertainEngine implements IChildContainerAcceptable {
     public IObjectRegistry getObjectRegistry(){
         return mObjectRegistry;
     }    
+    
+    public IEventDispatcher getEventDispatcher(){
+        return mConfig;
+    }
 
     /**
      * @param ocManager The ocManager to set.
@@ -596,7 +615,7 @@ public class UncertainEngine implements IChildContainerAcceptable {
         mSourceFileManager.shutdown();
         mLogger.log("Uncertain engine shutdown");        
         Procedure proc = loadProcedure("uncertain.core.EngineShutdown");
-        if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineShutdown.xml from class loader");
+        if(proc==null) throw new IllegalArgumentException("Can't load uncertain/core/EngineShutdown.proc from class loader");
         ProcedureRunner runner = createProcedureRunner(proc);
         runner.addConfiguration(mConfig);
         runner.run(); 
