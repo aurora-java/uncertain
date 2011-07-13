@@ -4,18 +4,21 @@
  */
 package uncertain.cache.action;
 
+import uncertain.cache.CacheBuiltinExceptionFactory;
 import uncertain.cache.ICache;
 import uncertain.cache.INamedCacheFactory;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.proc.AbstractEntry;
 
 public abstract class AbstractCacheAction extends AbstractEntry {
     
     INamedCacheFactory      mCacheFactory;
     String                  mCacheName;
-    String                  mCacheKey;    
+    String                  mCacheKey;
+    String                  dataPath;
     
     public String getCacheName() {
         return mCacheName;
@@ -47,13 +50,29 @@ public abstract class AbstractCacheAction extends AbstractEntry {
     public ICache   getCache(){
         if(mCacheName!=null){
             ICache cache = mCacheFactory.getNamedCache(mCacheName);
+            if(cache==null)
+                throw CacheBuiltinExceptionFactory.createNamedCacheNotFound(this, mCacheName);
             return cache;
         }else
-            throw new ConfigurationError("Can't get key "+mCacheName);
+            return mCacheFactory.getCache();
     }
     
     public String getKey( CompositeMap context ){
+        if(mCacheKey==null)
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "cacheKey");
         return TextParser.parse(mCacheKey, context);
+    }
+
+
+    public String getDataPath() {
+        if(dataPath==null)
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "dataPath");
+        return dataPath;
+    }
+
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
     }
 
 
