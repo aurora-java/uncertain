@@ -1,5 +1,5 @@
 /*
- * Created on 2011-4-10 ÏÂÎç08:47:05
+ * Created on 2011-4-10 ï¿½ï¿½ï¿½ï¿½08:47:05
  * $Id$
  */
 package uncertain.cache;
@@ -17,6 +17,8 @@ public class MapBasedCacheFactory implements INamedCacheFactory {
     boolean         mRegisterMBean = true;
     UncertainEngine mEngine;
     String          mName;
+    int             mInitialSize = 1000;
+    float           mLoadFactor = 0.75f;
     
     /*
     String          mBeanName;
@@ -72,7 +74,7 @@ public class MapBasedCacheFactory implements INamedCacheFactory {
             throw new IllegalArgumentException("Cache name can't be null");
         ICache cache = (ICache)mNamedCacheMap.get(name);
         if(cache==null){
-            cache = new MapBasedCache();
+            cache = new MapBasedCache(mInitialSize, mLoadFactor);
             try{
                 String mbean_name = mEngine==null?"name="+name:mEngine.getMBeanName("cache", "name="+name);
                 MBeanRegister.resiterMBean(mbean_name, cache);
@@ -90,6 +92,22 @@ public class MapBasedCacheFactory implements INamedCacheFactory {
 
     public boolean isCacheEnabled(String name) {
         return true;
+    }
+
+    public int getInitialSize() {
+        return mInitialSize;
+    }
+
+    public void setInitialSize(int initialSize) {
+        this.mInitialSize = initialSize;
+    }
+
+    public float getLoadFactor() {
+        return mLoadFactor;
+    }
+
+    public void setLoadFactor(float loadFactor) {
+        this.mLoadFactor = loadFactor;
     }
 
 }
