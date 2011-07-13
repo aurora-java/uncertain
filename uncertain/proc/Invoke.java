@@ -1,11 +1,12 @@
 /*
- * Created on 2010-5-19 ÏÂÎç02:12:07
+ * Created on 2010-5-19 ï¿½ï¿½ï¿½ï¿½02:12:07
  * $Id$
  */
 package uncertain.proc;
 
+import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
-import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
 
 /**
  * invoke another procedure <invoke procedure="some_procedure_name" />
@@ -13,6 +14,7 @@ import uncertain.core.ConfigurationError;
 public class Invoke extends AbstractEntry {
 
     String mProcedure;
+    boolean newContext = false;
     IProcedureManager mProcedureManager;
 
     /**
@@ -25,12 +27,24 @@ public class Invoke extends AbstractEntry {
 
     public void run(ProcedureRunner runner) throws Exception {
         if(mProcedure==null)
-            throw new ConfigurationError("<invoke>: must set 'procedure' property");
+            //throw new ConfigurationError("<invoke>: must set 'procedure' property");
+            throw BuiltinExceptionFactory.createAttributeMissing(this, "procedure");
         String proc_name = TextParser.parse(mProcedure, runner.getContext());
         Procedure proc = mProcedureManager.loadProcedure(proc_name);
         if(proc==null)
-            throw new IllegalArgumentException("Can't load procedure "+proc_name);
-        runner.call(proc);
+            //throw new IllegalArgumentException("Can't load procedure "+proc_name);
+            throw BuiltinExceptionFactory.createResourceLoadException(this, proc_name, null);
+        if(!newContext){
+            runner.call(proc);
+            runner.checkAndThrow();
+        }else{
+            CompositeMap context = new CompositeMap("context");
+            ProcedureRunner sub_runner = runner.spawn(proc);
+            sub_runner.setContext(context);
+            sub_runner.run();
+            context.clear();
+            sub_runner.checkAndThrow();
+        }
     }
 
     public String getProcedure() {
@@ -40,5 +54,15 @@ public class Invoke extends AbstractEntry {
     public void setProcedure(String procedure) {
         this.mProcedure = procedure;
     }
+    
+    public boolean getNewContext() {
+        return newContext;
+    }
+
+    public void setNewContext(boolean newContext) {
+        this.newContext = newContext;
+    }
+
+    
 
 }
