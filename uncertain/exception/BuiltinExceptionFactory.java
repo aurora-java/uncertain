@@ -56,4 +56,8 @@ public class BuiltinExceptionFactory {
         return new ConfigurationFileException("uncertain.exception.value_not_number", new Object[]{value}, locatable );
     }
     
+    public static GeneralException createInstanceNotFoundException( ILocatable locatable, Class required_class, String who_need_this_class ){
+        return new GeneralException("uncertain.exception.instance_not_found", new Object[]{required_class.getName(), who_need_this_class}, (Throwable)null, locatable );
+    }
+    
 }
