@@ -1,5 +1,5 @@
 /*
- * Created on 2009-12-3 ÏÂÎç02:08:56
+ * Created on 2009-12-3 ï¿½ï¿½ï¿½ï¿½02:08:56
  * Author: Zhou Fan
  */
 package uncertain.event;
@@ -15,14 +15,17 @@ import uncertain.composite.CompositeMap;
 import uncertain.core.ConfigurationError;
 import uncertain.core.IGlobalInstance;
 import uncertain.core.UncertainEngine;
+import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.exception.ConfigurationFileException;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
 import uncertain.logging.LoggingContext;
+import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IConfigurable;
 import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.IObjectRegistry;
 
-public class ParticipantManager implements IParticipantManager, IGlobalInstance, IConfigurable {
+public class ParticipantManager extends AbstractLocatableObject implements IParticipantManager, IGlobalInstance, IConfigurable {
     
     public static final String KEY_CATEGORY = "category";
 
@@ -126,7 +129,7 @@ public class ParticipantManager implements IParticipantManager, IGlobalInstance,
                     Class cls = Class.forName(cls_name);
                     lst.add(cls);
                 }catch(ClassNotFoundException ex){
-                    throw new ConfigurationError("Can't create instance of "+cls_name);
+                    throw BuiltinExceptionFactory.createClassNotFoundException(this, cls_name);
                 }
             }
     }

@@ -64,4 +64,8 @@ public class BuiltinExceptionFactory {
         return new GeneralException("uncertain.exception.instance_not_found", new Object[]{required_class.getName(), locatable.getClass().getName()}, (Throwable)null, locatable );
     }
     
+    public static ConfigurationFileException createClassNotFoundException( ILocatable locatable, String cls_name ){
+        return new ConfigurationFileException("uncertain.exception.classnotfoundexception", new Object[]{cls_name}, null, locatable);
+    }
+    
 }
