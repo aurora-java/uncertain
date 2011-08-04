@@ -58,7 +58,7 @@ public class ParticipantManager extends AbstractLocatableObject implements IPart
 
     /** Lazy load participant instance */
     protected List getParticipantInstanceList( String category)
-        throws Exception
+
     {
         List lst = (List)mParticipantsListMap.get(category);
         return lst;        
@@ -74,11 +74,14 @@ public class ParticipantManager extends AbstractLocatableObject implements IPart
     }
 
     public List getParticipantList( String category ){
-        try{
             return getParticipantInstanceList(category);
-        }catch(Exception ex){
+/*
+            try{
+
+    }catch(Exception ex){
             throw new RuntimeException("Error when creating participant list for category "+category, ex);
         }
+*/        
     }
 
     public Configuration getParticipantsAsConfig( String category ){
@@ -124,7 +127,8 @@ public class ParticipantManager extends AbstractLocatableObject implements IPart
                 CompositeMap item = (CompositeMap)it.next();
                 String cls_name = item.getString(KEY_CLASS);
                 if(cls_name==null)
-                    throw new ConfigurationError("Must set 'class' property:"+item.toXML());
+                    //throw new ConfigurationError("Must set 'class' property:"+item.toXML());
+                    throw BuiltinExceptionFactory.createAttributeMissing(this, KEY_CLASS);
                 try{
                     Class cls = Class.forName(cls_name);
                     lst.add(cls);
@@ -141,7 +145,8 @@ public class ParticipantManager extends AbstractLocatableObject implements IPart
                 CompositeMap child = (CompositeMap)it.next();
                 String category = child.getString(KEY_CATEGORY);
                 if(category==null)
-                    throw new ConfigurationError("Must set 'category' property:"+child.toXML());
+                    //throw new ConfigurationError("Must set 'category' property:"+child.toXML());
+                    throw BuiltinExceptionFactory.createAttributeMissing(this, KEY_CATEGORY);
                 loadConfigByCategory(child, category);
             }
     }
