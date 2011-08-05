@@ -25,7 +25,7 @@ public class DefaultPerObjectLoggingConfig implements IPerObjectLoggingConfig {
     }
 
     public void setTraceFlag(String object_name, boolean flag) {
-        mConfigMap.put(getLoggerProviderKey(object_name), new Boolean(flag));
+        mConfigMap.put(getTraceFlagKey(object_name), new Boolean(flag));
     }
 
     public ILoggerProvider getLoggerProvider(String object_name) {
