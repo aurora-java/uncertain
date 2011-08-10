@@ -355,6 +355,7 @@ public class UncertainEngine implements IContainer, IChildContainerAcceptable {
         checkLogger();
         
         // run application defined initial procedures
+/*
         IProcedureRegistry proc_reg = (IProcedureRegistry)mObjectRegistry.getInstanceOfType(IProcedureRegistry.class);
         if(proc_reg!=null){
             Procedure app_proc = proc_reg.getProcedure(PROCEDURE_NAME_APPLICATION_START);
@@ -366,7 +367,7 @@ public class UncertainEngine implements IContainer, IChildContainerAcceptable {
                 map.clear();
             }
         }
-  
+  */
         mIsRunning = true;
     }
     
