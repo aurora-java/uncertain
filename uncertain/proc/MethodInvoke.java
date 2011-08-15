@@ -4,6 +4,10 @@
  */
 package uncertain.proc;
 
+import java.lang.reflect.Method;
+
+import uncertain.composite.CompositeMap;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.ocm.IObjectRegistry;
 
 /**
@@ -25,42 +29,129 @@ import uncertain.ocm.IObjectRegistry;
  *  
  */
 public class MethodInvoke extends AbstractEntry {
-    
-    IObjectRegistry     mRegistry;
-    
-    String      methodName;
-    Class       className;
-    Class       instanceType;
-    String      resultPath;
 
-    public void run(ProcedureRunner runner) throws Exception {
-      /*
-       * // get method argument types 
-       * Class[] type_array = get type array from arguments array;
-       * 
-       * // for static method invoke
-       * if(className != null )
-       *   instance = null;
-       *   method= Class.forName(className).getMethod(methodName,type_array);
-       *   
-       * // for method invoke from registered instance 
-       * else if( instanceType != null ){
-       *   Object instance = mRegistry.getInstanceOfType(instanceType);
-       *   Class cls = instance.getClass();
-       *   method = cls.getMethod(methodName, type_array);
-       *  }
-       *  
-       *  else throw exception;
-       *  
-       *  // get argument array
-       *  Object[] arguments = get values from arguments arrays;
-       *  
-       *  Object return_value = method.invoke(instance, arguments);
-       *  
-       *  // set result to context
-       *  if(resultPath!=null)
-       *    context.putObject(resultPath, return_value, true);
-       */
-    }
+	IObjectRegistry mRegistry;
+
+	String methodName;
+	String className;
+
+	String instanceType;
+	String resultPath;
+	private Argument[] arguments;
+	private Class[] argumentClasses;
+	private Object[] argumentObjects;
+	public MethodInvoke(IObjectRegistry registry){
+		this.mRegistry = registry;
+	}
+	public void run(ProcedureRunner runner) throws Exception {
+		if (methodName == null) {
+			throw BuiltinExceptionFactory.createAttributeMissing(this, "methodName");
+		}
+		if (className == null && instanceType == null) {
+			throw BuiltinExceptionFactory.createOneAttributeMissing(this, "className,instanceType");
+		}
+		if (className != null && instanceType != null) {
+			throw BuiltinExceptionFactory.createConflictAttributesExcepiton(this, "className,instanceType");
+		}
+		initArguments(runner.getContext());
+		Object instance = null;
+		Method method = null;
+		if (className != null) {
+			method = Class.forName(className).getMethod(methodName, argumentClasses);
+		} else if (instanceType != null) {
+			instance =getInstanceOfType(mRegistry, Class.forName(instanceType));
+			if(instance == null){
+				throw BuiltinExceptionFactory.createInstanceNotFoundException(this, Class.forName(instanceType));
+			}
+			Class cls = instance.getClass();
+			method = cls.getMethod(methodName, argumentClasses);
+		}
+		Object return_value = method.invoke(instance, argumentObjects);
+		if (resultPath != null)
+			runner.getContext().putObject(resultPath, return_value, true);
+	}
+
+	private void initArguments(CompositeMap context) {
+		if (arguments == null)
+			return;
+		argumentClasses = new Class[arguments.length];
+		argumentObjects = new Object[arguments.length];
+		for (int i = 0; i < arguments.length; i++) {
+			arguments[i].onInitialize(context);
+			argumentClasses[i] = arguments[i].getClassType();
+			argumentObjects[i] = arguments[i].getObjectValue();
+		}
+	}
+	private Object getInstanceOfType(IObjectRegistry registry,Class type){
+		Object instance = null;
+		if(registry == null || type == null)
+			return null;
+		instance = registry.getInstanceOfType(type);
+		if(instance != null)
+			return instance;
+		Class superClass = type.getSuperclass();
+		if(superClass != null){
+			instance = registry.getInstanceOfType(superClass);
+			if(instance != null)
+				return instance;
+		}
+		Class[] interfaces = type.getInterfaces();
+		if(interfaces != null){
+			for(int i=0;i<interfaces.length;i++){
+				instance = registry.getInstanceOfType(interfaces[i]);
+				if(instance != null)
+					return instance;
+			}
+		}
+		return instance;
+	}
+
+	public IObjectRegistry getRegistry() {
+		return mRegistry;
+	}
+
+	public void setRegistry(IObjectRegistry mRegistry) {
+		this.mRegistry = mRegistry;
+	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
+	public String getInstanceType() {
+		return instanceType;
+	}
+
+	public void setInstanceType(String instanceType) {
+		this.instanceType = instanceType;
+	}
+
+	public String getResultPath() {
+		return resultPath;
+	}
+
+	public void setResultPath(String resultPath) {
+		this.resultPath = resultPath;
+	}
+
+	public Argument[] getArguments() {
+		return arguments;
+	}
+
+	public void setArguments(Argument[] arguments) {
+		this.arguments = arguments;
+	}
 
 }

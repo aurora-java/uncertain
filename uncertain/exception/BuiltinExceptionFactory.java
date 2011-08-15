@@ -67,5 +67,8 @@ public class BuiltinExceptionFactory {
     public static ConfigurationFileException createClassNotFoundException( ILocatable locatable, String cls_name ){
         return new ConfigurationFileException("uncertain.exception.classnotfoundexception", new Object[]{cls_name}, null, locatable);
     }
-    
+
+    public static ConfigurationFileException createConflictAttributesExcepiton( ILocatable locatable, String attribs){
+    	return new ConfigurationFileException("uncertain.exception.validation.conflict_attributes", new Object[]{attribs}, null, locatable);
+    }
 }
