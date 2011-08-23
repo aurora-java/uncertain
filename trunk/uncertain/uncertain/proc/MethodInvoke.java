@@ -77,7 +77,7 @@ public class MethodInvoke extends AbstractEntry {
 		argumentClasses = new Class[arguments.length];
 		argumentObjects = new Object[arguments.length];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i].onInitialize(context);
+			arguments[i].onInitialize(context,mRegistry);
 			argumentClasses[i] = arguments[i].getClassType();
 			argumentObjects[i] = arguments[i].getObjectValue();
 		}
