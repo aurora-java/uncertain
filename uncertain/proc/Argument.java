@@ -11,6 +11,7 @@ import uncertain.datatype.DataTypeRegistry;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.ConfigurationFileException;
 import uncertain.ocm.AbstractLocatableObject;
+import uncertain.ocm.IObjectRegistry;
 
 public class Argument extends AbstractLocatableObject {
 	private String type;
@@ -20,7 +21,7 @@ public class Argument extends AbstractLocatableObject {
 	private Object objectValue;
 	private Class classType;
 
-	public void onInitialize(CompositeMap context){
+	public void onInitialize(CompositeMap context,IObjectRegistry registry){
 		if(path==null && value ==null){
 			throw BuiltinExceptionFactory.createOneAttributeMissing(this, "path,value");
 		}
@@ -39,7 +40,15 @@ public class Argument extends AbstractLocatableObject {
 			classType = (Class)primitiveClazz.get(type);
 			if(classType == null)
 				classType = Class.forName(type);
-			objectValue = DataTypeRegistry.getInstance().convert(objectValue,classType);
+			if(DataTypeRegistry.getInstance().getDataType(classType) != null)
+				objectValue = DataTypeRegistry.getInstance().convert(objectValue,classType);
+			else if("instance".equals(path)){
+				if(classType.equals(registry.getClass())){
+					objectValue = registry;
+				}else{
+					objectValue = registry.getInstanceOfType(classType);
+				}
+			}
 		} catch (ClassNotFoundException e) {
 			throw BuiltinExceptionFactory.createClassNotFoundException(this, type);
 		}catch (ConvertionException e) {

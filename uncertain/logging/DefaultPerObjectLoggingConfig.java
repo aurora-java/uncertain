@@ -10,7 +10,7 @@ import java.util.Map;
 public class DefaultPerObjectLoggingConfig implements IPerObjectLoggingConfig {
     
     Map     mConfigMap = new HashMap();
-    
+    boolean enabledAll = false;
     private String getTraceFlagKey( String object_name ){
         return object_name +".trace"; 
     }
@@ -20,6 +20,8 @@ public class DefaultPerObjectLoggingConfig implements IPerObjectLoggingConfig {
     }
 
     public boolean getTraceFlag(String object_name) {
+    	if(enabledAll)
+    		return true;
         Boolean trace = (Boolean)mConfigMap.get(getTraceFlagKey(object_name));
         return trace==null?false:trace.booleanValue();
     }
@@ -40,5 +42,13 @@ public class DefaultPerObjectLoggingConfig implements IPerObjectLoggingConfig {
     public void clearSettings(){
         mConfigMap.clear();
     }
+
+	public boolean isEnabledAll() {
+		return enabledAll;
+	}
+
+	public void setEnabledAll(boolean enabledAll) {
+		this.enabledAll = enabledAll;
+	}
 
 }
