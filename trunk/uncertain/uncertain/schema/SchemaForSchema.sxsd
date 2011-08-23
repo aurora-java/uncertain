@@ -125,6 +125,7 @@
         <ss:element name="ss:simpleType">
             <ss:attributes>
                 <ss:attribute name="editor" type="ss:string"/>
+                <ss:attribute name="referenceType" type="ss:string"/>
             </ss:attributes>
             <ss:elements>
                 <ss:element ref="ss:restriction"/>
