@@ -5,13 +5,15 @@ package uncertain.schema;
 
 import uncertain.composite.QualifiedName;
 
-
 public class SimpleType extends AbstractQualifiedNamed implements IType {
-  
-    Restriction     mRestriction;
+
+	Restriction mRestriction;
 	String mEditor;
 	QualifiedName mEditorQName;
-    public Restriction getRestriction() {
+	String mReferenceType;
+	QualifiedName mReferenceTypeQName;
+
+	public Restriction getRestriction() {
 		return mRestriction;
 	}
 
@@ -19,23 +21,33 @@ public class SimpleType extends AbstractQualifiedNamed implements IType {
 		this.mRestriction = restriction;
 		addChild(this.mRestriction);
 	}
-    public boolean isComplex() {
-        return false;
-    }
-    
-    public void doAssemble(){
-        
-    }
-    public void resolveQName(IQualifiedNameResolver resolver) {
-        super.resolveQName(resolver);
+
+	public boolean isComplex() {
+		return false;
+	}
+
+	public void doAssemble() {
+
+	}
+
+	public void resolveQName(IQualifiedNameResolver resolver) {
+		super.resolveQName(resolver);
 		if (mEditor != null && !mEditor.equals("")) {
 			mEditorQName = resolver.getQualifiedName(mEditor);
 			if (mEditorQName == null)
 				throw new SchemaError("Can't resolve editor qualified name:"
 						+ mEditor);
 		}
+		if (mReferenceType != null && !mReferenceType.equals("")) {
+			mReferenceTypeQName = resolver.getQualifiedName(mReferenceType);
+			if (mReferenceTypeQName == null)
+				throw new SchemaError(
+						"Can't resolve referenceType qualified name:"
+								+ mReferenceType);
+		}
 
-    }
+	}
+
 	public String getEditor() {
 		return mEditor;
 	}
@@ -51,8 +63,25 @@ public class SimpleType extends AbstractQualifiedNamed implements IType {
 	public void setEditorQName(QualifiedName editorQName) {
 		this.mEditorQName = editorQName;
 	}
-    public boolean isExtensionOf( IType another ){
-        return false;    
-    }    
+
+	public String getReferenceType() {
+		return mReferenceType;
+	}
+
+	public void setReferenceType(String mReferenceType) {
+		this.mReferenceType = mReferenceType;
+	}
+
+	public QualifiedName getReferenceTypeQName() {
+		return mReferenceTypeQName;
+	}
+
+	public void setReferenceTypeQName(QualifiedName mReferenceTypeQName) {
+		this.mReferenceTypeQName = mReferenceTypeQName;
+	}
+
+	public boolean isExtensionOf(IType another) {
+		return false;
+	}
 
 }
