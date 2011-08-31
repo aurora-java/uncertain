@@ -20,7 +20,7 @@ import uncertain.ocm.IObjectRegistry;
  *  
  *  or
  *  
- *  <p:method-invoke instanceType="my.pkg.IRegisteredInterface" methodName="anyMethod" returnPath="/model/result/@status" >
+ *  <p:method-invoke instanceType="my.pkg.IRegisteredInterface" methodName="anyMethod" resultPath="/model/result/@status" >
  *      <p:arguments>
  *          <p:argument type="int" value="value containing ${@tag}" />
  *          <p:argument type="long" path="/parameter/path_to_parameter" />

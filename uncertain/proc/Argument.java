@@ -43,7 +43,7 @@ public class Argument extends AbstractLocatableObject {
 			if(DataTypeRegistry.getInstance().getDataType(classType) != null)
 				objectValue = DataTypeRegistry.getInstance().convert(objectValue,classType);
 			else if("instance".equals(path)){
-				if(classType.equals(registry.getClass())){
+				if("uncertain.ocm.IObjectRegistry".equals(type)){
 					objectValue = registry;
 				}else{
 					objectValue = registry.getInstanceOfType(classType);
