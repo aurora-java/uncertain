@@ -73,8 +73,8 @@
         </ss:element>
         <ss:element name="ss:element">
             <ss:attributes>
-                <ss:attribute default="unbounded" name="maxOccurs" type="ss:string"/>
-                <ss:attribute default="0" name="minOccurs" type="ss:string"/>
+                <ss:attribute name="maxOccurs" default="unbounded" type="ss:string"/>
+                <ss:attribute name="minOccurs" default="0" type="ss:string"/>
                 <ss:attribute name="displayMask" type="ss:string"/>
                 <ss:attribute name="wizard" type="ss:string"/>
             </ss:attributes>
@@ -86,13 +86,16 @@
             </ss:extensions>
         </ss:element>
         <ss:element name="ss:array">
+            <ss:attributes>
+                <ss:attribute name="idField" type="ss:string"/>
+            </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:element"/>
             </ss:extensions>
         </ss:element>
         <ss:element name="ss:attribute">
             <ss:attributes>
-                <ss:attribute default="optional" name="use"/>
+                <ss:attribute name="use" default="optional"/>
                 <ss:attribute name="default" type="ss:string"/>
                 <ss:attribute name="document" type="ss:string"/>
             </ss:attributes>
@@ -112,7 +115,7 @@
                 <ss:extension base="ss:HasTitle"/>
             </ss:extensions>
         </ss:element>
-        <ss:element displayMask="(${@base})" name="ss:extension">
+        <ss:element name="ss:extension" displayMask="(${@base})">
             <ss:attributes>
                 <ss:attribute name="base" type="ss:QName"/>
             </ss:attributes>
@@ -135,7 +138,7 @@
                 <ss:extension base="ss:BaseType"/>
             </ss:extensions>
         </ss:element>
-        <ss:element displayMask="(${@base})" name="ss:restriction">
+        <ss:element name="ss:restriction" displayMask="(${@base})">
             <ss:attributes>
                 <ss:attribute name="base" type="ss:string"/>
             </ss:attributes>
@@ -143,7 +146,7 @@
                 <ss:array name="ss:enumerations" type="ss:enumeration"/>
             </ss:arrays>
         </ss:element>
-        <ss:element displayMask="(${@value})" name="ss:enumeration">
+        <ss:element name="ss:enumeration" displayMask="(${@value})">
             <ss:attributes>
                 <ss:attribute name="value" type="ss:string"/>
             </ss:attributes>

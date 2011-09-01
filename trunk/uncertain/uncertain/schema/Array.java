@@ -49,9 +49,15 @@ public class Array extends Element {
         
     }    
     */
-    
+    String idField;
     public boolean isArray(){
         return true;
     }
+	public String getIdField() {
+		return idField;
+	}
+	public void setIdField(String idField) {
+		this.idField = idField;
+	}
 
 }
