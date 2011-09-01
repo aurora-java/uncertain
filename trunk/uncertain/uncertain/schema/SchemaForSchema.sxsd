@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ss:schema xmlns:ss="http://www.uncertain-framework.org/schema/simple-schema">
     <ss:types>
-        <ss:complexType name="ss:SchemaObject"><![CDATA[
-		]]></ss:complexType>
+        <ss:complexType name="ss:SchemaObject"/>
         <ss:complexType name="ss:QualifiedNamed">
             <ss:attributes>
                 <ss:attribute name="name" type="ss:QName"/>
