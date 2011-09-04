@@ -11,7 +11,7 @@ import uncertain.composite.CompositeMap;
 /**
  *  Get class name by package name + converted element name or registered class name
  */
-public class PackageMapping implements IClassLocator {
+public class PackageMapping extends AbstractLocatableObject implements IClassLocator {
 	
 	String 		package_name;
 	String 		name_space;

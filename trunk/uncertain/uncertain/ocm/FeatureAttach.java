@@ -10,7 +10,7 @@ import uncertain.composite.QualifiedName;
  * @author Zhou Fan
  * 
  */
-public class FeatureAttach {
+public class FeatureAttach extends AbstractLocatableObject {
     
     String elementName;
     String featureClass;

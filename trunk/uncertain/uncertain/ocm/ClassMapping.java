@@ -9,7 +9,7 @@ import uncertain.composite.CompositeMap;
  * @author Zhou Fan
  * 
  */
-public class ClassMapping implements IClassLocator {
+public class ClassMapping extends AbstractLocatableObject implements IClassLocator {
     
     String elementName;
     String className;
@@ -23,14 +23,14 @@ public class ClassMapping implements IClassLocator {
     }
     
     public String toString(){
-        String s= "class mapping:"+elementName+" -> ";
+        String s= elementName+" -> ";
         if(packageName!=null) s=s+packageName+'.'+className;
         else s=s+className;
         return s;
     }
 
-    /**
-     * @return Returns the className.
+    /* (non-Javadoc)
+     * @see uncertain.ocm.ClassMappingMBean#getClassName()
      */
     public String getClassName() {
         return className;
@@ -41,8 +41,8 @@ public class ClassMapping implements IClassLocator {
     public void setClassName(String className) {
         this.className = className;
     }
-    /**
-     * @return Returns the elementName.
+    /* (non-Javadoc)
+     * @see uncertain.ocm.ClassMappingMBean#getElementName()
      */
     public String getElementName() {
         return elementName;
@@ -53,8 +53,8 @@ public class ClassMapping implements IClassLocator {
     public void setElementName(String elementName) {
         this.elementName = elementName;
     }
-    /**
-     * @return Returns the packageName.
+    /* (non-Javadoc)
+     * @see uncertain.ocm.ClassMappingMBean#getPackageName()
      */
     public String getPackageName() {
         return packageName;
