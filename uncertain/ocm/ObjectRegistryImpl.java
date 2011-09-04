@@ -4,7 +4,6 @@
 package uncertain.ocm;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,16 +12,24 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+
 import uncertain.composite.CompositeMap;
-import uncertain.logging.DefaultLogger;
 import uncertain.logging.ILogger;
+import uncertain.mbean.IMBeanNameProvider;
+import uncertain.mbean.IMBeanRegister;
+import uncertain.mbean.IMBeanRegistrable;
+import uncertain.ocm.mbean.ObjectRegistryImplWrapper;
 
 /** Create object by constructor reflection, using instances associated with specific class
  *  as parameter
  *  @author Zhou Fan
  * 
  */
-public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
+public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBeanRegistrable {
     
     public static final String LOGGING_SPACE = "uncertain.objectspace";
     
@@ -323,6 +330,14 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry {
             list.addChild(instance);
         }
         return list;
+    }
+    
+    public void registerMBean(IMBeanRegister register,
+            IMBeanNameProvider name_provider)
+            throws MalformedObjectNameException,
+            InstanceAlreadyExistsException, MBeanRegistrationException,
+            NotCompliantMBeanException {
+        new ObjectRegistryImplWrapper(this).registerMBean(register, name_provider);
     }
 
 }
