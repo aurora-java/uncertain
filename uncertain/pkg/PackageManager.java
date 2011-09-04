@@ -8,24 +8,30 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 
 import uncertain.composite.CompositeLoader;
+import uncertain.ocm.ClassRegistry;
+import uncertain.ocm.ClassRegistryMBean;
 import uncertain.ocm.OCManager;
 import uncertain.schema.SchemaManager;
 
 /**
  * Manages ComponentPackages PackageManager
  */
-public class PackageManager {
+public class PackageManager implements IPackageManager {
 
     CompositeLoader mCompositeLoader;
     OCManager mOCManager;
     HashMap mPackageNameMap = new HashMap();
-    SchemaManager mSchemaManager = new SchemaManager();
+    ClassRegistry   mClassRegistry;
+    SchemaManager mSchemaManager;
+    // path -> loaded component package 
+    HashMap mLoadedPackagePaths = new HashMap();
 
     public static boolean isPackageDirectory(File dir) {
         if (!dir.isDirectory())
@@ -42,21 +48,36 @@ public class PackageManager {
     public PackageManager() {
         mCompositeLoader = CompositeLoader.createInstanceForOCM(null);
         mOCManager = OCManager.getInstance();
+        mClassRegistry = mOCManager.getClassRegistry();
+        mSchemaManager = new SchemaManager();
     }
 
-    public PackageManager(CompositeLoader loader, OCManager oc_manager) {
+    public PackageManager(CompositeLoader loader, OCManager oc_manager, SchemaManager schema_manager ) {
         mCompositeLoader = loader;
         mOCManager = oc_manager;
+        mClassRegistry = mOCManager.getClassRegistry();
+        mSchemaManager = schema_manager;
     }
 
     public CompositeLoader getCompositeLoader() {
         return mCompositeLoader;
     }
 
+    public ClassRegistryMBean getClassRegistry() {
+        return mClassRegistry;
+    }
+
+    public void setClassRegistry(ClassRegistry mClassRegistry) {
+        this.mClassRegistry = mClassRegistry;
+    }
+
     public OCManager getOCManager() {
         return mOCManager;
     }
 
+    /* (non-Javadoc)
+     * @see uncertain.pkg.IPackageManager#loadPackage(java.lang.String)
+     */
     public ComponentPackage loadPackage(String path) throws IOException {
         return loadPackage(path, ComponentPackage.class);
     }
@@ -66,21 +87,30 @@ public class PackageManager {
         mPackageNameMap.put(pkg.getName(), pkg);
     }
 
+
     public void addPackage(ComponentPackage pkg) {
         // if(pkg.getPackageManager()!=this)
         initPackage(pkg);
         SchemaManager sm = pkg.getSchemaManager();
         if (sm != null)
             mSchemaManager.addAll(sm);
+        ClassRegistry reg = pkg.getClassRegistry();
+        if(reg!=null)
+            mClassRegistry.addAll(reg);
     }
 
     public ComponentPackage loadPackage(String path, Class implement_cls)
             throws IOException {
-        ComponentPackage pkg = null;
+        File f = new File(path);
+        path = f.getCanonicalPath();
+        ComponentPackage pkg = (ComponentPackage)mLoadedPackagePaths.get(path);
+        if(pkg!=null)
+            return pkg;
+
         try {
             pkg = (ComponentPackage) implement_cls.newInstance();
         } catch (Exception ex) {
-            throw new PackageConfigurationError("Can't create instance of "
+            throw new RuntimeException("Can't create instance of "
                     + implement_cls.getName(), ex);
         }
         initPackage(pkg);
@@ -105,36 +135,38 @@ public class PackageManager {
      *            root directory that contains packages to load
      * @throws IOException
      */
-    public void loadPackgeDirectory(String directory) throws IOException {
-        File path = new File(directory);
+    public void loadPackgeDirectory(String root_directory) throws IOException {
+        File path = new File(root_directory);
         if (!path.isDirectory())
-            throw new IllegalArgumentException(directory
+            throw new IllegalArgumentException(root_directory
                     + " is not a directory");
         File[] files = path.listFiles();
         for (int i = 0; i < files.length; i++) {
             File file = files[i];
-            if (file.isDirectory() && isPackageDirectory(file))
+            if (isPackageDirectory(file))
                 loadPackage(file.getAbsolutePath());
         }
     }
 
-   protected void extractTempZipFile( JarInputStream jis, File baseDir, String file_name) throws IOException {
-       File file =  new File(baseDir, file_name);
-       file.deleteOnExit();
-       FileOutputStream fos = new FileOutputStream(file);
-       for (int c = jis.read(); c != -1; c = jis.read()) {
-           fos.write(c);
-         }
-       fos.close();
-   }
-   
-   /**
-    * Unzip specified entry in a jar file to temp directory
-    * @param jar_path
-    * @param pkg_name
-    * @return
-    * @throws IOException
-    */
+    protected void extractTempZipFile(JarInputStream jis, File baseDir,
+            String file_name) throws IOException {
+        File file = new File(baseDir, file_name);
+        file.deleteOnExit();
+        FileOutputStream fos = new FileOutputStream(file);
+        for (int c = jis.read(); c != -1; c = jis.read()) {
+            fos.write(c);
+        }
+        fos.close();
+    }
+
+    /**
+     * Unzip specified entry in a jar file to temp directory
+     * 
+     * @param jar_path
+     * @param pkg_name
+     * @return
+     * @throws IOException
+     */
     protected File createTempPackageDir(String jar_path, String pkg_name)
             throws IOException {
         InputStream is = null;
@@ -144,7 +176,7 @@ public class PackageManager {
             is = u.openStream();
             JarInputStream jis = new JarInputStream(is);
             ZipEntry ze = null;
-            
+
             File baseDir = tempDir;
             while ((ze = jis.getNextEntry()) != null) {
                 String name = ze.getName();
@@ -159,7 +191,7 @@ public class PackageManager {
                         if (!baseDir.mkdirs())
                             throw new IOException("Can't create dir "
                                     + baseDir.getAbsolutePath());
-                        baseDir.deleteOnExit();                        
+                        baseDir.deleteOnExit();
                     } else {
                         extractTempZipFile(jis, tempDir, name);
                         jis.closeEntry();
@@ -172,16 +204,43 @@ public class PackageManager {
                 is.close();
         }
     }
-    
+
+    private File getClassPathDirectory(String pkg_name) throws IOException {
+        URL url = Thread.currentThread().getContextClassLoader()
+                .getResource(pkg_name);
+        if (url == null)
+            throw new IOException("Can't find " + pkg_name + " from classpath");
+        String file = url.getFile();
+        int index = file.indexOf("!");
+        if (index > 0) {
+            // from jar
+            String jar_file = file.substring(0, index);
+            File dir = createTempPackageDir(jar_file, pkg_name);
+            return dir;
+        } else {
+            try {
+                return new File(new URI(url.toString()));
+            } catch (URISyntaxException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
     /**
-     * Load a package from CLASSPATH, either from directory, or from an entry in jar
-     * @param pkg_name name of package, in relative form, such as "uncertain_builtin_package/uncertain.test/"
-     * if the package is in a jar file, the name must ends with path separator ( that is, '/' )
+     * Load a package from CLASSPATH, either from directory, or from an entry in
+     * jar
+     * 
+     * @param pkg_name
+     *            name of package, in relative form, such as
+     *            "uncertain_builtin_package/uncertain.test/" if the package is
+     *            in a jar file, the name must ends with path separator ( that
+     *            is, '/' )
      * @throws IOException
      */
     public void loadPackgeFromClassPath(String pkg_name) throws IOException {
-        URL url = Thread.currentThread().getContextClassLoader().getResource(
-                pkg_name);
+
+        URL url = Thread.currentThread().getContextClassLoader()
+                .getResource(pkg_name);
         if (url == null)
             throw new IOException("Can't load " + pkg_name);
         String file = url.getFile();
@@ -194,20 +253,40 @@ public class PackageManager {
         } else {
             // from directory
             try {
-                loadPackage(new File(new URI (url.toString())).getAbsolutePath());
+                loadPackage(new File(new URI(url.toString())).getAbsolutePath());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
+
     }
 
-    public static void main(String[] args) throws Exception {
-        PackageManager pm = new PackageManager();
-        pm.loadPackgeFromClassPath("uncertain_builtin_package/uncertain.test/");
-        System.out.println(pm.getSchemaManager().getAllTypes());
-        //ComponentPackage pkg = pm.getPackage("uncertain.test");
-        //System.out.println(pkg);
+    /**
+     * Load all packages under a relative directory name in classpath, such as
+     * "uncertain_builtin_package/sub_package"
+     * 
+     * @param root_classpath
+     * @throws IOException
+     */
+    public void loadPackageFromRootClassPath(String root_classpath)
+            throws IOException {
+        File path_file = getClassPathDirectory(root_classpath);
+        loadPackgeDirectory(path_file.getAbsolutePath());
     }
 
-    
+    public void loadPackage(PackagePath path) throws IOException {
+        if (path.getPath() != null)
+            loadPackage(path.getPath());
+        else if (path.getClassPath() != null)
+            loadPackgeFromClassPath(path.getClassPath());
+        else if (path.getRootClassPath() != null) {
+            loadPackageFromRootClassPath(path.getRootClassPath());
+        }
+    }
+
+    public void loadPackagePaths(PackagePath[] paths) throws IOException {
+        for (int i = 0; i < paths.length; i++)
+            loadPackage(paths[i]);
+    }
+
 }
