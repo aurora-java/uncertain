@@ -71,4 +71,9 @@ public class BuiltinExceptionFactory {
     public static ConfigurationFileException createConflictAttributesExcepiton( ILocatable locatable, String attribs){
     	return new ConfigurationFileException("uncertain.exception.validation.conflict_attributes", new Object[]{attribs}, null, locatable);
     }
+    
+    public static ConfigurationFileException createInvalidPathException(ILocatable locatable, String path){
+        return new ConfigurationFileException("uncertain.exception.invalid_path", new Object[]{path}, null, locatable);
+    }
+    
 }
