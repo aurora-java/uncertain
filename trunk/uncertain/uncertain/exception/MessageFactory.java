@@ -101,8 +101,10 @@ public class MessageFactory {
     
     public static String getLocationMessage( ILocatable locate ){
         Location l = locate.getOriginLocation();
-        if(l!=null)
+        if(l!=null && locate.getOriginSource()!=null)
             return getLocationMessage(locate.getOriginSource(), l.getStartLine(), l.getStartColumn());
+        else if(locate.getOriginSource()!=null)
+            return getLocationMessage(locate.getOriginSource(), 0, 0);
         else
             return null;
     }
@@ -126,7 +128,7 @@ public class MessageFactory {
 	    if(exp instanceof ILocatable ){
 	        ILocatable lcb = (ILocatable)exp;
 	        if(lcb!=null)
-	            if(lcb.getOriginLocation()!=null)
+	            //if(lcb.getOriginLocation()!=null)
 	                result.append(getLocationMessage(lcb));
 	    }
 	    result.append(origin_message);
