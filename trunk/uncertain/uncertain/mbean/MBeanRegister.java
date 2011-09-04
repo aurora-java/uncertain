@@ -1,5 +1,5 @@
 /*
- * Created on 2011-4-13 обнГ08:56:01
+ * Created on 2011-4-13 О©╫О©╫О©╫О©╫08:56:01
  * $Id$
  */
 package uncertain.mbean;
@@ -16,6 +16,11 @@ import javax.management.NotCompliantMBeanException;
  to JDK 1.4:  mbs = MBeanServerFactory.createMBeanServer("SimpleAgent" );
  */
 public class MBeanRegister {
+    
+    public static IMBeanRegister getInstance(){
+        return RegisterJDK15.getInstance();
+    }
+
     static Class[]         ARG_TYPES = {String.class, Object.class};
     static  Method         REGISTER_METHOD = null;
     static{

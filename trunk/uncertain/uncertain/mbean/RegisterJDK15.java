@@ -1,5 +1,5 @@
 /*
- * Created on 2011-4-13 ÏÂÎç08:56:52
+ * Created on 2011-4-13 ï¿½ï¿½ï¿½ï¿½08:56:52
  * $Id$
  */
 package uncertain.mbean;
@@ -15,12 +15,33 @@ import javax.management.ObjectName;
 
 public class RegisterJDK15 {
 
+    public static class Instance implements IMBeanRegister {
+
+        public void register(String name, Object obj)
+                throws MalformedObjectNameException,
+                InstanceAlreadyExistsException, MBeanRegistrationException,
+                NotCompliantMBeanException {
+            RegisterJDK15.register(name, obj);
+        }
+    }
+    
+    static final IMBeanRegister DEFAULT_INSTANCE = new  Instance();
+    
+    public static IMBeanRegister getInstance(){
+        return DEFAULT_INSTANCE;
+    }
+
     public static void register(String name, Object obj)
             throws MalformedObjectNameException,
             InstanceAlreadyExistsException, MBeanRegistrationException,
             NotCompliantMBeanException {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName on = new ObjectName(name);
+        ObjectName on = null;
+        try {
+            on = new ObjectName(name);
+        } catch (Exception ex) {
+            throw new RuntimeException("Invalid object name:" + name, ex);
+        }
         mbs.registerMBean(obj, on);
     }
 

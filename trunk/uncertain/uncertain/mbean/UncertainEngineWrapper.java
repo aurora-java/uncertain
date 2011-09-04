@@ -1,5 +1,5 @@
 /*
- * Created on 2011-4-13 ÏÂÎç08:51:16
+ * Created on 2011-4-13 ï¿½ï¿½ï¿½ï¿½08:51:16
  * $Id$
  */
 package uncertain.mbean;
@@ -13,7 +13,7 @@ import uncertain.composite.CompositeMap;
 import uncertain.core.DirectoryConfig;
 import uncertain.core.UncertainEngine;
 import uncertain.logging.ILoggingTopicRegistry;
-import uncertain.ocm.ClassRegistry;
+import uncertain.ocm.ClassRegistryMBean;
 import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
@@ -36,7 +36,7 @@ public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
         mEngine.setConfigDirectory(dir);
     }
 
-    public ClassRegistry getClassRegistry() {
+    public ClassRegistryMBean getClassRegistry() {
         return mEngine.getClassRegistry();
     }
 
@@ -60,10 +60,6 @@ public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
         return mEngine.getGlobalContext();
     }
 
-    public ILoggingTopicRegistry getLoggingTopicRegistry() {
-        return mEngine.getLoggingTopicRegistry();
-    }
-
     public File getConfigDirectory() {
         return mEngine.getConfigDirectory();
     }
@@ -85,11 +81,11 @@ public class UncertainEngineWrapper implements UncertainEngineWrapperMBean {
     }
 
     public String getLogPath() {
-        return mEngine.getLogPath();
+        return mEngine.getDirectoryConfig().getLogDirectory();
     }
 
     public void setLogPath(String logPath) {
-        mEngine.setLogPath(logPath);
+        mEngine.getDirectoryConfig().setLogDirectory(logPath);
     }
 
     public String getDefaultLogLevel() {
