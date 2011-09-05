@@ -143,10 +143,12 @@ public class LoggerProvider extends AbstractLoggerProvider implements ILogPathSe
      */
     public void setLogPath(String logPath) {
         mLogPath = logPath;
+/*
         File file = new File(mLogPath);
         if(!file.exists()){
             throw new IllegalArgumentException("Log file path '"+mLogPath+"' does not exist");
-        }        
+        }
+*/                
     }
 
     public String getDefaultLogLevel() {
