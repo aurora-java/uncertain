@@ -19,6 +19,7 @@ import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.ClassRegistryMBean;
 import uncertain.ocm.OCManager;
 import uncertain.schema.SchemaManager;
+import uncertain.util.FileUtil;
 
 /**
  * Manages ComponentPackages PackageManager
@@ -184,10 +185,13 @@ public class PackageManager implements IPackageManager {
                     if (ze.isDirectory()) {
                         baseDir = new File(tempDir, name);
                         if (baseDir.exists())
+                                FileUtil.deleteDirectory(baseDir);
+                                /*
                             if (!baseDir.delete())
                                 throw new IOException(
                                         "Can't delete existing dir "
                                                 + baseDir.getAbsolutePath());
+                                                */
                         if (!baseDir.mkdirs())
                             throw new IOException("Can't create dir "
                                     + baseDir.getAbsolutePath());
