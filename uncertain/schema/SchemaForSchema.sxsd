@@ -86,7 +86,7 @@
         </ss:element>
         <ss:element name="ss:array">
             <ss:attributes>
-                <ss:attribute name="idField" type="ss:string"/>
+                <ss:attribute name="indexField" type="ss:string"/>
             </ss:attributes>
             <ss:extensions>
                 <ss:extension base="ss:element"/>

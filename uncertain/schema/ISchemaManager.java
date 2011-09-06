@@ -4,6 +4,7 @@
 package uncertain.schema;
 
 import java.util.Collection;
+import java.util.List;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.QualifiedName;
@@ -30,5 +31,5 @@ public interface ISchemaManager {
      * @return
      */
     public Element getElement( CompositeMap data );    
-
+    public List getElementsOfType( IType parent_type );
 }

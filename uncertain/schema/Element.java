@@ -163,7 +163,7 @@ public class Element extends ComplexType implements IReference {
 		mMinOccurs = minOccurs;
 	}
 
-	public List getChildElements(SchemaManager manager) {
+	public List getChildElements(ISchemaManager manager) {
 		List childElements = new ArrayList();
 		List childList = getAllElements();
 		Iterator childIterator = childList.iterator();

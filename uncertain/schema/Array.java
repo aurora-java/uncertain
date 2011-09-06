@@ -49,15 +49,15 @@ public class Array extends Element {
         
     }    
     */
-    String idField;
+    String indexField;
     public boolean isArray(){
         return true;
     }
-	public String getIdField() {
-		return idField;
+	public String getIndexField() {
+		return indexField;
 	}
-	public void setIdField(String idField) {
-		this.idField = idField;
+	public void setIndexField(String idField) {
+		this.indexField = idField;
 	}
 
 }
