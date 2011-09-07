@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.CompositeUtil;
 import uncertain.composite.IterationHandle;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
@@ -35,18 +36,60 @@ public class Configuration  implements Cloneable, IEventDispatcher
 {
     
     public static final String LOGGING_TOPIC = "uncertain.event";
+    
+    private class FeatureInstance {
+        int    attach_result;
+        Object feature_instance;
+        /*
+        public FeatureInstance( int result, Object inst ){
+            this.attach_result = result;
+            this.feature_instance = inst;
+        }
+        */
+    }
+    
+    private class ConfigurationIterator  implements IterationHandle {
+        
+        IterationHandle dataFilter;
+        
+        public ConfigurationIterator(IterationHandle filter){
+            dataFilter = filter;
+        }
+        
+        public int process( CompositeMap map){
+            int result = IterationHandle.IT_CONTINUE;
+            if(dataFilter!=null){
+                result = dataFilter.process(map);
+                if(result==IterationHandle.IT_BREAK)
+                    return result;
+            }
+            List fClassList = reg.getFeatures(map.getNamespaceURI(), map.getName());
+            if(fClassList != null){
+                List    fInstList = createFeatureList(map);
+                Iterator it = fClassList.iterator();
+                while(it.hasNext()){
+                    Class fClass = (Class)it.next();
+                    //attach_result = IFeature.NORMAL;
+                    //Object fInst = createFeatureInstance(fClass,map);
+                    FeatureInstance inst = createFeatureInstance(fClass,map);
+                    if(inst.attach_result==IFeature.NO_CONFIG)
+                        return IterationHandle.IT_REMOVE;
+                    else if (inst.attach_result==IFeature.NO_CHILD_CONFIG)
+                        result = IterationHandle.IT_NOCHILD;
+                    if(inst.feature_instance != null) 
+                        fInstList.add(inst.feature_instance);
+                }
+            }               
 
-    /**
-     * implement this interface to get & filter participant on its creation
-     * @author Zhou Fan
-     *
-     */
-    public interface IParticipantListener {
-        /**
-         * @param pInst created participant instance
-         * @return true if this instance can be added
-         */
-        public boolean addParticipant(Object pInst);
+            if(reg.getClassName(map)!=null){
+                
+                loadInternal(map);
+                return IterationHandle.IT_NOCHILD;
+            }
+
+            return result;
+
+        }
     };
     
     ParticipantRegistry		registry;
@@ -62,7 +105,7 @@ public class Configuration  implements Cloneable, IEventDispatcher
     // CompositeMap -> ParticipantInstance
     HashMap                 instance_map;
     
-    IParticipantListener	listener;
+    //IParticipantListener	listener;
     // temporary result
     int						attach_result=0;
     // current event handle
@@ -103,11 +146,11 @@ public class Configuration  implements Cloneable, IEventDispatcher
     public void setHandleManager(HandleManager handleManager) {
         this.handleManager = handleManager;
     }
-
+/*
     public void setListener(IParticipantListener listener){
         this.listener = listener;
     }
-    
+  */  
     public IEventHandle getCurrentHandle(){
         return current_handle;
     }
@@ -121,8 +164,10 @@ public class Configuration  implements Cloneable, IEventDispatcher
         if(obj!=null){
             Class cls = obj.getClass();
 	        if(registry.isParticipant(cls)||obj instanceof IEventListener){
-	            if(listener!=null)
+	            /*
+	             if(listener!=null)
 	                if(!listener.addParticipant(obj)) return;
+	                */
 	            participant_list.add(obj);
 	            logger.log(Level.CONFIG, "Added participant instance "+cls.getName());
 	        }else{
@@ -190,65 +235,50 @@ public class Configuration  implements Cloneable, IEventDispatcher
      * @param config
      * @return
      */
-    public Object createFeatureInstance(Class fClass, CompositeMap config){
+    private FeatureInstance createFeatureInstance(Class fClass, CompositeMap config){
         if(fClass==null)
             throw new NullPointerException("Class parameter is null");
+        FeatureInstance inst = new FeatureInstance();
+        inst.attach_result = IFeature.NORMAL;
+        Object fInst = null;
         try{
-            Object fInst = ocManager.getObjectCreator().createInstance(fClass);
-            if( fInst ==null ) throw new RuntimeException("Can't create instance of "+fClass.getName());
-            ocManager.populateObject(config,fInst);
-            if( fInst instanceof IFeature){
-                attach_result = ((IFeature)fInst).attachTo(config, this);
-                if(attach_result != IFeature.NORMAL) return null;
-            }
-            addParticipant(fInst);
-            return fInst;
+            fInst = ocManager.getObjectCreator().createInstance(fClass);
         }catch(Exception ex){
-            ocManager.handleException("Can't create feature instance of "+fClass.getName(),ex);
-            return null;
+            throw new RuntimeException("Can't create instance of "+fClass.getName(), ex);
         }
+        if( fInst ==null )
+            throw new RuntimeException("Can't create instance of "+fClass.getName());
+        ocManager.populateObject(config,fInst);
+        inst.feature_instance = fInst;
+        if( fInst instanceof IFeature){
+            inst.attach_result = ((IFeature)fInst).attachTo(config, this);
+            if(inst.attach_result == IFeature.NO_FEATURE_INSTANCE || inst.attach_result== IFeature.NO_CONFIG) 
+                inst.feature_instance = null;
+        }
+        if(inst.feature_instance!=null)
+            addParticipant(inst.feature_instance);
+        return inst;
     }
-    
+    /*
     public void loadConfig(CompositeMap config, IParticipantListener listener){
         setListener(listener);
         loadConfig(config);
+    }
+    */
+    
+    public void loadConfig(CompositeMap config ){
+        loadConfig(config,null);
     }
     
     /**
      * Load a CompositeMap and add create participants described by this CompositeMap
      * @param config A CompositeMap that contains participant description
+     * @param filter A IterationHandle to determine whether a child node will be processed.
+     * If the process() method returns NO_CHILD, then the child node will be ignored.
      */
-    public void loadConfig(CompositeMap config){
+    private void loadConfig(CompositeMap config, IterationHandle filter ){
         config_list.add(config);
-        IterationHandle handle = new IterationHandle(){
-          
-            public int process( CompositeMap map){
-
-                List fClassList = reg.getFeatures(map.getNamespaceURI(), map.getName());
-                if(fClassList != null){
-                    List	fInstList = createFeatureList(map);
-                    Iterator it = fClassList.iterator();
-                    while(it.hasNext()){
-                        Class fClass = (Class)it.next();
-                        attach_result = IFeature.NORMAL;
-                        Object fInst = createFeatureInstance(fClass,map);
-                        if(fInst != null) fInstList.add(fInst);
-                        if(attach_result==IFeature.NO_CONFIG)
-                            return IterationHandle.IT_REMOVE;
-                    }
-                }               
-
-                if(reg.getClassName(map)!=null){
-                    
-                    loadInternal(map);
-                    return IterationHandle.IT_NOCHILD;
-                }
-
-                return IterationHandle.IT_CONTINUE;
-
-            }
-        };
-        
+        IterationHandle handle = new ConfigurationIterator(filter);
         config.iterate(handle, true);
     }
 
@@ -538,7 +568,7 @@ public class Configuration  implements Cloneable, IEventDispatcher
         Configuration conf = new Configuration( registry, ocManager);
         conf.handleManager = (HandleManager)handleManager.clone();
         conf.config_list.addAll(config_list);
-        conf.listener = listener;
+        //conf.listener = listener;
         conf.parent = parent;
         conf.participant_list.addAll(participant_list);
         conf.exception_handle_list.addAll(exception_handle_list);
