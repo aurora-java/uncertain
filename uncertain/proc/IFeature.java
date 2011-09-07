@@ -16,6 +16,7 @@ public interface IFeature {
     public static final int NORMAL = 0;
     public static final int NO_FEATURE_INSTANCE = -1;
     public static final int NO_CONFIG = -2;
+    public static final int NO_CHILD_CONFIG = -3;
     
     /**
      * @param config The CompositeMap that the feature instance is associated with
@@ -24,8 +25,9 @@ public interface IFeature {
      * NORMAL: this feature can be attached
      * NO_FEATURE_INSTANCE: the feature instance should be discarded from Configuration
      * NO_CONFIG: both feature instance and the whole CompositeMap that the feature is associated
+     * NO_CHILD_CONFIG: this element can be added, but child nodes should not be processed
      * with should be discarded
      */
-    public int attachTo(CompositeMap config, Configuration procConfig );
+    public int attachTo(CompositeMap config_data, Configuration config );
 
 }
