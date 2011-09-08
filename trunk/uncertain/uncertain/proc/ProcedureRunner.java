@@ -193,13 +193,13 @@ public class ProcedureRunner {
         if(config!=null)
             config.addExceptionHandle(handle);
     }
-    
+/*    
     public void addFirstExceptionHandle(IExceptionHandle handle){
         Configuration config = getConfiguration();
         if(config!=null)
             config.addFirstExceptionHandle(handle);        
     }
-    
+*/    
     public void addExceptionHandles(Collection handle_list){
         Configuration config = getConfiguration();
         if(config!=null)
