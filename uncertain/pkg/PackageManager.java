@@ -210,10 +210,18 @@ public class PackageManager implements IPackageManager {
     }
 
     private File getClassPathDirectory(String pkg_name) throws IOException {
+        /*
         URL url = Thread.currentThread().getContextClassLoader()
                 .getResource(pkg_name);
-        if (url == null)
-            throw new IOException("Can't find " + pkg_name + " from classpath");
+        */
+        ClassLoader loader = PackageManager.class.getClassLoader();
+        URL url = loader.getResource(pkg_name);
+        if (url == null){
+            loader = Thread.currentThread().getContextClassLoader();
+            url = loader.getResource(pkg_name);
+        }
+        if( url == null)
+            throw new IOException("Can't find " + pkg_name + " from current classpath");
         String file = url.getFile();
         int index = file.indexOf("!");
         if (index > 0) {
