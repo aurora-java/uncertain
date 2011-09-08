@@ -205,7 +205,7 @@ public class CompositeMapParser extends DefaultHandler {
             throws SAXException {
         if (ch == null)
             return;
-        if (start == length)
+        if (length == 0)
             return;
         if (current_node != null) {
             String t = current_node.getText();
