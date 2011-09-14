@@ -336,10 +336,11 @@ public class Configuration  implements Cloneable, IEventDispatcher
     public void addExceptionHandle(IExceptionHandle handle){
         exception_handle_list.add(handle);
     }
-    
+/*    
     public void addFirstExceptionHandle(IExceptionHandle handle){
         exception_handle_list.add(0, handle);
     }
+*/    
     
     public int fireEvent(String event_name, Object[] args)
         throws Exception
