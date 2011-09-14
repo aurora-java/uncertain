@@ -1,7 +1,7 @@
 /*
  * DefaultTagProcessor.java
  *
- * Created on 2002Äê1ÔÂ12ÈÕ, ÏÂÎç7:45
+ * Created on 2002ï¿½ï¿½1ï¿½ï¿½12ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½7:45
  */
 
 package uncertain.util;
@@ -27,17 +27,17 @@ public class DefaultTagProcessor extends TagProcessor{
         super('%');
     }    
 
-    boolean acceptChar(char ch) {
+    int acceptChar(char ch) {
         switch( state){
             case INITIAL_STATE:
                 if( ch == escape_char){
                     state = GET_LAST_CHAR;
                 }
-                return true;
+                return TagProcessor.RESULT_IN_ESCAPE_CHAR;
             case GET_LAST_CHAR:                
-                return false;
+                return TagProcessor.RESULT_NORMAL_CHAR;
         }
-        return false;
+        return TagProcessor.RESULT_NORMAL_CHAR;
     }
     
     
