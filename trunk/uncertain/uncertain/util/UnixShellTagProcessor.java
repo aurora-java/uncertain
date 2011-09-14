@@ -1,7 +1,7 @@
 /*
  * UnixShellTagProcessor.java
  *
- * Created on 2002Äê1ÔÂ12ÈÕ, ÏÂÎç8:41
+ * Created on 2002ï¿½ï¿½1ï¿½ï¿½12ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½8:41
  */
 
 package uncertain.util;
@@ -25,20 +25,22 @@ public class UnixShellTagProcessor extends TagProcessor{
         super('$');
     }    
 
-    boolean acceptChar(char ch) {
+    int acceptChar(char ch) {
         switch(state){
             case INITIAL_STATE:
                 if( ch == '{'){
                     state = GET_FIRST_BRACKET;
-                    return true;
+                    return TagProcessor.RESULT_IN_ESCAPE_CHAR;
                 } 
-                else return false;
+                else return TagProcessor.RESULT_WRONG_CHAR;
             case GET_FIRST_BRACKET:
-                if( ch == '}')
-                    state = GET_LAST_BRACKET;
-                return true;
+                if( ch == '}'){
+                    return TagProcessor.RESULT_ESCAPE_END_CHAR;
+                }else{
+                    return TagProcessor.RESULT_IN_ESCAPE_CHAR;
+                }
             default:
-                return false;
+                return TagProcessor.RESULT_NORMAL_CHAR;
         }
     }
     

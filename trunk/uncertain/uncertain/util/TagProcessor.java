@@ -1,7 +1,7 @@
 /*
  * ParseState.java
  *
- * Created on 2002Äê1ÔÂ12ÈÕ, ÏÂÎç6:48
+ * Created on 2002ï¿½ï¿½1ï¿½ï¿½12ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½6:48
  */
 
 package uncertain.util;
@@ -12,6 +12,14 @@ package uncertain.util;
  * @version 
  */
 public abstract class TagProcessor {
+    
+    public static final int RESULT_IN_ESCAPE_CHAR = 0;
+    
+    public static final int RESULT_ESCAPE_END_CHAR = 1;
+    
+    public static final int RESULT_NORMAL_CHAR = 2;
+
+    public static final int RESULT_WRONG_CHAR = -1;
     
     public static final int INITIAL_STATE = 0;
     
@@ -37,14 +45,14 @@ public abstract class TagProcessor {
         return tag_string.toString();
     }
     
-    public  boolean accept( char ch){
-        if( tag_string.length() ==0 && ch==escape_char ) return false;
-        boolean acpt = acceptChar(ch);
-        if( acpt && isTagChar( ch))  tag_string.append(ch);        
+    public  int accept( char ch){
+        if( tag_string.length() ==0 && ch==escape_char ) return RESULT_NORMAL_CHAR;
+        int acpt = acceptChar(ch);
+        if( RESULT_IN_ESCAPE_CHAR==acpt && isTagChar( ch))  tag_string.append(ch);        
         return acpt;
     }
     
-    abstract boolean acceptChar( char ch);
+    abstract int acceptChar( char ch);
     
     abstract boolean isTagChar( char ch);
     

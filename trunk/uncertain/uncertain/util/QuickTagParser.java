@@ -22,7 +22,7 @@ public class QuickTagParser {
         processor = new UnixShellTagProcessor();
     }
 
-    void appendString(int index, TagProcessor processor, StringBuffer buf,
+    void appendParsedTag(int index, TagProcessor processor, StringBuffer buf,
             TagParseHandle handle) {
         String str = null;
         String tag = processor.getTagString();
@@ -33,10 +33,16 @@ public class QuickTagParser {
             buf.append(str);
     }
 
-    void appendChar(int index, TagParseHandle handle, StringBuffer buf, char ch) {
+    void appendNormalChar(int index, TagParseHandle handle, StringBuffer buf, char ch) {
         int n = handle.ProcessCharacter(index, ch);
         if (n >= 0)
             buf.append((char) n);
+    }
+    
+    void appendNormalStrings(int index, TagParseHandle handle, StringBuffer buf, StringBuffer content) {
+        for(int i=0; i<content.length(); i++){
+            appendNormalChar(index+i,handle,buf,content.charAt(i));
+        }
     }
 
     public String parse(Reader reader, TagParseHandle handle)
@@ -47,6 +53,7 @@ public class QuickTagParser {
         char tag_chr = processor.getStartingEscapeChar();
 
         StringBuffer result = new StringBuffer();
+        StringBuffer pending_char = new StringBuffer();
         int ch;
 
         processor.setEscapeState(false);
@@ -55,22 +62,42 @@ public class QuickTagParser {
             char chr = (char) ch;
             if (!processor.isEscapeState()) {
                 if(tag_chr==chr){
+                        pending_char.append(chr);
                         processor.setEscapeState(true);
                         tag_begin = index;
-                }else
-                    appendChar(index,handle,result,chr);
+                }else{
+                    appendNormalChar(index,handle,result,chr);
+                }
             } else {
-                if (!processor.accept(chr)) {
+                if(tag_chr==chr){
+                    //result.append(pending_char);
+                    appendNormalStrings(index,handle,result,pending_char);
+                    pending_char.setLength(0);
+                    pending_char.append(chr);
+                    continue;
+                }
+                pending_char.append(chr);
+                int rst = processor.accept(chr);
+                if (rst==TagProcessor.RESULT_NORMAL_CHAR || rst == TagProcessor.RESULT_ESCAPE_END_CHAR) {
                     processor.setEscapeState(false);
-                    appendString(tag_begin, processor, result, handle);
-                    appendChar(index, handle, result, chr);
+                    appendParsedTag(tag_begin, processor, result, handle);
+                    pending_char.setLength(0);
+                }else if( rst == TagProcessor.RESULT_WRONG_CHAR){
+                    processor.setEscapeState(false);
+                    //result.append(pending_char);
+                    appendNormalStrings(index,handle,result,pending_char);
+                    pending_char.setLength(0);
                 }
             }
             index++;
         }
 
         if (processor.isEscapeState())
-            appendString(tag_begin, processor, result, handle);
+            appendParsedTag(tag_begin, processor, result, handle);
+        
+        if(pending_char.length()>0)
+            //result.append(pending_char);
+            appendNormalStrings(index-pending_char.length(),handle,result,pending_char);
 
         return result.toString();
 
@@ -80,28 +107,7 @@ public class QuickTagParser {
         processor.clear();
         processor = null;
     }
-/*    
-    public static class TestHandle implements TagParseHandle {
-        
-        public String  ProcessTag(int index, String tag){
-            System.out.println("tag:"+tag);
-            return "#OK#";
-        }
-        
 
-        public int ProcessCharacter( int index, char ch){
-            return ch;
-        }
-        
-      }
-    
-    public static void main(String[] args) throws Exception {
-        UnixShellTagProcessor pr = new UnixShellTagProcessor();
-        QuickTagParser parser = new QuickTagParser(pr);
-        String s = parser.parse( new StringReader("${tag1} is ${tag2}"), new TestHandle());
-        System.out.println(s);
-    }
-*/
     public String parse( String str, TagParseHandle handle )  {
         if(str == null) return null;  
         try{
@@ -109,5 +115,5 @@ public class QuickTagParser {
         } catch(IOException ex){
           return null;
         }
-      }    
+    }    
 }
