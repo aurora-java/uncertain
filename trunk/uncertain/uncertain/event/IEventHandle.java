@@ -1,9 +1,10 @@
 /*
  * Created on 2005-5-24
  */
-package uncertain.proc;
+package uncertain.event;
 
 import uncertain.composite.CompositeMap;
+import uncertain.proc.ProcedureRunner;
 
 
 /**

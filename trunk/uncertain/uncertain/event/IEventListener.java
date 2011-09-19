@@ -1,7 +1,9 @@
 /*
  * Created on 2005-12-23
  */
-package uncertain.proc;
+package uncertain.event;
+
+import uncertain.proc.ProcedureRunner;
 
 
 /**

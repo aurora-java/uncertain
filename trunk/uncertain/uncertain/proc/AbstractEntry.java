@@ -67,6 +67,7 @@ public abstract class AbstractEntry implements IEntry, IConfigurable, ILocatable
     public void beginConfigure(CompositeMap config){
         source = config.getSourceFile()==null?null:config.getSourceFile().getAbsolutePath();
         location = config.getLocation();
+        name = config.getName();
     }
     
     public void endConfigure(){

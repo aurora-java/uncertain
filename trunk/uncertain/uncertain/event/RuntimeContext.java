@@ -5,6 +5,7 @@ package uncertain.event;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
+import uncertain.proc.trace.StackTraceManager;
 
 /**
  * A container that can hold event parameters, and can fire events
@@ -134,6 +135,14 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
 
     public void setSuccess(boolean success) {
         putBoolean(KEY_SERVICE_SUCCESS, success);
+    }
+    
+    public StackTraceManager    getStackTraceManager(){
+        return (StackTraceManager)getInstanceOfType(StackTraceManager.class);
+    }
+    
+    public void setStackTraceManager( StackTraceManager stm ){
+        setInstanceOfType(StackTraceManager.class, stm);
     }
 
 }

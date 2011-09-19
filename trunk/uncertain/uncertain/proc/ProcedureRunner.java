@@ -16,6 +16,7 @@ import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
 import uncertain.ocm.OCManager;
+import uncertain.proc.trace.StackTraceManager;
 
 /**
  * ProcedureRunner
@@ -26,24 +27,26 @@ public class ProcedureRunner {
     
     public static final String LOGGING_TOPIC = "uncertain.proc";    
     
-    CompositeMap		context;
-    Procedure			procedure;
-    ProcedureRunner		caller;
-    RuntimeContext      runtime_context;
-    UncertainEngine		uncertainEngine;
+    CompositeMap		mContext;
+    Procedure			mProcedure;
+    ProcedureRunner		mCaller;
+    RuntimeContext      mRuntimeContext;
+    UncertainEngine		mUncertainEngine;
     //Configuration       config;
 
     /** flag to designate whether the process is running */
-    boolean				is_continue = true;
+    boolean				mIsContinue = true;
 
     /** flag to designate whether running a list of IEntry */
-    boolean				running_list = false;    
+    boolean				mRunningList = false;    
     
     /** flag to designate whether in handle exception state */
-    boolean             in_exception_handle = false;
+    boolean             mInExceptionHandle = false;
     
     /** flag to designate continue running after an exception caught */
-    boolean             resume_after_exception = false;
+    boolean             mResumeAfterException = false;
+    
+    boolean             mSaveStackTrace = true;
     
     /** current iterator on EntryList */
     ListIterator		current_iterator;
@@ -63,6 +66,9 @@ public class ProcedureRunner {
     
     ILogger             mLogger;
     
+    /** Stack trace manager */
+    StackTraceManager   mStackTraceManager;
+    
     public ProcedureRunner(){
         setContext(new CompositeMap("runtime-context"));
     }
@@ -76,27 +82,28 @@ public class ProcedureRunner {
      * @return Returns the context.
      */
     public CompositeMap getContext() {
-        return context;
+        return mContext;
     }
     /**
      * @param context The context to set.
      */
     public void setContext(CompositeMap context) {
-        this.context = context;
-        this.runtime_context = RuntimeContext.getInstance(context);
+        this.mContext = context;
+        this.mRuntimeContext = RuntimeContext.getInstance(context);
+        this.mStackTraceManager = mRuntimeContext.getStackTraceManager();
         createDefaultConfig();
     }
     /**
      * @return Returns the procedure.
      */
     public Procedure getProcedure() {
-        return procedure;
+        return mProcedure;
     }
     /**
      * @param procedure The procedure to set.
      */
     public void setProcedure(Procedure procedure) {
-        this.procedure = procedure;
+        this.mProcedure = procedure;
         reset();
     }    
     
@@ -104,28 +111,28 @@ public class ProcedureRunner {
      * @return Returns the caller.
      */
     public ProcedureRunner getCaller() {
-        return caller;
+        return mCaller;
     }
     
     public void reset(){
-        if(procedure==null) 
+        if(mProcedure==null) 
             throw new IllegalArgumentException("Procedure not set");
-        current_entry_list = procedure;
+        current_entry_list = mProcedure;
         current_iterator = null;
-        is_continue = true;
+        mIsContinue = true;
     }
     
     public void stop(){
-        is_continue = false;
+        mIsContinue = false;
     }
     
     public boolean isRunning(){
-        return is_continue;
+        return mIsContinue;
     }
     
     
     public void setResumeAfterException( boolean flag ){
-        resume_after_exception = flag;
+        mResumeAfterException = flag;
     }
     
     /**
@@ -133,8 +140,12 @@ public class ProcedureRunner {
      * @param entry_name the name of entry to locate to
      * @return true if specified entry is found and successfully located to
      */
-    public boolean locateTo(String entry_name){      
-        IEntry entry = procedure.getNamedEntry(entry_name);
+    public boolean locateTo(String entry_name){ 
+        IEntry entry = null;
+        if(current_entry_list!=null)
+            entry = current_entry_list.getNamedEntry(entry_name);
+        if(entry==null)
+            entry = mProcedure.getNamedEntry(entry_name);
         if(entry==null) throw new IllegalStateException("Can't find entry '"+entry_name+"' in current procedure");
         IEntry owner = entry.getOwner();
         if(owner==null || !(owner instanceof EntryList)) 
@@ -149,17 +160,17 @@ public class ProcedureRunner {
         procException = thr.getCause();        
         if(procException==null) procException = thr;
         lastException = procException;
-        resume_after_exception = false;
-        runtime_context.setSuccess(false);
+        mResumeAfterException = false;
+        mRuntimeContext.setSuccess(false);
         if(handleException(procException)){
             procException = null;
         }
-        if(!resume_after_exception)
+        if(!mResumeAfterException)
             stop();
     }
     
     public void throwUnhandledException(Throwable thr){
-        runtime_context.setSuccess(false);
+        mRuntimeContext.setSuccess(false);
         procException = thr.getCause();
         if(procException==null) procException = thr;
         lastException = procException;
@@ -178,6 +189,8 @@ public class ProcedureRunner {
     public void checkAndThrow() throws Exception {
         Throwable thr = getException();
         if(thr==null) return;
+        if(mStackTraceManager!=null)
+            mStackTraceManager.fillException(thr);
         if( thr instanceof Exception )
             throw (Exception)thr;
         else if( thr instanceof Error )
@@ -213,7 +226,7 @@ public class ProcedureRunner {
     public boolean handleException(Throwable thr){
         Configuration config = getConfiguration();
         // Check if is in exception handle
-        if(in_exception_handle){ 
+        if(mInExceptionHandle){ 
             throwUnhandledException(thr);
             return false;
         }
@@ -221,17 +234,17 @@ public class ProcedureRunner {
         List exception_handle_list = config==null?null:config.getExceptionHandles();
         if(exception_handle_list==null) return false;  
         // Handle exception
-        in_exception_handle = true;
+        mInExceptionHandle = true;
         Iterator it = exception_handle_list.iterator();
         while(it.hasNext()){
             IExceptionHandle handle = (IExceptionHandle)it.next();
             boolean result = handle.handleException(this, thr);
             if(result){
-                in_exception_handle = false;
+                mInExceptionHandle = false;
                 return true;
             }
         }
-        in_exception_handle = false;
+        mInExceptionHandle = false;
         return false;
     }
     
@@ -243,16 +256,29 @@ public class ProcedureRunner {
      */
     public void run() {
         try{
-            if(current_entry_list !=null && current_iterator==null){            
+            if(current_entry_list !=null && current_iterator==null){
+                // enter & exit
+                if(mSaveStackTrace && mStackTraceManager!=null)
+                    mStackTraceManager.enter(current_entry_list);
                 current_entry_list.run(this);
+                if(mSaveStackTrace && mStackTraceManager!=null)
+                    mStackTraceManager.exit();
+                // end
             }
             else
-                while(is_continue && current_entry_list !=null && current_iterator!=null){
-                    while(is_continue && current_iterator.hasNext()){
+                while(mIsContinue && current_entry_list !=null && current_iterator!=null){
+                    while(mIsContinue && current_iterator.hasNext()){
                         IEntry entry = (IEntry)current_iterator.next();
-                        entry.run(this);                
+                        // enter & exit
+                        if(mSaveStackTrace && mStackTraceManager!=null)
+                            mStackTraceManager.enter(entry);
+                        entry.run(this);
+                        if(mSaveStackTrace && mStackTraceManager!=null)
+                            mStackTraceManager.exit();
+                        // end
+                        
                     }
-                    if(running_list) return;
+                    if(mRunningList) return;
                     IEntry prev = current_entry_list;
                     IEntry owner = current_entry_list.getOwner();
                     if(owner ==null) 
@@ -282,16 +308,16 @@ public class ProcedureRunner {
         // save prev internal state
         EntryList		prev_entry_list = current_entry_list;
         ListIterator	prev_iterator   = current_iterator;
-        boolean			prev_flag = running_list;
+        boolean			prev_flag = mRunningList;
         // set current list to run
         current_entry_list = list;
         current_iterator   = list.getEntryList().listIterator();
-        running_list = true;
+        mRunningList = true;
         run();
         // restore prev internal state
         current_entry_list = prev_entry_list;
         current_iterator   = prev_iterator;
-        running_list = prev_flag;
+        mRunningList = prev_flag;
     }
     
     public void fireEvent(String event_name){
@@ -373,14 +399,16 @@ public class ProcedureRunner {
     public ProcedureRunner spawn(Procedure proc){
         ProcedureRunner child = new ProcedureRunner();
         child.setProcedure(proc);
-        child.caller = this;
-        child.context = context;
-        child.runtime_context = runtime_context;
+        child.mCaller = this;
+        child.setContext(mContext);
+        child.mRuntimeContext = mRuntimeContext;
         //child.config_map = config_map;
         // child.config = config;
-        child.uncertainEngine = uncertainEngine;
+        child.mUncertainEngine = mUncertainEngine;
         child.mLogger = mLogger;
+        child.mSaveStackTrace = this.mSaveStackTrace;
         child.reset();
+        //child.mStackTraceManager = this.mStackTraceManager;
         return child;
     }
     
@@ -394,8 +422,8 @@ public class ProcedureRunner {
     private void createDefaultConfig(){
         Configuration config = getConfiguration();
         if(config==null){
-            if(uncertainEngine!=null)
-                config = uncertainEngine.createConfig();
+            if(mUncertainEngine!=null)
+                config = mUncertainEngine.createConfig();
             else
                 config = new Configuration();
             setConfiguration(config);
@@ -403,12 +431,12 @@ public class ProcedureRunner {
     }
     
     public void setConfiguration( Configuration config ){
-        runtime_context.setConfig(config);
+        mRuntimeContext.setConfig(config);
         //this.config = config;
     }
     
     public Configuration getConfiguration(){
-        return runtime_context==null?null:runtime_context.getConfig();
+        return mRuntimeContext==null?null:mRuntimeContext.getConfig();
         //return config;
     }
     
@@ -440,11 +468,11 @@ public class ProcedureRunner {
 
     //TODO remove in future
     public UncertainEngine getUncertainEngine() {
-        return uncertainEngine;
+        return mUncertainEngine;
     }
 
     public void setUncertainEngine(UncertainEngine uncertainEngine) {
-        this.uncertainEngine = uncertainEngine;
+        this.mUncertainEngine = uncertainEngine;
         createDefaultConfig();
         /*
         if( getConfiguration()==null)
@@ -459,9 +487,9 @@ public class ProcedureRunner {
      * @throws java.lang.IllegalArgumentException if given field name is not defined
      */
     public void setContextField(String name, Object value){
-        Field field = procedure.getField(name);
+        Field field = mProcedure.getField(name);
         if(field==null) throw new IllegalArgumentException("Field "+name+" is not defined in procedure");
-        context.putObject(field.getPath(), value, true);
+        mContext.putObject(field.getPath(), value, true);
     }
     
     /**
@@ -471,9 +499,9 @@ public class ProcedureRunner {
      * @throws java.lang.IllegalArgumentException if given field name is not defined
      */
     public Object getContextField(String name){
-        Field field = procedure.getField(name);
+        Field field = mProcedure.getField(name);
         if(field==null) throw new IllegalArgumentException("Field "+name+" is not defined in procedure");
-        return context.getObject(field.getName());
+        return mContext.getObject(field.getName());
     }
     
     /**
@@ -489,7 +517,7 @@ public class ProcedureRunner {
         Configuration config = getConfiguration();
         Collection participants = config ==null? null: config.getParticipantList();
         if(participants==null) return;
-        OCManager oc_manager = uncertainEngine==null? OCManager.getInstance(): uncertainEngine.getOcManager();
+        OCManager oc_manager = mUncertainEngine==null? OCManager.getInstance(): mUncertainEngine.getOcManager();
         // iterate through all fields
         Iterator it = fields.iterator();
         while(it.hasNext()){
@@ -497,7 +525,7 @@ public class ProcedureRunner {
             String name = field.getName();
             if(write_to_participant){
                 // write context field to all participants
-                Object value = context.getObject(field.getPath());
+                Object value = mContext.getObject(field.getPath());
                 if(value==null) continue;
                 for(Iterator pit = participants.iterator(); pit.hasNext();){
                     Object participant = pit.next();
@@ -509,19 +537,19 @@ public class ProcedureRunner {
                     Object participant = pit.next();
                     Object value = oc_manager.getAttribute(participant, name);
                     if(value!=null)
-                        context.putObject(field.getPath(), value, true);
+                        mContext.putObject(field.getPath(), value, true);
                 }                
             }
         }        
     }
     
     public ILogger getLogger(){
-        if(caller!=null)
-            return caller.getLogger();
+        if(mCaller!=null)
+            return mCaller.getLogger();
         if(mLogger!=null) return mLogger;
-        ILogger logger = (ILogger)runtime_context.getInstanceOfType(ILogger.class);
+        ILogger logger = (ILogger)mRuntimeContext.getInstanceOfType(ILogger.class);
         if(logger==null){
-            ILoggerProvider provider = (ILoggerProvider)runtime_context.getInstanceOfType(ILoggerProvider.class);
+            ILoggerProvider provider = (ILoggerProvider)mRuntimeContext.getInstanceOfType(ILoggerProvider.class);
             if(provider!=null)
                 return provider.getLogger(LOGGING_TOPIC);
             else
@@ -536,6 +564,14 @@ public class ProcedureRunner {
 
     public Throwable getLatestException(){
         return lastException;
+    }
+    
+    public StackTraceManager getStackTraceManager(){
+        return mStackTraceManager;
+    }
+    
+    public void setSaveStackTrace( boolean flag ){
+        this.mSaveStackTrace = flag;
     }
 
 }

@@ -3,7 +3,6 @@
  */
 package uncertain.event;
 
-import uncertain.proc.IEventHandle;
 
 public interface ISingleEventHandle extends IEventHandle {
     

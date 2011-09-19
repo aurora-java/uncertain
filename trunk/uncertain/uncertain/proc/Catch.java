@@ -76,7 +76,7 @@ public class Catch extends Procedure implements IExceptionHandle {
     void locateRunner(ProcedureRunner runner){
         if(_next_step!=null){
             runner.locateTo(_next_step);
-            runner.resume_after_exception = true;
+            runner.mResumeAfterException = true;
         }
     }
     /*
