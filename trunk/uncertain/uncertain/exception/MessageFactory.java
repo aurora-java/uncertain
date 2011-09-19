@@ -9,14 +9,16 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import uncertain.proc.trace.IWithProcedureStackTrace;
+import uncertain.proc.trace.TraceElement;
 import uncertain.util.resource.ILocatable;
 import uncertain.util.resource.Location;
 
 public class MessageFactory {
 
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	public static final String RESOURCES_UNCERTAIN_BUILTIN_EXCEPTIONS = "resources.UncertainBuiltinExceptions";
     public static final String DEFAULT_EXCEPTION_CONFIG_FILE_NAME = "exception_config";
     private static Locale locale = Locale.getDefault();
@@ -132,6 +134,13 @@ public class MessageFactory {
 	                result.append(getLocationMessage(lcb));
 	    }
 	    result.append(origin_message);
+	    if(exp instanceof IWithProcedureStackTrace){
+	        TraceElement element = ((IWithProcedureStackTrace)exp).getTraceElement();
+	        if(element!=null){
+	            String trace = element.toStackTrace();
+	            result.append(LINE_SEPARATOR).append(trace);
+	        }
+	    }
 	    return result.toString();
 	}
 	
