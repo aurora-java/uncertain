@@ -6,6 +6,8 @@ package uncertain.exception;
 import java.io.File;
 
 import uncertain.composite.CompositeMap;
+import uncertain.proc.trace.IWithProcedureStackTrace;
+import uncertain.proc.trace.TraceElement;
 import uncertain.util.resource.ILocatable;
 import uncertain.util.resource.Location;
 
@@ -17,11 +19,12 @@ import uncertain.util.resource.Location;
  * 
  */
 public abstract class BaseException extends Exception implements ILocatable,
-        ICodedException {
+        ICodedException, IWithProcedureStackTrace {
 
     protected Location location;
     protected String sourceFile;
     protected String code;
+    protected TraceElement traceElement;
 
     protected BaseException(String message, Throwable cause) {
         super(message, cause);
@@ -102,6 +105,14 @@ public abstract class BaseException extends Exception implements ILocatable,
     public String getMessage() {
         String msg = super.getMessage();
         return MessageFactory.getExceptionMessage(this, msg);
+    }
+
+    public TraceElement getTraceElement() {
+        return traceElement;
+    }
+
+    public void setTraceElement(TraceElement traceElement) {
+        this.traceElement = traceElement;
     }
 
 }
