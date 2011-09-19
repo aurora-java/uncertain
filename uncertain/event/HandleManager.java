@@ -11,10 +11,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-import uncertain.proc.IEventHandle;
-import uncertain.proc.IEventListener;
 import uncertain.proc.ParticipantRegistry;
-import uncertain.proc.ReflectionMethodHandle;
 import uncertain.proc.ParticipantRegistry.HandleMethod;
 
 

@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import uncertain.event.ReflectionMethodHandle;
+
 /**
  * Holds cached handle methods for participant class 
  * @author Zhou Fan
