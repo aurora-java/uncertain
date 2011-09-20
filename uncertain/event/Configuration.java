@@ -56,6 +56,8 @@ public class Configuration  implements Cloneable, IEventDispatcher
         
         public int process( CompositeMap map){
             int result = IterationHandle.IT_CONTINUE;
+            if(isMapLoaded(map))
+                return IterationHandle.IT_CONTINUE;
             if(dataFilter!=null){
                 result = dataFilter.process(map);
                 if(result==IterationHandle.IT_BREAK)
@@ -154,6 +156,23 @@ public class Configuration  implements Cloneable, IEventDispatcher
     }
     
     /**
+     * Whether specified CompositeMap is already loaded. If a clone of original loaded CompositeMap
+     * is passed, return result will be false. 
+     * @param data
+     * @return true if is loaded
+     */
+    public boolean isMapLoaded( CompositeMap data ){
+        Integer value = CompositeUtil.uniqueHashCode(data);
+        if(instance_map!=null)
+            if(instance_map.containsKey(value))
+                return true;
+        if(feature_map!=null)
+            if(feature_map.containsKey(value))
+                return true;
+        return false;
+    }
+    
+    /**
      * Add a object as participant. 
      * @param obj
      */
@@ -194,15 +213,13 @@ public class Configuration  implements Cloneable, IEventDispatcher
         return obj;
     }
     
-    /** get a participant instance created from a container
-     * @param container
-     * @return
-     */
+    
     public Object getInstance(CompositeMap container){
         if(instance_map==null)
             return null;
         return container==null?instance_map.get(null):instance_map.get(new Integer(CompositeUtil.uniqueHashCode(container)));
     }
+    
     
     private void loadInternal(CompositeMap container){
        
@@ -223,7 +240,7 @@ public class Configuration  implements Cloneable, IEventDispatcher
     private List createFeatureList( CompositeMap config ){
         if(feature_map==null) feature_map = new HashMap();
         LinkedList fList = new LinkedList();
-        feature_map.put(config,fList);
+        feature_map.put(CompositeUtil.uniqueHashCode(config),fList);
         return fList;
     }
     
@@ -305,8 +322,9 @@ public class Configuration  implements Cloneable, IEventDispatcher
      * @param config
      * @return
      */
+    
     public List getAttachedFeatures( CompositeMap config ){
-        return feature_map==null?null:(List)feature_map.get(config);
+        return feature_map==null?null:(List)feature_map.get(CompositeUtil.uniqueHashCode(config));
     }
     
     /**
@@ -462,10 +480,12 @@ public class Configuration  implements Cloneable, IEventDispatcher
         List features = null;
         if(feature_map==null) 
             return null;
-        features = (List)feature_map.get(config);
+        //features = (List)feature_map.get(config);
+        features = getAttachedFeatures(config);
         if(features==null){
             loadConfig(config);
-            features = (List)feature_map.get(config);
+            //features = (List)feature_map.get(config);
+            features = getAttachedFeatures(config);
             if(features==null) return null;
         }
         HandleManager manager = new HandleManager(registry);
@@ -563,6 +583,7 @@ public class Configuration  implements Cloneable, IEventDispatcher
         return DummyLogger.getInstance();
     }
     
+    /*
     public Object clone(){
         Configuration conf = new Configuration( registry, ocManager);
         conf.handleManager = (HandleManager)handleManager.clone();
@@ -579,5 +600,6 @@ public class Configuration  implements Cloneable, IEventDispatcher
         }        
         return conf;
     }
+    */
 
 }
