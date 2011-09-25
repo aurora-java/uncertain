@@ -3,7 +3,7 @@
  */
 package uncertain.proc;
 
-import uncertain.core.ConfigurationError;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.ocm.OCManager;
 
 public class Catch extends Procedure implements IExceptionHandle {
@@ -65,7 +65,7 @@ public class Catch extends Procedure implements IExceptionHandle {
         try{
             _exception_class = Class.forName(_exception);
         }catch(ClassNotFoundException ex){
-            throw new ConfigurationError("specified exception class can't be found: "+type);
+            throw BuiltinExceptionFactory.createClassNotFoundException(this, type);
         }
     }
     
@@ -87,7 +87,8 @@ public class Catch extends Procedure implements IExceptionHandle {
     public boolean handleException(ProcedureRunner runner, Throwable exception) {
         boolean match_exception = handle_any_type;
         if(!handle_any_type){
-            if(_exception_class==null) throw new ConfigurationError("'exception' property must be set for <catch>");
+            if(_exception_class==null)
+                throw BuiltinExceptionFactory.createAttributeMissing(this, "exception");
             match_exception = _exception_class.isInstance(exception);
         }
         if(match_exception){
