@@ -161,8 +161,11 @@ public class ProcedureRunner {
         if(procException==null) procException = thr;
         lastException = procException;
         mResumeAfterException = false;
+        mRuntimeContext.setException(procException);
         mRuntimeContext.setSuccess(false);
         if(handleException(procException)){
+            mRuntimeContext.setException(null);
+            mRuntimeContext.setLastHandledException(procException);
             procException = null;
         }
         if(!mResumeAfterException)
