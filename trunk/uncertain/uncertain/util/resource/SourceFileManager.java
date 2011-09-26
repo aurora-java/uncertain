@@ -94,14 +94,15 @@ public class SourceFileManager implements ISourceFileManager , IStartable {
         if(isStarted)
             return true;
         isContinue = true;
-        mCheckThread.start();
+        if(!mCheckThread.isAlive())
+            mCheckThread.start();
         isStarted = true;
         return true;
     }
     
     public void shutdown(){
         isContinue = false;
-        mCheckThread.interrupt();
+//        mCheckThread.interrupt();
         isStarted = false;
     }
 
