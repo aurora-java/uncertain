@@ -17,11 +17,13 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     
     public static final String  KEY_CONFIGURATION = "__configuration__" ;
     
+    public static final String  KEY_LAST_HANDLED_EXCEPTION = "__last_handled_exception__";
+    
     public static final String  KEY_EXCEPTION = "__exception__";
     
     public static final String  KEY_IS_TRACE = "__is_trace__";
     
-    public static final String  KEY_TRACE_OBJECT = "__trace_object__";
+    //public static final String  KEY_TRACE_OBJECT = "__trace_object__";
 
     public static final String KEY_SERVICE_SUCCESS = "__service_success__";
     
@@ -31,7 +33,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
         return context;
     }
     
-    public CompositeMap getParentMap(){
+    private CompositeMap getParentMap(){
         return getObjectContext().getParent();
     }
 
@@ -100,7 +102,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     public Throwable getException(){
         return (Throwable)get(KEY_EXCEPTION);
     }
-    
+/*    
     public Exception getCatchableException(){
         Throwable thr = getException();
         if(thr!=null)
@@ -108,9 +110,17 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
                 return (Exception)thr;
         return null;
     }
-    
+*/    
     public void setException(Throwable e){
         put(KEY_EXCEPTION, e);
+    }
+    
+    public Throwable getLastHandledException(){
+        return (Throwable)get(KEY_LAST_HANDLED_EXCEPTION);
+    }
+    
+    public void setLastHandledException(Throwable thr){
+        put(KEY_LAST_HANDLED_EXCEPTION, thr);
     }
    
     public boolean isTrace(){
@@ -120,7 +130,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     public void setTrace( boolean trace ){
         putBoolean(KEY_IS_TRACE, trace);
     }
-
+/*
     public Object getTraceObject() {
         return get(KEY_TRACE_OBJECT);
     }
@@ -128,7 +138,7 @@ public class RuntimeContext extends DynamicObject implements IRuntimeContext {
     public void setTraceObject( Object obj ){
         put(KEY_TRACE_OBJECT, obj);
     }
-
+*/
     public boolean isSuccess() {
         return getBoolean(KEY_SERVICE_SUCCESS, true);
     }
