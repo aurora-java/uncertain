@@ -5,6 +5,7 @@ package uncertain.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -465,6 +466,18 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                 doConfigure(cfg_list);
         }
     }
+    
+    public void loadConfigFile( String full_path )
+    {
+        try{
+            CompositeMap    data = mCompositeLoader.loadByFullFilePath(full_path);
+            ArrayList lst = new ArrayList(1);
+            lst.add(data);
+            doConfigure(lst);
+        }catch(Exception ex){
+            throw new RuntimeException("Can't load file "+full_path,ex);
+        }
+    }
 
     /*
      * ================== factory methods =======================================
@@ -636,8 +649,12 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     public void addContextListener(IContextListener listener) {
         mContextListenerSet.add(listener);
     }
+    
+    public void startup(){
+        startup(true);
+    }
 
-    public void startup() {
+    public void startup( boolean scan_config_files ) {
         long tick = System.currentTimeMillis();
         File local_config_file = new File(mConfigDir, "uncertain.local.xml");
         CompositeMap local_config_map = null;
@@ -652,7 +669,8 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         }
         checkLogger();
         mLogger.log("Uncertain engine startup");
-        scanConfigFiles(DEFAULT_CONFIG_FILE_PATTERN);
+        if(scan_config_files)
+            scanConfigFiles(DEFAULT_CONFIG_FILE_PATTERN);
         mIsRunning = true;
         registerMBean();
         tick = System.currentTimeMillis() - tick;
