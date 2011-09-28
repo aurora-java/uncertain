@@ -17,7 +17,6 @@ public class Argument extends AbstractLocatableObject {
 	private String type;
 	private String value;
 	private String path;
-	private CompositeMap config;
 	private Object objectValue;
 	private Class classType;
 
@@ -77,11 +76,7 @@ public class Argument extends AbstractLocatableObject {
 	public void validConfig(){
 		
 	}
-	public void beginConfigure(CompositeMap config) {
-		this.config = config;
-	}
-	public void endConfigure() {
-	}
+
 	public Object getObjectValue() {
 		return objectValue;
 	}
