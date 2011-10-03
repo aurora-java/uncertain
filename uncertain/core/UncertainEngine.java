@@ -23,6 +23,7 @@ import uncertain.event.Configuration;
 import uncertain.event.IContextListener;
 import uncertain.event.IEventDispatcher;
 import uncertain.event.RuntimeContext;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.IExceptionListener;
 import uncertain.logging.BasicConsoleHandler;
 import uncertain.logging.BasicFileHandler;
@@ -42,10 +43,13 @@ import uncertain.mbean.IMBeanRegistrable;
 import uncertain.mbean.MBeanRegister;
 import uncertain.mbean.UncertainEngineWrapper;
 import uncertain.ocm.ClassRegistry;
+import uncertain.ocm.IClassLocator;
 import uncertain.ocm.IObjectCreator;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.ocm.ObjectRegistryImpl;
+import uncertain.pkg.IInstanceCreationListener;
+import uncertain.pkg.IPackageManager;
 import uncertain.pkg.PackageManager;
 import uncertain.pkg.PackagePath;
 import uncertain.proc.IProcedureManager;
@@ -92,6 +96,9 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     Set mContextListenerSet;
     File mConfigDir;
     boolean mIsRunning = true;
+    Set<String> mLoadedFiles = new HashSet<String>();
+    List<ILifeCycle>    mLoadedLifeCycleList = new LinkedList<ILifeCycle>();
+    
     /* =========== logging related members =================== */
     // String mLogPath;
     String mDefaultLogLevel = "WARNING";
@@ -117,12 +124,12 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     public UncertainEngine() {
         bootstrap();
     }
-
+/*
     public UncertainEngine(File config_dir) {
         bootstrap();
         setConfigDirectory(config_dir);
     }
-
+*/
     public UncertainEngine(File config_dir, String config_file_name) {
         bootstrap();
         setConfigDirectory(config_dir);
@@ -148,13 +155,15 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     }
 
     private void registerBuiltinInstances() {
-        // objectSpace.registerParameter(compositeParser);
-        mObjectRegistry.registerInstance(mCompositeLoader);
-        mObjectRegistry.registerInstance(mClassRegistry);
-        mObjectRegistry.registerInstance(mParticipantRegistry);
-        mObjectRegistry.registerInstance(mOcManager);
         mObjectRegistry.registerInstanceOnce(IContainer.class, this);
         mObjectRegistry.registerInstanceOnce(UncertainEngine.class, this);
+        mObjectRegistry.registerInstance(CompositeLoader.class, mCompositeLoader);
+        mObjectRegistry.registerInstance(IClassLocator.class, mClassRegistry);
+        mObjectRegistry.registerInstance(ClassRegistry.class, mClassRegistry);
+        mObjectRegistry.registerInstance(ParticipantRegistry.class, mParticipantRegistry);
+        mObjectRegistry.registerInstance(OCManager.class, mOcManager);
+        mObjectRegistry.registerInstance(DirectoryConfig.class, mDirectoryConfig);
+                
         mObjectRegistry.registerInstanceOnce(IObjectRegistry.class,
                 mObjectRegistry);
         mObjectRegistry.registerInstanceOnce(IObjectCreator.class,
@@ -166,7 +175,8 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                 this.getProcedureManager());
         mObjectRegistry.registerInstanceOnce(ISourceFileManager.class,
                 mSourceFileManager);
-        mObjectRegistry.registerInstance(mPackageManager);
+        mObjectRegistry.registerInstance(IPackageManager.class, mPackageManager);
+
         mObjectRegistry.registerInstanceOnce(ISchemaManager.class, mSchemaManager);
     }
 
@@ -183,6 +193,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         mClassRegistry.registerPackage("uncertain.core");
         mClassRegistry.registerPackage("uncertain.core.admin");
         mClassRegistry.registerPackage("uncertain.event");
+        mClassRegistry.registerPackage("uncertain.pkg");
         mClassRegistry.registerPackage("uncertain.cache");
         mClassRegistry.registerPackage("uncertain.cache.action");
         mClassRegistry.registerClass("class-registry", "uncertain.ocm",
@@ -353,6 +364,21 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         }
         return true;
     }
+    
+    private boolean loadInstance( Object inst ){
+        mConfig.addParticipant(inst);
+        if (inst instanceof IContextListener)
+            addContextListener((IContextListener) inst);
+        if( inst instanceof ILifeCycle ){
+            ILifeCycle c =(ILifeCycle)inst; 
+            if(c.startup()){
+                mLoadedLifeCycleList.add(c);
+                return true;
+            } else
+                return false;
+        }
+        return true;
+    }
 
     /**
      * Do configuration and startup works
@@ -360,16 +386,15 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
      * @param cfg
      *            collection of CompositeMap containing configuration data.
      */
-    public void doConfigure(Collection cfg) {
-        mIsRunning = false;
-        mConfig = createConfig();
-        mConfig.setLogger(mLogger);
+    private void doConfigure(Collection cfg) {
         // logger.info("Attached:"+this.ocManager.getClassRegistry().getFeatures(new
         // ElementIdentifier(null,"class-registry")));
         mConfig.loadConfigList(cfg);
+        /*
         if (mConfig.getParticipantList().size() > 0)
             mLogger.log("Adding configuration participant "
                     + mConfig.getParticipantList());
+                    */
         // regsiter global instances
         Iterator it = mConfig.getParticipantList().iterator();
         while (it.hasNext()) {
@@ -379,6 +404,9 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
             if (inst instanceof IContextListener)
                 addContextListener((IContextListener) inst);
         }
+    }
+    
+    private void runStartupProcedure(){
         // run procedure
         Procedure proc = loadProcedure("uncertain.core.EngineInit");
         if (proc == null)
@@ -447,7 +475,10 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
             LinkedList cfg_list = new LinkedList();
             ListIterator fit = file_list.listIterator(cfg_files.length);
             while (fit.hasPrevious()) {
-                String file_path = ((File) fit.previous()).getAbsolutePath();
+                File file = (File) fit.previous();
+                if(mLoadedFiles.contains(file.getAbsolutePath()))
+                    continue;
+                String file_path = file.getAbsolutePath();
                 mLogger.log("Loading configuration file " + file_path);
                 try {
                     CompositeMap config_map = mCompositeLoader
@@ -461,6 +492,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                     setInitError(thr);
                     return;
                 }
+                mLoadedFiles.add(file.getAbsolutePath());
             }
             if (cfg_list.size() > 0)
                 doConfigure(cfg_list);
@@ -572,7 +604,8 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         mConfigDir = dir;
         mDirectoryConfig.setConfigDirectory(dir.getPath());
     }
-/*
+
+    /** for O/C mapping */
     public void addClassRegistry(ClassRegistry reg) {
         mClassRegistry.addAll(reg);
     }
@@ -580,7 +613,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     public void addClassRegistry(ClassRegistry reg, boolean override) {
         mClassRegistry.addAll(reg, override);
     }
-*/
+
     /**
      * @return Returns the classRegistry.
      */
@@ -653,9 +686,28 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     public void startup(){
         startup(true);
     }
+    
+    private void loadInstanceFromPackage(){
+        mPackageManager.createInstances(mObjectRegistry, new IInstanceCreationListener(){
+            
+            public void onInstanceCreate( Object instance, File config_file ){
+                if(!loadInstance(instance)){
+                    throw BuiltinExceptionFactory.createInstanceStartError(instance, config_file.getAbsolutePath(), null);
+                }
+                mLoadedFiles.add(config_file.getAbsolutePath());
+                mLogger.info("Loaded instance "+instance.getClass().getName()+" from "+config_file.getAbsolutePath());
+            }
+        });
+        
+    }
 
     public void startup( boolean scan_config_files ) {
         long tick = System.currentTimeMillis();
+
+        mIsRunning = false;
+        mConfig = createConfig();
+        mConfig.setLogger(mLogger);
+        
         File local_config_file = new File(mConfigDir, "uncertain.local.xml");
         CompositeMap local_config_map = null;
         if (local_config_file.exists()) {
@@ -669,8 +721,14 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         }
         checkLogger();
         mLogger.log("Uncertain engine startup");
-        if(scan_config_files)
+        
+        if(scan_config_files){
+            // new part, load all instances
+            loadInstanceFromPackage();
+            // old part
             scanConfigFiles(DEFAULT_CONFIG_FILE_PATTERN);
+        }
+        runStartupProcedure();
         mIsRunning = true;
         registerMBean();
         tick = System.currentTimeMillis() - tick;
@@ -678,9 +736,10 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     }
 
     public void shutdown() {
-        mIsRunning = false;
-        mSourceFileManager.shutdown();
-        mLogger.log("Uncertain engine shutdown");
+        if(mSourceFileManager!=null)
+            mSourceFileManager.shutdown();
+        if(mLogger!=null)
+            mLogger.log("Uncertain engine shutdown");
         Procedure proc = loadProcedure("uncertain.core.EngineShutdown");
         if (proc == null)
             throw new IllegalArgumentException(
@@ -688,6 +747,15 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         ProcedureRunner runner = createProcedureRunner(proc);
         runner.addConfiguration(mConfig);
         runner.run();
+        
+        for(ILifeCycle l: mLoadedLifeCycleList){
+            try{
+                l.shutdown();
+            }catch(Throwable thr){
+                mLogger.log(Level.WARNING, "Error when shuting down instance "+l, thr);
+            }
+        }
+        mIsRunning = false;        
     }
 
     public DirectoryConfig getDirectoryConfig() {
