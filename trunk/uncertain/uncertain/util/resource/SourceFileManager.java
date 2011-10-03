@@ -8,9 +8,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import uncertain.core.IStartable;
+import uncertain.core.ILifeCycle;
 
-public class SourceFileManager implements ISourceFileManager , IStartable {
+public class SourceFileManager implements ISourceFileManager , ILifeCycle {
 
     static SourceFileManager DEFAULT_INSTANCE = new SourceFileManager();
 
@@ -102,7 +102,7 @@ public class SourceFileManager implements ISourceFileManager , IStartable {
     
     public void shutdown(){
         isContinue = false;
-//        mCheckThread.interrupt();
+        mCheckThread.interrupt();
         isStarted = false;
     }
 
