@@ -76,4 +76,29 @@ public class BuiltinExceptionFactory {
         return new ConfigurationFileException("uncertain.exception.invalid_path", new Object[]{path}, null, locatable);
     }
     
+    public static ConfigurationFileException createCannotCreateInstanceFromConfigException(ILocatable locatable, String config_path ){
+        return new ConfigurationFileException("uncertain.exception.cannot_create_instance_from_config", new Object[]{config_path}, null, locatable);
+    }
+    
+    public static GeneralException createInstanceDependencyNotMeetException(ILocatable locatable, String object_list ){
+        return new GeneralException("uncertain.exception.instance_dependency_not_meet", new Object[]{object_list}, null, locatable);
+    }
+    
+    public static GeneralException createInstanceTypeWrongException( String source, Class expected_type, Class actual_type ){
+        return new GeneralException("uncertain.exception.instance_type_wrong", new Object[]{source, expected_type, actual_type}, (Throwable)null );
+    }
+
+    public static GeneralException createXmlGrammarException( String source, Throwable cause ){
+        return new GeneralException("uncertain.exception.xml_grammar_exception", new Object[]{source}, cause );
+    }
+    
+    public static GeneralException createRequiredFileNotFound( String source ){
+        return new GeneralException("uncertain.exception.required_file_not_found", new Object[]{source}, (Throwable)null );
+    }
+    
+    public static GeneralException createInstanceStartError( Object instance, String config_file, Throwable cause ){
+        return new GeneralException("uncertain.exception.engine.instance_start_error", new Object[]{instance, config_file}, cause );
+    }
+    
+    
 }

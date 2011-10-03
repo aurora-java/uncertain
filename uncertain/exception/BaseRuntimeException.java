@@ -59,7 +59,7 @@ public abstract class BaseRuntimeException extends RuntimeException implements I
 
     public BaseRuntimeException(String code, Object[] args, Throwable cause,
             ILocatable location) {
-        this(code, args, cause, location.getOriginSource(), location==null?null:location
+        this(code, args, cause, location==null?null:location.getOriginSource(), location==null?null:location
                 .getOriginLocation());
     }
 
