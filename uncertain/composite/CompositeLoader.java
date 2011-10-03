@@ -80,6 +80,8 @@ public class CompositeLoader {
 	boolean            mSupportFileMerge = false;
 	boolean            mSaveNamespaceMapping = false;
 	
+	CompositeLoaderSilentyWrapper wrapper = new CompositeLoaderSilentyWrapper(this);
+	
 	
 	CompositeMap parse( InputStream stream) throws IOException, SAXException {
 	    CompositeMapParser p = new CompositeMapParser(this);
@@ -494,5 +496,9 @@ public class CompositeLoader {
 
     public void setSourceFileManager(ISourceFileManager mSourceFileManager) {
         this.mSourceFileManager = mSourceFileManager;
-    }    
+    }
+    
+    public CompositeLoaderSilentyWrapper silently(){
+        return wrapper;
+    }
 }
