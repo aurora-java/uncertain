@@ -7,7 +7,7 @@ package uncertain.core;
 /**
  * Defines start & shutdown 
  */
-public interface IStartable {
+public interface ILifeCycle {
 
     /**
      * @return true if this operation is success
