@@ -18,6 +18,7 @@ import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
 import uncertain.composite.QualifiedName;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.schema.ComplexType;
@@ -41,6 +42,7 @@ public class ComponentPackage {
     String mName;
     PackageManager mOwner;
     SchemaManager mSchemaManager;
+    InstanceConfig  mInstanceConfig;
     // configuration of this package
     CompositeMap mConfigData;
     PackageConfig mPackageConfig;
@@ -56,7 +58,7 @@ public class ComponentPackage {
         initPackage();
     }
 
-    public File getConfigDirectory() {
+    public File getConfigPath() {
         return mConfigPathFile;
     }
 
@@ -72,22 +74,17 @@ public class ComponentPackage {
     }
 
     protected CompositeMap loadConfigFile(File config_path, String name,
-            boolean is_required) throws IOException {
+            boolean is_required) {
         CompositeLoader loader = mOwner.getCompositeLoader();
         File config_file = new File(config_path, name);
         if (!config_file.exists()) {
             if (is_required)
-                throw new FileNotFoundException("package config file "
-                        + config_file.getPath() + " is not found");
+                throw BuiltinExceptionFactory.createRequiredFileNotFound(config_file.getAbsolutePath());
             else
                 return null;
         }
         String path = config_file.getPath();
-        try {
-            return loader.loadByFullFilePath(path);
-        } catch (SAXException ex) {
-            throw new RuntimeException("Config file is not valid: " + path, ex);
-        }
+        return loader.silently().loadByFullFilePath(path);
     }
 
     protected void loadSchemaFile(File config_path) throws IOException {
@@ -136,6 +133,24 @@ public class ComponentPackage {
             }
         }
     }
+    
+    private Object createOptionalObject( String config_file, Class type ){
+        File config_path = new File(mBasePathFile, CONFIG_PATH);
+        OCManager oc_manager = mOwner.getOCManager();
+        File source_file = new File(config_path,config_file);
+        if(!source_file.exists())
+            return null;
+        CompositeMap data = loadConfigFile(config_path, config_file, false);
+        if ( data != null){
+            Object inst = oc_manager.createObject(data);
+            if(inst==null)
+                throw BuiltinExceptionFactory.createCannotCreateInstanceFromConfigException(null, source_file.getAbsolutePath());
+            if(!type.isInstance(inst))
+                throw BuiltinExceptionFactory.createInstanceTypeWrongException(source_file.getAbsolutePath(), type, inst.getClass());
+            return inst;
+        }
+        return null;
+    }
 
     protected void initPackage() throws IOException {
 
@@ -151,6 +166,12 @@ public class ComponentPackage {
             setName(mBasePathFile.getName());
         }
 
+        mClassRegistry = (ClassRegistry)createOptionalObject(CLASS_REGISTRY_FILE,ClassRegistry.class);
+        mInstanceConfig = (InstanceConfig)createOptionalObject("instance.xml", InstanceConfig.class);
+        if(mInstanceConfig!=null)
+            mInstanceConfig.setOwnerPackage(this);
+
+        /*
         CompositeMap registry = loadConfigFile(config_path,
                 CLASS_REGISTRY_FILE, false);
         if (registry != null)
@@ -163,9 +184,12 @@ public class ComponentPackage {
                                 + " is not valid, the root element should be mapped to "
                                 + ClassRegistry.class.getName());
             }
+ */       
+        // create SchemaManager
         mSchemaManager = new SchemaManager(oc_manager);
         mSchemaManager.setParent(mOwner.getSchemaManager());
         loadSchemaFile(config_path);
+        
     }
 
     /**
@@ -256,6 +280,14 @@ public class ComponentPackage {
 
     public SchemaManager getSchemaManager() {
         return mSchemaManager;
+    }
+    
+    public InstanceConfig getInstanceConfig(){
+        return mInstanceConfig;
+    }
+    
+    public String toString(){
+        return "package "+ mName +" from " + mBasePathFile==null?"(null)":mBasePathFile.getAbsolutePath();
     }
 
 }
