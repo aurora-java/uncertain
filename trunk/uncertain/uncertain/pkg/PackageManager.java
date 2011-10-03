@@ -11,12 +11,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.ClassRegistryMBean;
+import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.schema.SchemaManager;
 import uncertain.util.FileUtil;
@@ -26,21 +29,24 @@ import uncertain.util.FileUtil;
  */
 public class PackageManager implements IPackageManager {
 
+    public static final String FILE_PACKAGE_XML = "package.xml";
+    public static final String KEY_CONFIG = "config";
     CompositeLoader mCompositeLoader;
     OCManager mOCManager;
-    HashMap mPackageNameMap = new HashMap();
+    // package name -> loaded component package
+    HashMap<String,ComponentPackage> mPackageNameMap = new HashMap<String,ComponentPackage>();
     ClassRegistry   mClassRegistry;
     SchemaManager mSchemaManager;
     // path -> loaded component package 
-    HashMap mLoadedPackagePaths = new HashMap();
+    HashMap<String,ComponentPackage> mLoadedPackagePaths = new HashMap<String,ComponentPackage>();
 
     public static boolean isPackageDirectory(File dir) {
         if (!dir.isDirectory())
             return false;
-        File config_dir = new File(dir, "config");
+        File config_dir = new File(dir, KEY_CONFIG);
         if (!config_dir.exists() || !config_dir.isDirectory())
             return false;
-        File pkg_xml = new File(config_dir, "package.xml");
+        File pkg_xml = new File(config_dir, FILE_PACKAGE_XML);
         if (!pkg_xml.exists())
             return false;
         return true;
@@ -85,11 +91,18 @@ public class PackageManager implements IPackageManager {
 
     protected void initPackage(ComponentPackage pkg) {
         pkg.setPackageManager(this);
-        mPackageNameMap.put(pkg.getName(), pkg);
     }
 
 
     public void addPackage(ComponentPackage pkg) {
+        String name = pkg.getName();
+        if(pkg.getName()==null)
+            throw new IllegalArgumentException("Package name can't be null");
+        if(mPackageNameMap.containsKey(name)){
+            throw new IllegalArgumentException("Package with name "+name+" is already loaded");
+        }
+        mPackageNameMap.put(name, pkg);
+
         // if(pkg.getPackageManager()!=this)
         initPackage(pkg);
         SchemaManager sm = pkg.getSchemaManager();
@@ -104,7 +117,7 @@ public class PackageManager implements IPackageManager {
             throws IOException {
         File f = new File(path);
         path = f.getCanonicalPath();
-        ComponentPackage pkg = (ComponentPackage)mLoadedPackagePaths.get(path);
+        ComponentPackage pkg = mLoadedPackagePaths.get(path);
         if(pkg!=null)
             return pkg;
 
@@ -117,12 +130,11 @@ public class PackageManager implements IPackageManager {
         initPackage(pkg);
         pkg.load(path);
         addPackage(pkg);
-        // System.out.println("loaded "+path);
         return pkg;
     }
 
     public ComponentPackage getPackage(String name) {
-        return (ComponentPackage) mPackageNameMap.get(name);
+        return mPackageNameMap.get(name);
     }
 
     public SchemaManager getSchemaManager() {
@@ -186,12 +198,6 @@ public class PackageManager implements IPackageManager {
                         baseDir = new File(tempDir, name);
                         if (baseDir.exists())
                                 FileUtil.deleteDirectory(baseDir);
-                                /*
-                            if (!baseDir.delete())
-                                throw new IOException(
-                                        "Can't delete existing dir "
-                                                + baseDir.getAbsolutePath());
-                                                */
                         if (!baseDir.mkdirs())
                             throw new IOException("Can't create dir "
                                     + baseDir.getAbsolutePath());
@@ -299,6 +305,15 @@ public class PackageManager implements IPackageManager {
     public void loadPackagePaths(PackagePath[] paths) throws IOException {
         for (int i = 0; i < paths.length; i++)
             loadPackage(paths[i]);
+    }
+    
+    public void createInstances(IObjectRegistry reg, IInstanceCreationListener listener ){
+        List<InstanceConfig> lst = new LinkedList<InstanceConfig>();
+        for( ComponentPackage pkg: mPackageNameMap.values()){
+            InstanceConfig cfg = pkg.getInstanceConfig();
+            if(cfg!=null) lst.add(cfg);
+        }
+        InstanceConfig.loadComponents(lst, reg, mCompositeLoader, mOCManager, listener);
     }
 
 }

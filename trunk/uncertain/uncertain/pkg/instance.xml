@@ -1,0 +1,12 @@
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="datasource.config" alternativeConfigFile="${configPath}/0.datasource.config" rootElement="" rootNamspace="" >
+			<u:required-instances>
+				<u:type typeName="javax.sql.DataSource" />
+			</u:required-instances>
+			<u:implement-types>
+				<u:type typeName="aurora.applicaiton.features.ICustomizationDataProvider" />
+			</u:implement-types>
+		</u:configurable-instance>
+	</u:instances>
+</u:instance-config>
