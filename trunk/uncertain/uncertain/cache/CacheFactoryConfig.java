@@ -9,10 +9,10 @@ import java.util.Map;
 
 import uncertain.core.ConfigurationError;
 import uncertain.core.IGlobalInstance;
-import uncertain.core.IStartable;
+import uncertain.core.ILifeCycle;
 import uncertain.ocm.IObjectRegistry;
 
-public class CacheFactoryConfig implements INamedCacheFactory, IGlobalInstance {
+public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 
     
     public static ICache getNamedCache( IObjectRegistry reg, String name ){
@@ -104,7 +104,7 @@ public class CacheFactoryConfig implements INamedCacheFactory, IGlobalInstance {
         mCacheMappingArray = mappings;
     }
     
-    public void onAssemble(){
+    public boolean startup() {
         for( int i=0; i<mNamedCacheFactoryArray.length; i++)
             mCacheFactoryMap.put(mNamedCacheFactoryArray[i].getName(), mNamedCacheFactoryArray[i]);
         for( int i=0; i<mCacheMappingArray.length; i++){
@@ -123,6 +123,7 @@ public class CacheFactoryConfig implements INamedCacheFactory, IGlobalInstance {
             if(mDefaultCacheFactory==null)
                 throw new ConfigurationError("Can't find cache factory named "+mDefaultCacheFactoryName);
         }
+        return true;
     }
 
     public boolean isCacheEnabled(String name) {
@@ -137,16 +138,22 @@ public class CacheFactoryConfig implements INamedCacheFactory, IGlobalInstance {
         }
     }
     
-    public void onShutdown(){
+    public void shutdown(){
         if(mNamedCacheFactoryArray==null)
             return;
         for(int i=0; i<mNamedCacheFactoryArray.length; i++){
             Object o = mNamedCacheFactoryArray[i];
-            if(o instanceof IStartable){
-                IStartable s = (IStartable)o;
+            if(o instanceof ILifeCycle){
+                ILifeCycle s = (ILifeCycle)o;
                 s.shutdown();
             }
         }
+        
     }
+    /*
+    public void onShutdown(){
+        shutdown();
+    }
+    */
 
 }
