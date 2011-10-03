@@ -21,7 +21,7 @@ public interface IProcedureManager {
      * @param name name of procedure, in java class format
      * @return A new Procedure instance according to specified name
      */
-    public Procedure loadProcedure( String name ) throws IOException, SAXException;
+    public Procedure loadProcedure( String name );
     
     /**
      * Create a new empty Procedure instance

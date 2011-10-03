@@ -1,5 +1,5 @@
 /*
- * Created on 2009-9-2 ÏÂÎç02:24:17
+ * Created on 2009-9-2 ï¿½ï¿½ï¿½ï¿½02:24:17
  * Author: Zhou Fan
  */
 package uncertain.proc;
@@ -86,16 +86,12 @@ public class ProcedureManager implements IProcedureManager {
     }
 
     private Procedure loadProcedureNC(String name) 
-        throws IOException, SAXException
     {
-        CompositeMap map = mCompositeLoader.loadFromClassPath(name);
-        if(map==null)
-            throw new IOException("Can't load config file "+name);
+        CompositeMap map = mCompositeLoader.silently().loadFromClassPath(name);
         return createProcedure(map);
     }
     
     public Procedure loadProcedure(String name) 
-    throws IOException, SAXException
     {
         if(!mIsCache || mCache==null)
             return loadProcedureNC(name);
