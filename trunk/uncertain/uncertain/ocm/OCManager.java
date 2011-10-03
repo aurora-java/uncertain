@@ -181,9 +181,12 @@ public class OCManager implements IMappingHandle {
 		try{
 		    obj = objectCreator.createInstance(cls);
 		    //logger.info("Instance created: "+cls.getName());
-		} catch(Throwable thr){
+		} catch(Exception ex){
+		    /*
 			fireEvent(OCMEventFactory.newObjectCreationFailEvent(this,container));
-			return null;		    
+			return null;
+			*/
+		    throw new RuntimeException(ex);
 		}        
 		return obj;
     }
