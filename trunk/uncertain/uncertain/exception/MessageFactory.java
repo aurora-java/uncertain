@@ -108,7 +108,7 @@ public class MessageFactory {
         else if(locate.getOriginSource()!=null)
             return getLocationMessage(locate.getOriginSource(), 0, 0);
         else
-            return null;
+            return "";
     }
 	
     /**
