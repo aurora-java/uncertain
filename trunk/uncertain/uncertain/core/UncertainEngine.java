@@ -403,6 +403,12 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                 getObjectRegistry().registerInstance(inst);
             if (inst instanceof IContextListener)
                 addContextListener((IContextListener) inst);
+            if( inst instanceof ILifeCycle ){
+                ILifeCycle c =(ILifeCycle)inst; 
+                if(c.startup()){
+                    mLoadedLifeCycleList.add(c);
+                }
+            }
         }
     }
     
@@ -745,7 +751,8 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
             throw new IllegalArgumentException(
                     "Can't load uncertain/core/EngineShutdown.proc from class loader");
         ProcedureRunner runner = createProcedureRunner(proc);
-        runner.addConfiguration(mConfig);
+        if(mConfig!=null)
+            runner.addConfiguration(mConfig);
         runner.run();
         
         for(ILifeCycle l: mLoadedLifeCycleList){
