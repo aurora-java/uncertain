@@ -423,23 +423,21 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
     }
 
     public void scanConfigFiles() {
-        if (mConfigDir != null) {
-            mLogger.log("Scanning config directory " + mConfigDir);
-            scanConfigFiles(mConfigDir, DEFAULT_CONFIG_FILE_PATTERN);
-        } else {
-            if (mDirectoryConfig != null)
-                if (mDirectoryConfig.getBaseDirectory() != null) {
-                    mLogger.log("Scanning config directory "
-                            + mCompositeLoader.getBaseDir());
-                    scanConfigFiles(
-                            new File(mDirectoryConfig.getBaseDirectory()),
-                            DEFAULT_CONFIG_FILE_PATTERN);
-                }
-        }
+        File cfg_dir = getConfigDirectory();
+        if(cfg_dir==null && mDirectoryConfig!=null)
+            if(mDirectoryConfig.getBaseDirectory()!=null){
+                cfg_dir = new File(mDirectoryConfig.getBaseDirectory());
+                if(!cfg_dir.exists())
+                    cfg_dir = null;
+            }
+        if (cfg_dir != null) {
+            mLogger.log("Scanning config directory " + cfg_dir);
+            scanConfigFiles(cfg_dir, DEFAULT_CONFIG_FILE_PATTERN);
+        }     
     }
 
     public void scanConfigFiles(String pattern) {
-        scanConfigFiles(mConfigDir, pattern);
+        scanConfigFiles(getConfigDirectory(), pattern);
     }
 
     private List getSortedList(File[] files) {
@@ -678,6 +676,11 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
      * @return Returns the config_dir.
      */
     public File getConfigDirectory() {
+        if(mConfigDir==null){
+            String dir = mDirectoryConfig.getConfigDirectory();
+            if(dir!=null)
+                mConfigDir = new File(dir);
+        }
         return mConfigDir;
     }
 
@@ -714,7 +717,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         mConfig = createConfig();
         mConfig.setLogger(mLogger);
         
-        File local_config_file = new File(mConfigDir, "uncertain.local.xml");
+        File local_config_file = new File(getConfigDirectory(), "uncertain.local.xml");
         CompositeMap local_config_map = null;
         if (local_config_file.exists()) {
             try {
