@@ -32,4 +32,6 @@ public interface ISchemaManager {
      */
     public Element getElement( CompositeMap data );    
     public List getElementsOfType( IType parent_type );
+    public Wizard getWizard( QualifiedName qname);
+    public Editor getEditor(QualifiedName qname);
 }
