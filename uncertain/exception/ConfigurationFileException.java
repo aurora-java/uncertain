@@ -31,7 +31,7 @@ public class ConfigurationFileException extends
     }
     
     public ConfigurationFileException( String code, Object[] args, Throwable cause, ILocatable location ){
-        super(code,args,cause,location.getOriginSource(), location.getOriginLocation());
+        super(code,args,cause,location!=null?location.getOriginSource():"", location!=null?location.getOriginLocation():null);
     }
     
     public ConfigurationFileException( String code, Object[] args,ILocatable location ){
