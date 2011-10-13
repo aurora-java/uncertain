@@ -4,18 +4,6 @@
 package uncertain.core;
 
 import java.io.File;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import uncertain.composite.CompositeLoader;
-import uncertain.composite.CompositeMap;
-import uncertain.core.UncertainEngine;
-import uncertain.ocm.ClassRegistry;
-import uncertain.ocm.IObjectRegistry;
-import uncertain.util.LoggingUtil;
 
 public class EngineInitiator {
 
