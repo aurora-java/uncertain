@@ -125,7 +125,7 @@ public class InstanceConfig extends AbstractLocatableObject {
         return inst_list;
     }
     
-    public static void loadComponents( Collection<InstanceConfig> inst_config_list, IObjectRegistry obj_registry,  CompositeLoader composite_loader, OCManager oc_manager, IInstanceCreationListener listener ){
+    public static void loadComponents( Collection<InstanceConfig> inst_config_list, IObjectRegistry obj_registry,  CompositeLoader composite_loader, OCManager oc_manager, IInstanceCreationListener listener ,boolean continueWithException){
         Map<String,ConfigurableInstance> set = new HashMap<String,ConfigurableInstance>();
         List<ConfigurableInstance> inst_list = new LinkedList<ConfigurableInstance>();
         for(InstanceConfig config: inst_config_list){
@@ -139,23 +139,34 @@ public class InstanceConfig extends AbstractLocatableObject {
             for( ListIterator<ConfigurableInstance> it = inst_list.listIterator();  it.hasNext(); ){
                 ConfigurableInstance inst = it.next();
                 if(inst.canCreateInstance(obj_registry)){
-                    ConfigurableInstance ci = set.get(inst.getActualConfigFile().getAbsolutePath());
-                    if(ci!=null)
-                        throw new RuntimeException("duplicated config file:"+inst.getOriginSource()+", existing from "+ci.getOriginSource());
-                    set.put(inst.getActualConfigFile().getAbsolutePath(), inst);
-                    Object instance = inst.createInstance(composite_loader, oc_manager);
-                    inst.registerInstance(instance, obj_registry);
-                    if(listener!=null)
-                        listener.onInstanceCreate(instance, inst.getActualConfigFile());
-                    created_num++;
-                    it.remove();
+					try {
+						ConfigurableInstance ci = set.get(inst.getActualConfigFile().getAbsolutePath());
+						if (ci != null)
+							throw new RuntimeException("duplicated config file:" + inst.getOriginSource()
+									+ ", existing from " + ci.getOriginSource());
+						set.put(inst.getActualConfigFile().getAbsolutePath(), inst);
+						Object instance = inst.createInstance(composite_loader, oc_manager);
+						inst.registerInstance(instance, obj_registry);
+						if (listener != null)
+							listener.onInstanceCreate(instance, inst.getActualConfigFile());
+						created_num++;
+						it.remove();
+					} catch (Throwable e) {
+						if (!continueWithException) {
+							throw new RuntimeException(e);
+						}
+					}
                 }
             }
             if(created_num==0){
-                StringBuffer error_list = new StringBuffer();
-                for( ConfigurableInstance inst:inst_list)
-                    error_list.append(inst.getActualConfigFile().getAbsolutePath()).append(" ");
-                throw BuiltinExceptionFactory.createInstanceDependencyNotMeetException(null, error_list.toString());
+				if (!continueWithException) {
+					StringBuffer error_list = new StringBuffer();
+					for (ConfigurableInstance inst : inst_list)
+						error_list.append(inst.getActualConfigFile().getAbsolutePath()).append(" ");
+					throw BuiltinExceptionFactory.createInstanceDependencyNotMeetException(null, error_list.toString());
+				} else {
+					break;
+				}
             }
         }
     }
