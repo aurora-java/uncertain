@@ -307,13 +307,13 @@ public class PackageManager implements IPackageManager {
             loadPackage(paths[i]);
     }
     
-    public void createInstances(IObjectRegistry reg, IInstanceCreationListener listener ){
+    public void createInstances(IObjectRegistry reg, IInstanceCreationListener listener,boolean continueWithException){
         List<InstanceConfig> lst = new LinkedList<InstanceConfig>();
         for( ComponentPackage pkg: mPackageNameMap.values()){
             InstanceConfig cfg = pkg.getInstanceConfig();
             if(cfg!=null) lst.add(cfg);
         }
-        InstanceConfig.loadComponents(lst, reg, mCompositeLoader, mOCManager, listener);
+        InstanceConfig.loadComponents(lst, reg, mCompositeLoader, mOCManager, listener,continueWithException);
     }
 
 }

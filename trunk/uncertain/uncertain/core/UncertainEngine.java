@@ -107,7 +107,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
 
     // exception during init process
     Throwable mInitException;
-
+    boolean mContinueLoadInstanceWithException = false;;
     public static UncertainEngine createInstance() {
         UncertainEngine engine = new UncertainEngine();
         engine.initialize(null);
@@ -706,7 +706,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                 mLoadedFiles.add(config_file.getAbsolutePath());
                 mLogger.info("Loaded instance "+instance.getClass().getName()+" from "+config_file.getAbsolutePath());
             }
-        });
+        },mContinueLoadInstanceWithException);
         
     }
 
@@ -843,5 +843,13 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         }
         reg_set.clear();
     }
+
+	public boolean isContinueLoadConfigWithException() {
+		return mContinueLoadInstanceWithException;
+	}
+
+	public void setContinueLoadConfigWithException(boolean continueLoadConfigWithException) {
+		this.mContinueLoadInstanceWithException = continueLoadConfigWithException;
+	}
 
 }
