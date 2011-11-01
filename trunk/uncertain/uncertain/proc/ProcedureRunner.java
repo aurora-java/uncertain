@@ -339,6 +339,7 @@ public class ProcedureRunner {
         // set current event
         current_event = event_name;
         try{
+            config.fireEvent(event_name, parameters, this, config.getHandleManager());
             // modify?
             /*
             int result = config.fireEvent(event_name, parameters, this, config.getHandleManager());
