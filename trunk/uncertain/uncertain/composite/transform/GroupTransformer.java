@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.CompositeUtil;
 
 /**
  * Group child CompositeMap on specified field <code>
@@ -133,7 +134,7 @@ public class GroupTransformer implements CompositeTransformer {
 	}
 	public static CompositeMap transform(CompositeMap source, GroupConfig config, int childLevel) {
 		List result = new LinkedList();
-		getLevelChilds(source, childLevel, result);
+		CompositeUtil.getLevelChilds(source, childLevel, result);
 		if (result == null || result.isEmpty())
 			return null;
 		for (Iterator it = result.iterator(); it.hasNext();) {
@@ -154,22 +155,6 @@ public class GroupTransformer implements CompositeTransformer {
 			return source;
 		GroupConfig[] configs = GroupConfig.createGroupConfigs(config);
 		return transform(source,configs);
-	}
-
-	public static void getLevelChilds(CompositeMap source, int level, List result) {
-		if (source == null)
-			return;
-		if (level == 0)
-			result.add(source);
-		if (source.getChilds() == null)
-			return;
-		if (level == 1) {
-			result.addAll(source.getChilds());
-		} else if (level > 1) {
-			for (Iterator it = source.getChildIterator(); it.hasNext();) {
-				getLevelChilds((CompositeMap) it.next(), level - 1, result);
-			}
-		}
 	}
 
 	public static void main(String[] args) {
