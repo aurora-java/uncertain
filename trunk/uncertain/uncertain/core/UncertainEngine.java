@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -60,6 +58,7 @@ import uncertain.proc.ProcedureRunner;
 import uncertain.schema.ISchemaManager;
 import uncertain.schema.SchemaManager;
 import uncertain.util.FilePatternFilter;
+import uncertain.util.FileUtil;
 import uncertain.util.resource.ISourceFileManager;
 import uncertain.util.resource.SourceFileManager;
 
@@ -440,25 +439,6 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         scanConfigFiles(getConfigDirectory(), pattern);
     }
 
-    private List getSortedList(File[] files) {
-        List lst = new LinkedList();
-        for (int i = 0; i < files.length; i++)
-            lst.add(files[i]);
-        Collections.sort(lst, new Comparator() {
-
-            public int compare(Object o1, Object o2) {
-                return ((File) o1).getAbsolutePath().compareTo(
-                        ((File) o2).getAbsolutePath());
-            }
-
-            public boolean equals(Object obj) {
-                return obj == this;
-            }
-
-        });
-        return lst;
-    }
-
     /**
      * Scan a directory for files that matches certain pattern, and load these
      * file to perform configuration task
@@ -474,7 +454,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
 
         FilePatternFilter filter = new FilePatternFilter(file_pattern);
         File cfg_files[] = dir.listFiles(filter);
-        List file_list = getSortedList(cfg_files);
+        List file_list = FileUtil.getSortedList(cfg_files);
         if (cfg_files.length > 0) {
             LinkedList cfg_list = new LinkedList();
             ListIterator fit = file_list.listIterator(cfg_files.length);
