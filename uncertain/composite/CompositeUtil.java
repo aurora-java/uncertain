@@ -587,4 +587,20 @@ public class CompositeUtil {
 		source_cache.clear();
 	}
 
+	public static void getLevelChilds(CompositeMap source, int level, List result) {
+		if (source == null)
+			return;
+		if (level == 0)
+			result.add(source);
+		if (source.getChilds() == null)
+			return;
+		if (level == 1) {
+			result.addAll(source.getChilds());
+		} else if (level > 1) {
+			for (Iterator it = source.getChildIterator(); it.hasNext();) {
+				getLevelChilds((CompositeMap) it.next(), level - 1, result);
+			}
+		}
+	}
+
 }
