@@ -154,8 +154,10 @@ public class PackageManager implements IPackageManager {
             throw new IllegalArgumentException(root_directory
                     + " is not a directory");
         File[] files = path.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
+        List<File> file_list = FileUtil.getSortedList(files);
+        for(File file:file_list){
+        //for (int i = 0; i < files.length; i++) {
+            //File file = files[i];
             if (isPackageDirectory(file))
                 loadPackage(file.getAbsolutePath());
         }
@@ -270,11 +272,13 @@ public class PackageManager implements IPackageManager {
             loadPackage(dir.getAbsolutePath());
         } else {
             // from directory
-            try {
-                loadPackage(new File(new URI(url.toString())).getAbsolutePath());
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+            URI uri = null;
+            try{
+                uri = new URI(url.toString());
+            }catch(URISyntaxException ex){
+                throw new RuntimeException("Can't parse uri from resource url "+url.toString());
             }
+            loadPackage(new File(uri).getAbsolutePath());
         }
 
     }
