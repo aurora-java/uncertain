@@ -244,6 +244,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         mSourceFileManager = SourceFileManager.getInstance();
         mSourceFileManager.startup();
         mSchemaManager = new SchemaManager();
+        mSchemaManager.addSchema(SchemaManager.getSchemaForSchema());
         mPackageManager = new PackageManager(mCompositeLoader, mOcManager, mSchemaManager);
 
         registerBuiltinInstances();
