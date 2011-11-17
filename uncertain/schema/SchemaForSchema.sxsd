@@ -40,6 +40,7 @@
             </ss:attributes>
         </ss:complexType>
         <ss:complexType name="ss:BaseType"/>
+        <ss:complexType name="ss:AnyElement"/>
     </ss:types>
     <ss:elements>
         <ss:element name="ss:complexType">
