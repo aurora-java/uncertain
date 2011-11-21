@@ -5,7 +5,6 @@ package uncertain.proc;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
-import uncertain.core.ConfigurationError;
 import uncertain.exception.BuiltinExceptionFactory;
 
 /**
@@ -21,6 +20,7 @@ public class Set extends AbstractEntry {
     String field;
     String sourceField;
     String value;  
+    boolean setToNull = false;
     
 
     /**
@@ -63,13 +63,28 @@ public class Set extends AbstractEntry {
     public void run(ProcedureRunner runner) {
         if(field==null)
             throw BuiltinExceptionFactory.createAttributeMissing(this, "field");
+
+        CompositeMap context = runner.getContext();
+        if(setToNull){
+            Object value = context.getObject(field);
+            if(value!=null&&value instanceof CompositeMap){
+                ((CompositeMap)value).clear();
+            }
+            context.putObject(field, null, true);
+            return;
+        }
         if(sourceField==null && value==null)
             throw BuiltinExceptionFactory.createOneAttributeMissing(this, "sourceField,value");
-        CompositeMap context = runner.getContext();
         if(sourceField!=null)
             context.putObject(field, context.getObject(sourceField), true);
         else
             context.putObject(field, TextParser.parse(value,context), true);
+    }
+    public boolean getSetToNull() {
+        return setToNull;
+    }
+    public void setSetToNull(boolean setToNull) {
+        this.setToNull = setToNull;
     }
 
 }
