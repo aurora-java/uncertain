@@ -8,7 +8,17 @@ public class Namespace extends AbstractSchemaObject {
     String prefix;
     String url;
 
-    public String getPrefix() {
+    public Namespace() {
+		super();
+	}
+
+	public Namespace(String prefix, String url) {
+		super();
+		this.prefix = prefix;
+		this.url = url;
+	}
+
+	public String getPrefix() {
         return prefix;
     }
 
