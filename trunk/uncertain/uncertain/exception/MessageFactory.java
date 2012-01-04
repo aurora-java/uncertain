@@ -38,7 +38,17 @@ public class MessageFactory {
     public static void loadResource(String path, Locale locale){
         loadResource(path, locale, false);
     }
+    
+    public static void loadResource( String path, boolean overwrite ){
+        loadResource(path, locale, overwrite);
+    }
 	
+    /**
+     * Load language resource from class path
+     * @param path resource path in java CLASSPATH convention "dir.file_name" -> "dir/file_name.properties"
+     * @param locale Locale of resource file
+     * @param overwrite whether reload (thus overwrite previous loaded file ) if this resource is already loaded
+     */
 	public static void loadResource(String path, Locale locale, boolean overwrite) {
 		ResourceBundle resourceBundle = null;
         resourceBundle = ResourceBundle.getBundle(path, locale);
