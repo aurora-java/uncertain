@@ -19,6 +19,7 @@ import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
 import uncertain.composite.QualifiedName;
 import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.exception.MessageFactory;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.schema.ComplexType;
@@ -134,6 +135,16 @@ public class ComponentPackage {
         }
     }
     
+    private void loadResources(){
+        if(mPackageConfig==null)
+            return;
+        String[] resources = mPackageConfig.getResourceFiles();
+        if(resources==null)
+            return;
+        for(int i=0; i<resources.length; i++)
+            MessageFactory.loadResource(resources[i], false);
+    }
+    
     private Object createOptionalObject( String config_file, Class type ){
         File config_path = new File(mBasePathFile, CONFIG_PATH);
         OCManager oc_manager = mOwner.getOCManager();
@@ -189,6 +200,7 @@ public class ComponentPackage {
         mSchemaManager = new SchemaManager(oc_manager);
         mSchemaManager.setParent(mOwner.getSchemaManager());
         loadSchemaFile(config_path);
+        loadResources();
         
     }
 
