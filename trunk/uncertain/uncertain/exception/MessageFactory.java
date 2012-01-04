@@ -23,6 +23,7 @@ public class MessageFactory {
     public static final String DEFAULT_EXCEPTION_CONFIG_FILE_NAME = "exception_config";
     private static Locale locale = Locale.getDefault();
 	private static Map messages = new HashMap();
+	private static Map loaded_paths = new HashMap();
 	
 
 	public synchronized static void loadResource(String path) {
@@ -33,8 +34,12 @@ public class MessageFactory {
         String path = pkg_name + '.' + DEFAULT_EXCEPTION_CONFIG_FILE_NAME;
         loadResource(path);
     }
+    
+    public static void loadResource(String path, Locale locale){
+        loadResource(path, locale, false);
+    }
 	
-	public static void loadResource(String path, Locale locale) {
+	public static void loadResource(String path, Locale locale, boolean overwrite) {
 		ResourceBundle resourceBundle = null;
         resourceBundle = ResourceBundle.getBundle(path, locale);
 /*
@@ -44,13 +49,18 @@ public class MessageFactory {
 		    resourceBundle = ResourceBundle.getBundle(path);
 		}
 */		
+        if(loaded_paths.containsKey(path))
+            if(!overwrite){
+                return;
+            }
+        loaded_paths.put(path, path);
 		if(resourceBundle==null)
 		    throw new RuntimeException("Can't load resource "+path);
 		Enumeration keys = resourceBundle.getKeys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
 			String fullKey = generateFullKey(key,locale);
-			if(messages.containsKey(fullKey)){
+			if(messages.containsKey(fullKey) && ! overwrite ){
 				 throw new RuntimeException("The key:"+key+" from "+path+" has been defined before ! Please try another.");
 			}
 			messages.put(fullKey, resourceBundle.getString(key));
