@@ -125,5 +125,27 @@
                 <ss:array name="p:fields" type="p:field"/>
             </ss:arrays>
         </ss:element>
+        <ss:element name="p:argument" document="调用方法里的参数，被method-invoke元素所调用">
+            <ss:attributes>
+                <ss:attribute name="type" document="参数的Java类型，譬如int，java.lang.String"/>
+                <ss:attribute name="value" document="参数的内容，与path二选一"/>
+                <ss:attribute name="path" document="参数内容的来源路径，与value二选一。譬如parameter/path_to_parameter"/>
+            </ss:attributes>
+        </ss:element>
+        <ss:element name="p:method-invoke" document="执行一个静态方法或者已注册对象的公开方法">
+            <ss:attributes>
+                <ss:attribute name="className" document="静态方法的类名，与instanceType属性二选一" type="ss:string"/>
+                <ss:attribute name="methodName" document="方法名" type="ss:string"/>
+                <ss:attribute name="instanceType" document="已注册对象的名称，与className属性二选一"/>
+            </ss:attributes>
+            <ss:arrays>
+                <ss:array name="p:arguments" type="p:argument"/>
+            </ss:arrays>
+        </ss:element>
+        <ss:element name="p:invoke" document="执行一个流程">
+            <ss:attributes>
+                <ss:attribute name="procedure" document="流程文件的classpath路径，譬如init.load_priviledge_check_data" type="ss:string"/>
+            </ss:attributes>
+        </ss:element>
     </ss:elements>
 </ss:schema>
