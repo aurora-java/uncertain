@@ -49,8 +49,6 @@ public class GroupCompositeMapWithFields {
 					}
 					if (breakbegin) {
 						bp.addPoint(rowNum, y);
-//						System.out.println("rowNum:" + rowNum + " column:" + y);
-//						breakbegin = true;
 					}
 				}
 			}
@@ -66,15 +64,11 @@ public class GroupCompositeMapWithFields {
 		int[] columnIndex;
 
 		BreakPoints(int rowCount, int columnCount) {
-//			System.out.println("rowcount:" + rowCount + " columnCount:"
-//					+ columnCount);
 			matric = new int[columnCount][rowCount];
 			columnIndex = new int[columnCount];
 		}
 
 		void addPoint(int row, int column) {
-			// System.out.println("row:"+row+" column:"+column);
-			// System.out.println("columnIndex[column]"+columnIndex[column]);
 			matric[column][columnIndex[column]] = row;
 			columnIndex[column]++;
 		}
@@ -85,7 +79,6 @@ public class GroupCompositeMapWithFields {
 				int preValue = 0;
 				for (int y = 0; y < matric[x].length; y++) {
 					int value = matric[x][y];
-					// System.out.print(value+",");
 					if (value == 0){
 						if(matric[x].length-preValue>2){
 							list.add(new int[] { preValue, x, matric[x].length-1, x });
@@ -97,7 +90,6 @@ public class GroupCompositeMapWithFields {
 					}
 					preValue = value;
 				}
-//				System.out.println();
 			}
 			return list;
 		}
