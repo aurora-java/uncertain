@@ -71,6 +71,14 @@
                 <ss:attribute name="instanceClass" type="ss:string"/>
             </ss:attributes>
         </ss:element>
+        <ss:element name="ss:typeExtend">
+            <ss:attributes>
+                <ss:attribute name="base" type="ss:QName"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="ss:complexType"/>
+            </ss:extensions>
+        </ss:element>
         <ss:element name="ss:element">
             <ss:attributes>
                 <ss:attribute name="maxOccurs" default="unbounded" type="ss:string"/>
@@ -162,6 +170,7 @@
                 <ss:array name="ss:types" type="ss:BaseType"/>
                 <ss:array name="ss:editors" type="ss:editor"/>
                 <ss:array name="ss:wizards" type="ss:wizard"/>
+                <ss:array name="ss:typeExtends" type="ss:typeExtend"/>
             </ss:arrays>
         </ss:element>
     </ss:elements>
