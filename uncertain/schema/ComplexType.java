@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
 import uncertain.composite.QualifiedName;
@@ -26,7 +25,7 @@ public class ComplexType extends AbstractCategorized implements IType {
     NamedObjectManager  mObjectManager = new NamedObjectManager();
     
     Schema              mSchema;
-
+    List<ComplexType>   mTypeExtends;
     public boolean isComplex() {       
         return true;
     }
@@ -67,9 +66,17 @@ public class ComplexType extends AbstractCategorized implements IType {
     }
 
     public boolean isExtensionOf( IType another ){
-    	if(getAllExtendedTypes()!= null&&getAllExtendedTypes().contains(another))
+    	if(getAllSuperTypes()!= null&&getAllSuperTypes().contains(another))
     		return true;
         return false;    
+    }
+    public List getAllExtendedTypes(){
+    	List<ComplexType> result = getAllSuperTypes();
+    	if(result == null)
+    		result = new LinkedList();
+    	if(mTypeExtends != null)
+    		result.addAll(mTypeExtends);
+    	return result;
     }
     
     /**
@@ -77,7 +84,7 @@ public class ComplexType extends AbstractCategorized implements IType {
      * order(directly extended type appear first), and each type occurs only once.
      * @return List<ComplexType> A list containing all types 
      */
-    public List getAllExtendedTypes(){
+    public List<ComplexType> getAllSuperTypes(){
         /** @todo use cache */
         final ComplexType[] extended_types = loadSuperTypes();
         final Set map = new HashSet();
@@ -92,25 +99,25 @@ public class ComplexType extends AbstractCategorized implements IType {
             if(!map.contains(qname)){
                 map.add(qname);
                 result.add(t);
-                addSuperElements(t);
+                addElements(t);
             }
         }
         // Add super types extended by parent types
         for( int i=0; i<extended_types.length; i++){
-            final Collection super_type = extended_types[i].getAllExtendedTypes();
+            final Collection super_type = extended_types[i].getAllSuperTypes();
             if( super_type!=null)
                 for( Iterator it = super_type.iterator(); it.hasNext(); ){
                     ComplexType st = (ComplexType)it.next();
                     if(!map.contains(st.getQName())){
                         map.add(st.getQName());
                         result.add(st);
-                        addSuperElements(st);
+                        addElements(st);
                     }
                 }
         }
         return result;
     }
-    private void addSuperElements(ComplexType ct){
+    private void addElements(ComplexType ct){
     	Element[] elements = ct.getElements();
     	if(elements != null){
 	    	for(int i=0;i<elements.length;i++){
@@ -312,6 +319,12 @@ public class ComplexType extends AbstractCategorized implements IType {
     public void resolveReference( ISchemaManager manager ){
         super.resolveReference(manager);
         mObjectManager.resolveReference(manager);
+    }
+    public void addTypeExtend(ComplexType ct){
+    	if(mTypeExtends == null)
+    		mTypeExtends = new LinkedList<ComplexType>();
+    	mTypeExtends.add(ct);
+    	addElements(ct);
     }
 
 }

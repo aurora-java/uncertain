@@ -20,6 +20,7 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
     Category[]          mCategories;
     Editor[]          	mEditors;
     Wizard[]          	mWizards;
+    TypeExtend[]        mTypeExtends;
     String              mTargetNamespace;
     ISchemaManager      mSchemaManager;
 
@@ -102,13 +103,21 @@ public class Schema extends AbstractSchemaObject implements IQualifiedNameResolv
         addChildArray( Editors, SchemaConstant.TYPE_EDITOR );
     }
     
-    public Wizard[] geWizards() {
+    public Wizard[] getWizards() {
         return mWizards;
     }
 
     public void addWizards(Wizard[] Wizards) {
     	mWizards = Wizards;
         addChildArray( Wizards, SchemaConstant.TYPE_WIZARD );
+    }
+    public TypeExtend[] getTypeExtends() {
+        return mTypeExtends;
+    }
+
+    public void addTypeExtends(TypeExtend[] typeExtends) {
+    	mTypeExtends = typeExtends;
+        addChildArray( mTypeExtends, SchemaConstant.TYPE_ITYPE );
     }
 
     public String getTargetNamespace() {
