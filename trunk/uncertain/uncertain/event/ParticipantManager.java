@@ -12,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
-import uncertain.core.ConfigurationError;
 import uncertain.core.IGlobalInstance;
 import uncertain.core.UncertainEngine;
 import uncertain.exception.BuiltinExceptionFactory;
-import uncertain.exception.ConfigurationFileException;
 import uncertain.logging.ILogger;
 import uncertain.logging.ILoggerProvider;
 import uncertain.logging.LoggingContext;
@@ -61,6 +59,10 @@ public class ParticipantManager extends AbstractLocatableObject implements IPart
 
     {
         List lst = (List)mParticipantsListMap.get(category);
+        if(lst == null){
+        	lst = new LinkedList();
+        	mParticipantsListMap.put(category, lst);
+        }
         return lst;        
     }
     
