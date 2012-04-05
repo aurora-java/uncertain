@@ -155,5 +155,18 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
         shutdown();
     }
     */
+    public void setNamedCache(String name, ICache cache) {
+    	 Object o = mPredefinedCacheMap.get(name);
+         if(o==null){
+             if(mDefaultCacheFactory !=null)
+            	 mDefaultCacheFactory.setNamedCache(name,cache);
+         }
+         else{
+             if(NOT_ENABLED_CACHE.equals(o))
+                 return ;
+             else
+                 ((INamedCacheFactory)o).setNamedCache(name,cache);
+         }
+    }
 
 }
