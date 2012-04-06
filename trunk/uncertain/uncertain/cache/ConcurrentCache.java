@@ -16,7 +16,6 @@ public class ConcurrentCache implements ICache,IReadWriteLockable {
 		this.cache = cache;
 	}
 
-	@Override
 	public Object getValue(Object key) {
 		read.lock();
 		try {
@@ -26,32 +25,26 @@ public class ConcurrentCache implements ICache,IReadWriteLockable {
 		}
 	}
 
-	@Override
 	public boolean setValue(Object key, Object value) {
 		return cache.setValue(key, value);
 	}
 
-	@Override
 	public boolean setValue(Object key, int timeout, Object value) {
 		return cache.setValue(key, timeout, value);
 	}
 
-	@Override
 	public void remove(Object key) {
 		cache.remove(key);
 	}
 
-	@Override
 	public void clear() {
 		cache.clear();
 	}
 
-	@Override
 	public Lock readLock() {
 		return read;
 	}
 
-	@Override
 	public Lock writeLock() {
 		return write;
 	}
