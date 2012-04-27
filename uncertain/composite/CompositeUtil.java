@@ -355,7 +355,7 @@ public class CompositeUtil {
 		while (it.hasNext()) {
 			CompositeMap child = (CompositeMap) it.next();
 			String text = child.getText();
-			if (child.size() == 0 && text != null) {
+			if (child.size() == 0 && text != null && !"".equals(text.trim())) {
 				root.put(child.getName(), text);
 				it.remove();
 			} else
