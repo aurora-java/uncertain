@@ -4,6 +4,7 @@
 package uncertain.pkg;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,9 +83,6 @@ public class PackageManager implements IPackageManager {
         return mOCManager;
     }
 
-    /* (non-Javadoc)
-     * @see uncertain.pkg.IPackageManager#loadPackage(java.lang.String)
-     */
     public ComponentPackage loadPackage(String path) throws IOException {
         return loadPackage(path, ComponentPackage.class);
     }
@@ -184,11 +182,18 @@ public class PackageManager implements IPackageManager {
      */
     protected File createTempPackageDir(String jar_path, String pkg_name)
             throws IOException {
+        if(jar_path==null) 
+            throw new NullPointerException("jar_path parameter is null");
         InputStream is = null;
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         try {
-            URL u = new URL(jar_path);
-            is = u.openStream();
+            // to be enhanced. in weblogic+linux path doesn't start with file:// 
+            if(jar_path.indexOf("://")>=0){
+                URL u = new URL(jar_path);
+                is = u.openStream();
+            }else{
+                is = new FileInputStream(jar_path);
+            }
             JarInputStream jis = new JarInputStream(is);
             ZipEntry ze = null;
 
