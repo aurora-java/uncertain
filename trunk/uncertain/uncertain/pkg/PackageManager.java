@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -188,10 +189,10 @@ public class PackageManager implements IPackageManager {
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         try {
             // to be enhanced. in weblogic+linux path doesn't start with file:// 
-            if(jar_path.indexOf("://")>=0){
+            try{
                 URL u = new URL(jar_path);
                 is = u.openStream();
-            }else{
+            }catch(MalformedURLException ex){
                 is = new FileInputStream(jar_path);
             }
             JarInputStream jis = new JarInputStream(is);
