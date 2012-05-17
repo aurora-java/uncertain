@@ -154,17 +154,18 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 			if (mEngine == null)
 				throw BuiltinExceptionFactory.createInstanceNotFoundException(null, UncertainEngine.class);
 			File cacheConfigDir = new File(mEngine.getConfigDirectory(), cacheAppConfig);
-			if (!cacheConfigDir.exists()) {
-				String resourcePath = null;
-				try {
-					resourcePath = cacheConfigDir.getCanonicalPath();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				if (resourcePath != null)
-					throw BuiltinExceptionFactory.createResourceLoadException(null, resourcePath, null);
+			if (cacheConfigDir.exists()) {
+				scanConfigFiles(cacheConfigDir, UncertainEngine.DEFAULT_CONFIG_FILE_PATTERN);
+//				String resourcePath = null;
+//				try {
+//					resourcePath = cacheConfigDir.getCanonicalPath();
+//				} catch (IOException e) {
+//					throw new RuntimeException(e);
+//				}
+//				if (resourcePath != null)
+//					throw BuiltinExceptionFactory.createResourceLoadException(null, resourcePath, null);
 			}
-			scanConfigFiles(cacheConfigDir, UncertainEngine.DEFAULT_CONFIG_FILE_PATTERN);
+			
 		}
 		return true;
 	}
