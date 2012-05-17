@@ -46,7 +46,7 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 	private static final CacheWrapper NOT_ENABLED_CACHE = new CacheWrapper();
 
 	String mName;
-	String cacheAppConfig = "cacheAppConfig";
+	String cacheConfig = "cacheConfig";
 
 	INamedCacheFactory mDefaultCacheFactory;
 	String mDefaultCacheFactoryName;
@@ -62,7 +62,7 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 	ILogger mLogger;
 	UncertainEngine mEngine;
 	List<ILifeCycle> mLoadedLifeCycleList = new LinkedList<ILifeCycle>();
-	Set<ICacheProvider> cacheAppSet = new HashSet<ICacheProvider>();
+	Set<ICacheProvider> cacheProviderSet = new HashSet<ICacheProvider>();
 
 	public CacheFactoryConfig() {
 
@@ -147,13 +147,13 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 			if (mDefaultCacheFactory == null)
 				throw new ConfigurationError("Can't find cache factory named " + mDefaultCacheFactoryName);
 		}
-		if (cacheAppConfig != null) {
+		if (cacheConfig != null) {
 			if (mRegistry == null)
 				throw new IllegalStateException("Field IObjectRegistry can't be null");
 			mEngine = (UncertainEngine) mRegistry.getInstanceOfType(UncertainEngine.class);
 			if (mEngine == null)
 				throw BuiltinExceptionFactory.createInstanceNotFoundException(null, UncertainEngine.class);
-			File cacheConfigDir = new File(mEngine.getConfigDirectory(), cacheAppConfig);
+			File cacheConfigDir = new File(mEngine.getConfigDirectory(), cacheConfig);
 			if (cacheConfigDir.exists()) {
 				scanConfigFiles(cacheConfigDir, UncertainEngine.DEFAULT_CONFIG_FILE_PATTERN);
 //				String resourcePath = null;
@@ -219,12 +219,12 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 		}
 	}
 
-	public String getCacheAppConfig() {
-		return cacheAppConfig;
+	public String getCacheConfig() {
+		return cacheConfig;
 	}
 
-	public void setCacheAppConfig(String cacheAppConfig) {
-		this.cacheAppConfig = cacheAppConfig;
+	public void setCacheConfig(String cacheConfig) {
+		this.cacheConfig = cacheConfig;
 	}
 
 	private void scanConfigFiles(File dir, String file_pattern) {
@@ -261,7 +261,7 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 								mLoadedLifeCycleList.add(c);
 							}
 					}
-					cacheAppSet.add((ICacheProvider) inst);
+					cacheProviderSet.add((ICacheProvider) inst);
 				} catch (Throwable thr) {
 					console.warning("Can't load initialize config file " + file_path);
 					mEngine.logException("Error when loading configuration file " + file_path, thr);
@@ -271,7 +271,7 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 	}
 
 	public void onInitialize() throws Exception {
-		for (ICacheProvider cacheApp : cacheAppSet) {
+		for (ICacheProvider cacheApp : cacheProviderSet) {
 			cacheApp.onInitialize();
 		}
 	}
