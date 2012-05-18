@@ -4,13 +4,8 @@
  */
 package uncertain.proc;
 
-import java.io.IOException;
-
-import org.xml.sax.SAXException;
-
-import uncertain.cache.CacheFactoryConfig;
 import uncertain.cache.ICache;
-import uncertain.cache.MapBasedCache;
+import uncertain.cache.INamedCacheFactory;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
@@ -116,7 +111,11 @@ public class ProcedureManager implements IProcedureManager {
     }
     
     public void onInitialize(){
-        mCache = CacheFactoryConfig.getNamedCache(mUncertainEngine.getObjectRegistry(), CACHE_NAME);
+    	INamedCacheFactory cacheFactory = (INamedCacheFactory)mUncertainEngine.getObjectRegistry().getInstanceOfType(INamedCacheFactory.class);
+    	if(cacheFactory != null){
+    		  mCache = cacheFactory.getNamedCache(CACHE_NAME);
+    	}
+//        mCache = CacheFactoryConfig.getNamedCache(mUncertainEngine.getObjectRegistry(), CACHE_NAME);
         if(mCache!=null){
             setCache(mCache);
             setIsCache(true);
