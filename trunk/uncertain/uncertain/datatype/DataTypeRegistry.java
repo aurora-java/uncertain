@@ -71,7 +71,7 @@ public class DataTypeRegistry {
     }
     
     public DataType getType( Object obj){
-       return  getType( obj.getClass());
+       return  getDataType( obj.getClass());
     }
 
 	public Object convert( Object value, Class prefered_class) throws ConvertionException{
