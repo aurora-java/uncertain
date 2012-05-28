@@ -66,6 +66,8 @@ public class MethodInvoke extends AbstractEntry {
 			Class cls = instance.getClass();
 			method = cls.getMethod(methodName, argumentClasses);
 		}
+		if(method == null)
+			throw new RuntimeException("Can not find method:"+methodName+" in "+className);
 		Object return_value = method.invoke(instance, argumentObjects);
 		if (resultPath != null)
 			runner.getContext().putObject(resultPath, return_value, true);
