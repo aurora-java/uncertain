@@ -421,7 +421,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         if (!runInitProcedure(proc))
             return;
     }
-
+/*
     public void scanConfigFiles() {
         File cfg_dir = getConfigDirectory();
         if(cfg_dir==null && mDirectoryConfig!=null)
@@ -440,15 +440,6 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
         scanConfigFiles(getConfigDirectory(), pattern);
     }
 
-    /**
-     * Scan a directory for files that matches certain pattern, and load these
-     * file to perform configuration task
-     * 
-     * @param dir
-     *            Directory that contains config file
-     * @param file_pattern
-     *            regular expression string to specify file name pattern
-     */
     public void scanConfigFiles(File dir, String file_pattern) {
         mIsRunning = true;
         mInitException = null;
@@ -483,7 +474,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                 doConfigure(cfg_list);
         }
     }
-    
+*/    
     public void loadConfigFile( String full_path )
     {
         try{
@@ -716,7 +707,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
             // new part, load all instances
             loadInstanceFromPackage();
             // old part
-            scanConfigFiles(DEFAULT_CONFIG_FILE_PATTERN);
+            // scanConfigFiles(DEFAULT_CONFIG_FILE_PATTERN);
         }
         runStartupProcedure();
         mIsRunning = true;
