@@ -19,6 +19,7 @@ import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 
 import uncertain.composite.CompositeLoader;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.ocm.ClassRegistry;
 import uncertain.ocm.ClassRegistryMBean;
 import uncertain.ocm.IObjectRegistry;
@@ -41,6 +42,8 @@ public class PackageManager implements IPackageManager {
     SchemaManager mSchemaManager;
     // path -> loaded component package 
     HashMap<String,ComponentPackage> mLoadedPackagePaths = new HashMap<String,ComponentPackage>();
+    
+    String  mTempPath;
 
     public static boolean isPackageDirectory(File dir) {
         if (!dir.isDirectory())
@@ -186,7 +189,13 @@ public class PackageManager implements IPackageManager {
         if(jar_path==null) 
             throw new NullPointerException("jar_path parameter is null");
         InputStream is = null;
-        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        File tempDir = null;
+        if( this.mTempPath!=null){
+            tempDir = new File(mTempPath);
+            if(!tempDir.exists() || !tempDir.isDirectory())
+                throw BuiltinExceptionFactory.createInvalidPathException(null, mTempPath);
+        }else    
+            tempDir = new File(System.getProperty("java.io.tmpdir"));
         try {
             // to be enhanced. in weblogic+linux path doesn't start with file:// 
             try{
@@ -324,6 +333,14 @@ public class PackageManager implements IPackageManager {
             if(cfg!=null) lst.add(cfg);
         }
         InstanceConfig.loadComponents(lst, reg, mCompositeLoader, mOCManager, listener,continueWithException);
+    }
+
+    public String getTempPath() {
+        return mTempPath;
+    }
+
+    public void setTempPath(String tempPath) {
+        this.mTempPath = tempPath;
     }
 
 }
