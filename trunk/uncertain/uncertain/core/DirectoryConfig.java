@@ -27,6 +27,8 @@ public class DirectoryConfig extends DynamicObject {
     
     public static final String KEY_BASE_PATH = "basepath";
     
+    public static final String KEY_TEMP_PATH = "temppath";
+    
     public static DirectoryConfig createDirectoryConfig( CompositeMap dir_config ){
         DirectoryConfig dir = new DirectoryConfig();
         dir.initialize(dir_config);
@@ -67,6 +69,14 @@ public class DirectoryConfig extends DynamicObject {
     
     public void setConfigDirectory( String config_dir ){
         putString(KEY_CONFIG_PATH, config_dir);
+    }
+    
+    public String getTempDirectory(){
+        return getString(KEY_TEMP_PATH);
+    }
+    
+    public void setTempDirectory(String temp_dir){
+        putString(KEY_TEMP_PATH,temp_dir);
     }
     
     /**
