@@ -129,7 +129,7 @@ public class JSONAdaptor {
         }        
     }
     
-    public static JSONObject toJSONObject(CompositeMap map, Set array_names){
+    public static JSONObject toJSONObject(CompositeMap map, Set<String> array_names){
         //JSONObject obj = new JSONObject(map);
         JSONObject obj = new JSONObject();
         copyToJSON(map, obj);        
