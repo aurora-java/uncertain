@@ -15,7 +15,7 @@ import uncertain.composite.CompositeUtil;
 
 /**
  * Group child CompositeMap on specified field <code>
- *     	<transform class="org.lwap.composite.GroupTransformer" group-name="modular" group-field="MODULAR_ID">
+ *     	<transform class="uncertain.composite.transform.GroupTransformer" group-name="modular" sub-group-name="services" group-field="MODULAR_ID">
  *   			<group-field name="MODULAR_NAME" remove-field="true"/>
  *   			<group-field name="MODULAR_ID" remove-field="true" />
  *   		</transform>
@@ -26,6 +26,7 @@ public class GroupTransformer implements CompositeTransformer {
 	static GroupTransformer default_instance = new GroupTransformer();
 
 	public static final String KEY_GROUP_NAME = "group-name";
+	public static final String KEY_SUB_GROUP_NAME = "sub-group-name";
 	public static final String KEY_GROUP_FIELD_NAME = "name";
 	public static final String KEY_REMOVE_FIELD = "remove-field";
 	public static final String KEY_GROUP_FIELD = "group-field";
@@ -57,6 +58,8 @@ public class GroupTransformer implements CompositeTransformer {
 		String group_field = transform_config.getString(KEY_GROUP_FIELD);
 		if (group_field == null)
 			return source;
+		
+		String sub_group_name = transform_config.getString(KEY_SUB_GROUP_NAME);
 
 		Iterator childs = source.getChildIterator();
 		if (childs == null)
@@ -83,7 +86,13 @@ public class GroupTransformer implements CompositeTransformer {
 				}
 				groups.put(value, group_item);
 			}
-			group_item.addChild(item);
+			if(sub_group_name!=null){
+			    CompositeMap sub_group = group_item.getChild(sub_group_name);
+			    if(sub_group==null)
+			        sub_group = group_item.createChild(sub_group_name);
+			    sub_group.addChild(item);
+			}else
+			    group_item.addChild(item);
 		}
 
 		source.getChilds().clear();
