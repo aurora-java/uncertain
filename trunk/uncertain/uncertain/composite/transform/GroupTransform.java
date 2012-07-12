@@ -12,7 +12,7 @@ import uncertain.proc.ProcedureRunner;
 
 /**
  * Group child CompositeMap on specified field <code>
- *     	<group-transform source="/model/data" target="/model/target" groupName="modular" subGroup-name="services" groupField="MODULAR_ID">
+ *     	<group-transform source="/model/data" target="/model/target" groupName="modular" subGroupName="services" groupField="MODULAR_ID">
  *   		<group-field name="MODULAR_NAME" removeField="true"/>
  *   		<group-field name="MODULAR_ID" removeField="true" />
  *   	</group-transform>
@@ -21,12 +21,12 @@ import uncertain.proc.ProcedureRunner;
  *   </code>
  */
 public class GroupTransform extends AbstractTransform {
-	public static final String KEY_GROUP_NAME = "group-name";
-	public static final String KEY_SUB_GROUP_NAME = "sub-group-name";
+	public static final String KEY_GROUP_NAME = "groupName";
+	public static final String KEY_SUB_GROUP_NAME = "subGroupName";
 	public static final String KEY_GROUP_FIELD_NAME = "name";
-	public static final String KEY_REMOVE_FIELD = "remove-field";
-	public static final String KEY_GROUP_FIELD = "group-field";
-	final String KEY_GROUP_CONFIG = "group-config";
+	public static final String KEY_REMOVE_FIELD = "removeField";
+	public static final String KEY_GROUP_FIELD = "groupField";
+	final String KEY_GROUP_CONFIG = "groupConfig";
 	final String KEY_SOURCE = "source";
 	final String KEY_TARGET = "target";
 	CompositeMap elementConifg;

@@ -9,12 +9,12 @@ import uncertain.proc.ProcedureRunner;
 
 /**
  * * <code>
- *     	<matrix-transform source="/model/data" target="/model/target" id-field="ID_FIELD" parent-field="PARENT_FIELD"/>
+ *     	<matrix-transform source="/model/data" target="/model/target" idField="ID_FIELD" parentField="PARENT_FIELD"/>
  *   </code>
  */
 public class TreeTransform extends AbstractTransform {
-	public static final String KEY_ID_FIELD = "id-field";
-	public static final String KEY_PARENT_FIELD = "parent-field";
+	public static final String KEY_ID_FIELD = "idField";
+	public static final String KEY_PARENT_FIELD = "parentField";
 
 	final String KEY_SOURCE = "source";
 	final String KEY_TARGET = "target";
