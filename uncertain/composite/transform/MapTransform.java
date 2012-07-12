@@ -7,11 +7,11 @@ import uncertain.proc.ProcedureRunner;
 
 /**
  * * <code>
- *     	<map-transform source="/model/data" target="/model/target" key-field="KEY_FIELD"/>
+ *     	<map-transform source="/model/data" target="/model/target" keyField="KEY_FIELD"/>
  *   </code>
  */
 public class MapTransform extends AbstractTransform {
-	public static final String KEY_FIELD = "key-field";
+	public static final String KEY_FIELD = "keyField";
 	final String KEY_SOURCE = "source";
 	final String KEY_TARGET = "target";
 
