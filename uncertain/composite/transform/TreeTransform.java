@@ -13,8 +13,8 @@ import uncertain.proc.ProcedureRunner;
  *   </code>
  */
 public class TreeTransform extends AbstractTransform {
-	public static final String KEY_ID_FIELD = "idField";
-	public static final String KEY_PARENT_FIELD = "parentField";
+	public static final String KEY_ID_FIELD = "idfield";
+	public static final String KEY_PARENT_FIELD = "parentfield";
 
 	final String KEY_SOURCE = "source";
 	final String KEY_TARGET = "target";
