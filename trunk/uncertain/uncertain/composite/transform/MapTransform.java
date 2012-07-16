@@ -11,7 +11,7 @@ import uncertain.proc.ProcedureRunner;
  *   </code>
  */
 public class MapTransform extends AbstractTransform {
-	public static final String KEY_FIELD = "keyField";
+	public static final String KEY_FIELD = "keyfield";
 	final String KEY_SOURCE = "source";
 	final String KEY_TARGET = "target";
 

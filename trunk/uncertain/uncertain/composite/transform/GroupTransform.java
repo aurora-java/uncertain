@@ -21,12 +21,12 @@ import uncertain.proc.ProcedureRunner;
  *   </code>
  */
 public class GroupTransform extends AbstractTransform {
-	public static final String KEY_GROUP_NAME = "groupName";
-	public static final String KEY_SUB_GROUP_NAME = "subGroupName";
+	public static final String KEY_GROUP_NAME = "groupname";
+	public static final String KEY_SUB_GROUP_NAME = "subgroupname";
 	public static final String KEY_GROUP_FIELD_NAME = "name";
-	public static final String KEY_REMOVE_FIELD = "removeField";
-	public static final String KEY_GROUP_FIELD = "groupField";
-	final String KEY_GROUP_CONFIG = "groupConfig";
+	public static final String KEY_REMOVE_FIELD = "removefield";
+	public static final String KEY_GROUP_FIELD = "groupfield";
+	final String KEY_GROUP_CONFIG = "groupconfig";
 	final String KEY_SOURCE = "source";
 	final String KEY_TARGET = "target";
 	CompositeMap elementConifg;
@@ -213,15 +213,14 @@ public class GroupTransform extends AbstractTransform {
 
 		CompositeMap context = runner.getContext();
 		CompositeMap sourceMap = (CompositeMap) context.getObject(source);
-
+		CompositeMap targetMap = (CompositeMap) sourceMap.clone();
+		context.putObject(target, targetMap, true);
 		if (groupConfig != null) {
 			CompositeMap groupConfigMap = (CompositeMap) context
-					.getObject(groupConfig);
-			context.putObject(target,
-					transformByConfig(sourceMap, groupConfigMap));
-		} else {
-			CompositeMap targetMap = (CompositeMap) sourceMap.clone();
-			context.putObject(target, targetMap, true);
+					.getObject(groupConfig);			
+			transformByConfig(targetMap, groupConfigMap);
+		} else {			
+			
 			this.transform(targetMap, this.elementConifg);
 		}
 	}

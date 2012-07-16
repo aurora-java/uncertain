@@ -24,11 +24,11 @@ public class MatrixTransform extends AbstractTransform {
 
 	CompositeMap elementConifg;
 
-	public static final String KEY_GROUP_FIELD = "groupField";
-	public static final String KEY_COLUMN_FIELD = "columnField";
-	public static final String KEY_VALUE_FIELD = "valueField";
-	public static final String KEY_SHARED_FIELD = "sharedField";
-	public static final String KEY_PUT_VALUE_ONLY = "putValueOnly";
+	public static final String KEY_GROUP_FIELD = "groupfield";
+	public static final String KEY_COLUMN_FIELD = "columnfield";
+	public static final String KEY_VALUE_FIELD = "valuefield";
+	public static final String KEY_SHARED_FIELD = "sharedfield";
+	public static final String KEY_PUT_VALUE_ONLY = "putvalueonly";
 	public static final String KEY_COLUMN_LIST = "_column_list";
 
 	// fields for getter/setter
