@@ -59,5 +59,16 @@
                 <ss:extension base="p:AbstractAction"/>
             </ss:extensions>
         </ss:element>
+        <ss:element name="t:master-detail-join" document="将detail结果集拼接到master结果集中">
+            <ss:attributes>
+                <ss:attribute name="model" document="master结果集，不能为空。"/>
+                <ss:attribute name="detailModel" document="detail结果集，不能为空。"/>
+                <ss:attribute name="joinField" document="join字段，多个字段用逗号隔开，不能为空"/>
+                <ss:attribute name="detailPath" document="detail拼接之后相对于master的路径，为空则为master record的子节点"/>
+            </ss:attributes>
+            <ss:extensions>
+                <ss:extension base="p:AbstractAction"/>
+            </ss:extensions>
+        </ss:element>
     </ss:elements>
 </ss:schema>
