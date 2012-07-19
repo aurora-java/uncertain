@@ -40,7 +40,7 @@ public class ReflectionMapper implements IObjectMapper {
 		rule_map.put(type, rule);
 	}
 	
-	public MappingRule createMappingRule( Class type){
+	public synchronized MappingRule createMappingRule( Class type){
 		MappingRule rule = class_analyzer.analyze(type);
 		rule_map.put(type,rule);
 		if( oc_manager.isEventEnable())
