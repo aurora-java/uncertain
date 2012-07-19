@@ -5,12 +5,15 @@
 package uncertain.cache;
 
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
@@ -238,8 +241,32 @@ public class CacheFactoryConfig implements INamedCacheFactory, ILifeCycle {
 	}
 
 	public void onInitialize() {
+		int cacheMSize = mCacheManagerSet.size();
+		CountDownLatch doneSignal = new CountDownLatch(cacheMSize);   
 		for (ICacheManager cacheApp : mCacheManagerSet) {
-			cacheApp.initialize();
+			new Thread(new CacheInitor(cacheApp, doneSignal)).start();//线程启动了   
+		}
+        try {
+			doneSignal.await();//等待所有的线程执行完毕   
+		} catch (InterruptedException e) {
+			mLogger.log(Level.SEVERE, "", e);
 		}
 	}
+	class CacheInitor implements Runnable {   
+        private CountDownLatch doneSignal;   
+        private ICacheManager cacheManager;
+        CacheInitor(ICacheManager cacheManager, CountDownLatch doneSignal) {   
+        	this.cacheManager = cacheManager;
+            this.doneSignal = doneSignal;   
+        }   
+        public void run() {   
+            try {   
+            	cacheManager.initialize();
+            } catch (Exception e) {   
+            	mLogger.log(Level.SEVERE, "", e);
+            } finally {   
+                doneSignal.countDown();   
+            }   
+        }   
+    }   
 }
