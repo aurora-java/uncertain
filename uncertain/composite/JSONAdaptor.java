@@ -168,15 +168,11 @@ public class JSONAdaptor {
                         }
                         */
                         // Always put default array name
-                        
-                        /* 2012-6-27 put array as key */
-                        /*
                         JSONObject child_obj = new JSONObject();
                         copyToJSON(item, child_obj);
                         child_obj.put(DEFAULT_ARRAY_NAME, array);
                         obj.put(name, child_obj);
-                        */
-                        obj.put(name, array);
+                        
                     }else{
                         JSONObject child = toJSONObject(item);    
                         obj.accumulate(name, child);
