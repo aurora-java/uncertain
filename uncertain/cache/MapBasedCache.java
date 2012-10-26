@@ -1,5 +1,5 @@
 /*
- * Created on 2011-3-29 ä¸??10:06:52
+ * Created on 2011-3-29 ï¿½??10:06:52
  * $Id$
  */
 package uncertain.cache;
@@ -8,10 +8,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import uncertain.mbean.MBeanUtil;
 
-public class MapBasedCache implements ICache, MapBasedCacheMBean {
+public class MapBasedCache implements ICache, MapBasedCacheMBean,ICacheClone{
     
     public static final int DEFAULT_CACHE_SIZE = 1000;
     
@@ -19,7 +20,7 @@ public class MapBasedCache implements ICache, MapBasedCacheMBean {
     long         mRequestCount = 0;
     long         mHitCount = 0;
     long         mUpdateCount = 0;
-    HashMap     mCacheMap;    
+    HashMap    mCacheMap;    
     Date        mCreationDate = new Date();
     
     public String getName() {
@@ -32,6 +33,10 @@ public class MapBasedCache implements ICache, MapBasedCacheMBean {
     
     public MapBasedCache(){
         mCacheMap = new HashMap(DEFAULT_CACHE_SIZE);
+    }
+    
+    public MapBasedCache(HashMap map){
+        mCacheMap = map;
     }
     
     public MapBasedCache(int capacity){
@@ -100,5 +105,31 @@ public class MapBasedCache implements ICache, MapBasedCacheMBean {
     public String dumpMappings(){
         return MBeanUtil.dumpMap(mCacheMap);
     }
+
+	public Object cacheClone() {
+		return new MapBasedCache((HashMap)mCacheMap.clone());
+	}
+
+	public Iterator iterator() {
+		return mCacheMap.entrySet().iterator();
+	}
+	
+	public Map getMap(){
+		return mCacheMap;
+	}
+
+	public void cacheCopy(ICacheClone cache) {
+		if(cache instanceof MapBasedCache){
+			mCacheMap.putAll(((MapBasedCache)cache).getMap());
+		}else{
+			Iterator<Entry<String, Object>> it = cache.iterator();
+			 if(it != null){
+				 for(;it.hasNext();){
+					 Entry entry = it.next();
+					 mCacheMap.put(entry.getKey(), entry.getValue());
+				 }
+			 }
+		}
+	}
 
 }
