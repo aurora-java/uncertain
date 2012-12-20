@@ -76,6 +76,14 @@ public class StackTraceManager {
         currentNode.setExitTime(System.currentTimeMillis());
         currentNode = currentNode.getParent();
     }
+    
+    public String getStackTrace(){
+        StringBuffer buf = new StringBuffer();
+        for(TraceElement elm = currentNode; elm!=null; elm = elm.getParent()){
+            buf.append(elm.getSourceName()).append("(").append(elm.getSourceFile()).append(")\r\n");
+        }
+        return buf.toString();
+    }
 
 
 }
