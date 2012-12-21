@@ -5,13 +5,13 @@ package uncertain.proc;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
 import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
 import uncertain.event.Configuration;
-import uncertain.event.EventModel;
 import uncertain.event.RuntimeContext;
 import uncertain.logging.DummyLogger;
 import uncertain.logging.ILogger;
@@ -61,6 +61,10 @@ public class ProcedureRunner {
     String				current_event = null;
     
     Throwable           lastException;
+    
+    // 2012-12-18
+    // Add exception handle stack to implement nested exception handle
+    LinkedList          mExceptionHandleStack = null;
     
     /** exception thrown during running process */
     Throwable			procException;
@@ -235,7 +239,13 @@ public class ProcedureRunner {
             return false;
         }
         // Check if has exception handle list
-        List exception_handle_list = config==null?null:config.getExceptionHandles();
+        Collection exception_handle_list = null;
+        exception_handle_list = getCurrentExceptionHandleInStack();
+        //if(exception_handle_list==null)
+        //    exception_handle_list = config==null?null:config.getExceptionHandles();
+        if(exception_handle_list==null && config!=null)
+            exception_handle_list = config.getExceptionHandles();
+        
         if(exception_handle_list==null) return false;  
         // Handle exception
         mInExceptionHandle = true;
@@ -582,6 +592,30 @@ public class ProcedureRunner {
     
     public void setSaveStackTrace( boolean flag ){
         this.mSaveStackTrace = flag;
+    }
+
+    // 2012-12-18
+    // Add exception handle stack to implement nested exception handle
+    
+    public void pushExceptionHandle(Collection handles ){
+        if(mExceptionHandleStack==null)
+            mExceptionHandleStack = new LinkedList();
+        mExceptionHandleStack.add(0, handles);
+    }
+    
+    public void popExceptionHandle(){
+        if(mExceptionHandleStack != null && mExceptionHandleStack.size()>0)
+            mExceptionHandleStack.remove(0);
+        else
+            throw new IllegalStateException("Illegal pop. Should call push first");
+    }
+    
+    private Collection getCurrentExceptionHandleInStack(){
+        if(mExceptionHandleStack==null)
+            return null;
+        if(mExceptionHandleStack.size()==0)
+            return null;
+        return (Collection)(mExceptionHandleStack.get(0));
     }
 
 }
