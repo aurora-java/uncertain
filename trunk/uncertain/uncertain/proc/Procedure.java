@@ -86,14 +86,23 @@ public class Procedure extends EntryList {
     public void run(ProcedureRunner runner) throws Exception {
          //ILogger logger = runner.getLogger();
          //logger.log(Level.CONFIG, "Enter procedure " + getName());
-         populateContextFields(runner);
-         if(exception_handles!=null) 
-             runner.addExceptionHandles(exception_handles);
-         // Add default participants
-         if(participant_class_list!=null){
-             addDefaultParticipants(runner);
+         boolean need_pop = false;
+         try{
+             populateContextFields(runner);
+             if(exception_handles!=null) {
+                 //runner.addExceptionHandles(exception_handles);
+                 runner.pushExceptionHandle(exception_handles);
+                 need_pop = true;
+             }
+             // Add default participants
+             if(participant_class_list!=null){
+                 addDefaultParticipants(runner);
+             }
+             runner.run(this);
+         }finally{
+             if(need_pop)
+                 runner.popExceptionHandle();
          }
-         runner.run(this);
     }
 
     /**For any child elements defined in procedure config that is not a built-in element,

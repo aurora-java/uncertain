@@ -1,0 +1,11 @@
+<p:procedure>
+        <a:model-execute model="do_something_that_will_throw_exception"/>
+ 		<p:exception-handles>
+        		<p:catch Exception="java.sql.SQLException">
+        			<p:set field="@__service_success__" value="true" />
+        			<p:set field="@success" value="false" />
+        			<p:set field="/error/@message" value="供应商编码不能重复" />
+        			<p:set field="/error/@code" value="MSCLD-001" />
+        		</p:catch>
+       	</p:exception-handles>     
+</p:procedure>
