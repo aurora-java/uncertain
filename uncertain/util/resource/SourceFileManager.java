@@ -22,7 +22,7 @@ public class SourceFileManager implements ISourceFileManager , ILifeCycle {
 
     // File.getAbsolutePath() -> ISourceFile
     Map                 mSourceFileMap = new HashMap(INITIAL_SIZE);
-    FileCheckThread     mCheckThread = new FileCheckThread("SourceFileManager.FileCheckThread");
+    FileCheckThread     mCheckThread;
     long                mCheckInterval = 1000;
     
     boolean isContinue = true;
@@ -94,6 +94,7 @@ public class SourceFileManager implements ISourceFileManager , ILifeCycle {
         if(isStarted)
             return true;
         isContinue = true;
+        mCheckThread = new FileCheckThread("SourceFileManager.FileCheckThread");
         if(!mCheckThread.isAlive())
             mCheckThread.start();
         isStarted = true;
