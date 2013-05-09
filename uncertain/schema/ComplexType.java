@@ -66,7 +66,8 @@ public class ComplexType extends AbstractCategorized implements IType {
     }
 
     public boolean isExtensionOf( IType another ){
-    	if(getAllSuperTypes()!= null&&getAllSuperTypes().contains(another))
+    	List<ComplexType> allSuperTypes = getAllSuperTypes();
+    	if(allSuperTypes!= null&&allSuperTypes.contains(another))
     		return true;
         return false;    
     }
