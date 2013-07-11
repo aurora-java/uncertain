@@ -61,7 +61,7 @@ public class Loop extends Procedure {
         CompositeMap context = runner.getContext();
         Object obj = null;
         if(source!=null)
-            obj=context.getObject(source);
+            obj=context.getObject(uncertain.composite.TextParser.parse(source, context));
         else
             obj=context.getChilds();
         if(obj==null){
