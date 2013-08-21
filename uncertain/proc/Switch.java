@@ -55,6 +55,7 @@ public class Switch extends AbstractEntry implements IChildContainerAcceptable {
 		while( it.hasNext()){
 			Case theCase = (Case)it.next();
 			String value = theCase.getEvaluatedValue(context);
+			value = uncertain.composite.TextParser.parse(value, context);
 			// the default case
 			if( value == null) {
 				caseToRun = theCase;
