@@ -7,6 +7,7 @@ package uncertain.mbean;
 import java.lang.management.ManagementFactory;
 
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -41,6 +42,13 @@ public class RegisterJDK15 {
             on = new ObjectName(name);
         } catch (Exception ex) {
             throw new RuntimeException("Invalid object name:" + name, ex);
+        }
+        if(mbs.isRegistered(on)){
+			try {
+				mbs.unregisterMBean(on);
+			} catch (InstanceNotFoundException e) {
+				throw new RuntimeException(e);
+			}
         }
         mbs.registerMBean(obj, on);
     }

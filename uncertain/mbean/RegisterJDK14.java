@@ -1,10 +1,11 @@
 /*
- * Created on 2011-4-13 ÏÂÎç08:56:52
+ * Created on 2011-4-13 ï¿½ï¿½ï¿½ï¿½08:56:52
  * $Id$
  */
 package uncertain.mbean;
 
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -21,6 +22,13 @@ public class RegisterJDK14 {
         MBeanServer mbs = MBeanServerFactory.createMBeanServer("SimpleAgent" );
         //MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName on = new ObjectName(name);
+        if(mbs.isRegistered(on)){
+			try {
+				mbs.unregisterMBean(on);
+			} catch (InstanceNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+        }
         mbs.registerMBean(obj, on);
     }
 
