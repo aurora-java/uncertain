@@ -12,11 +12,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
+
+import org.jboss.vfs.VirtualFile;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.exception.BuiltinExceptionFactory;
@@ -26,6 +29,7 @@ import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.schema.SchemaManager;
 import uncertain.util.FileUtil;
+import uncertain.util.VirtualFileProcessor;
 
 /**
  * Manages ComponentPackages PackageManager
@@ -252,7 +256,10 @@ public class PackageManager implements IPackageManager {
             String jar_file = file.substring(0, index);
             File dir = createTempPackageDir(jar_file, pkg_name);
             return dir;
-        } else {
+        }else if(url.toString().startsWith("vfs")){ 
+        	return VirtualFileProcessor.getPhysicalFile(url);
+        } 
+        else {
             try {
                 return new File(new URI(url.toString()));
             } catch (URISyntaxException ex) {
@@ -293,6 +300,9 @@ public class PackageManager implements IPackageManager {
             }catch(URISyntaxException ex){
                 throw new RuntimeException("Can't parse uri from resource url "+url.toString());
             }
+            if(url.toString().startsWith("vfs")){            	 
+            	loadPackage(VirtualFileProcessor.getPhysicalFile(url).getAbsolutePath());
+            }else
             loadPackage(new File(uri).getAbsolutePath());
         }
 
