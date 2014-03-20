@@ -12,15 +12,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
-
-import org.jboss.vfs.VirtualFile;
-
 import uncertain.composite.CompositeLoader;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.ocm.ClassRegistry;
