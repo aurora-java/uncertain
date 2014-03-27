@@ -1,7 +1,7 @@
 /*
  * StringSplitter.java
  *
- * Created on 2001Äê12ÔÂ13ÈÕ, ÏÂÎç3:43
+ * Created on 2001ï¿½ï¿½12ï¿½ï¿½13ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½3:43
  */
 
 package uncertain.util;
@@ -37,7 +37,7 @@ public class StringSplitter  {
         if( str == null) return;
         int id = start_id;
         int lth = str.length();
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         boolean in_sequence = false;
         
         for(; id<lth; id++){
@@ -85,7 +85,7 @@ public class StringSplitter  {
     }
     
     public static String concatenate( String[] array, String separator_char){
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for(int i=0; i<array.length; i++){
             if(i>0) buf.append(separator_char);
             buf.append(array[i]);

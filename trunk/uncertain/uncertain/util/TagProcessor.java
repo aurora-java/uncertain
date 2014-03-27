@@ -25,7 +25,7 @@ public abstract class TagProcessor {
     
     int state = INITIAL_STATE;
     
-    StringBuffer           tag_string;
+    StringBuilder           tag_string;
 
     char                      escape_char;
 
@@ -34,7 +34,7 @@ public abstract class TagProcessor {
     public TagProcessor(char _escape_char){
         escape_char = _escape_char;
 //        handle = _handle;
-        tag_string = new StringBuffer();
+        tag_string = new StringBuilder();
     }
     
     public char getStartingEscapeChar(){
