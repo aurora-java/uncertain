@@ -69,7 +69,7 @@ public class TextTemplate implements Serializable, Cloneable {
         Iterator it = mContentList.iterator();
         while(it.hasNext()){
             Object obj = it.next();
-            if(obj instanceof String || obj instanceof StringBuffer){
+            if(obj instanceof String || obj instanceof StringBuffer || obj instanceof StringBuilder){
                 writer.write(obj.toString());
             }
             else if( obj instanceof ITagContent){
