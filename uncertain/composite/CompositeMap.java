@@ -46,6 +46,8 @@ public class CompositeMap extends TypedHashMap implements Cloneable {
     protected Map   namespace_mapping;
     
     Location location;
+    
+    protected String  uuid;
 
 	/** Creates new CompositeMap
      */
