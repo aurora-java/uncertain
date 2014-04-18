@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import uncertain.util.GroupObjectProcessorImpl;
 import uncertain.util.IGroupObjectProcessor;
@@ -24,6 +25,8 @@ import uncertain.util.IRecordFilter;
  * 
  */
 public class CompositeUtil {
+    
+    static final boolean use_uuid = "true".endsWith(System.getProperty("uncertain.composite.use_uuid"));
 
 	public static final String ANY_VALUE = "*";
 	public static final String NULL_VALUE = "null";
@@ -396,7 +399,14 @@ public class CompositeUtil {
 	}
 
 	public static int uniqueHashCode(CompositeMap m) {
-		return System.identityHashCode(m);
+	    if(use_uuid){
+	        if(m.uuid==null)
+	            m.uuid = UUID.randomUUID().toString();
+	        return m.uuid.hashCode();
+	        
+	    }
+	    else
+	        return System.identityHashCode(m);
 	}
 
 	/**
