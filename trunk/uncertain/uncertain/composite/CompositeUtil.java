@@ -26,7 +26,7 @@ import uncertain.util.IRecordFilter;
  */
 public class CompositeUtil {
     
-    static final boolean use_uuid = "true".endsWith(System.getProperty("uncertain.composite.use_uuid"));
+    static final boolean use_uuid = "true".endsWith(System.getProperty("uncertain.composite.use_uuid","false"));
 
 	public static final String ANY_VALUE = "*";
 	public static final String NULL_VALUE = "null";
