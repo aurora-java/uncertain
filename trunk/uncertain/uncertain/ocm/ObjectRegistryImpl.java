@@ -272,7 +272,10 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
 					msg.append(",");
 				else
 					msg.append(",params:");
-				msg.append(obj.getClass());
+				if(obj!=null)
+					msg.append(obj.getClass());
+				else
+					msg.append("null");
 				isFirst=false;
 			}
 			throw new RuntimeException(msg.toString(), e);
