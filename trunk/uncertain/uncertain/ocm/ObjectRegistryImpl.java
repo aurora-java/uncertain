@@ -3,6 +3,7 @@
  */
 package uncertain.ocm;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -256,12 +257,26 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
     }
     
     private Object createInstanceInternal(Class type)
-        throws Exception
     {
         Constructor c = getConstructor(type);
         if(c==null) return null;
         Object[] params = (Object[])parameter_map.get(type);
-        return c.newInstance(params);
+        try {
+			return c.newInstance(params);
+		} catch (Exception e) {
+			StringBuffer msg=new StringBuffer("Constructor:");
+			msg.append(c);
+			boolean isFirst=true;
+			for(Object obj:params){
+				if(!isFirst)
+					msg.append(",");
+				else
+					msg.append(",params:");
+				msg.append(obj.getClass());
+				isFirst=false;
+			}
+			throw new RuntimeException(msg.toString(), e);
+		} 
     }
     
     /**
