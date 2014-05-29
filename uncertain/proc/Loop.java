@@ -6,6 +6,7 @@ package uncertain.proc;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import uncertain.composite.CompositeMap;
 import uncertain.core.ConfigurationError;
@@ -14,6 +15,8 @@ import uncertain.exception.ConfigurationFileException;
 import uncertain.ocm.OCManager;
 
 public class Loop extends Procedure {
+	
+	public static final String KEY_PARENT_RECORD = "parent_record";
     
     String  source;
     boolean nullable = true;
@@ -86,6 +89,9 @@ public class Loop extends Procedure {
             CompositeMap old_context = runner.getContext();
             while(source_it.hasNext()){
                 CompositeMap item = (CompositeMap)source_it.next();
+                if("record".equals(context.getName())){
+                	item.put(KEY_PARENT_RECORD, context);
+                }
                 runner.setContext(item);
                 super.run(runner);
                 Throwable thr = runner.getException(); 
