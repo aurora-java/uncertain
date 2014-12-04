@@ -266,7 +266,7 @@ public class UncertainEngine implements IContainer, IMBeanNameProvider {
                 if(mDirectoryConfig==null)
                     mDirectoryConfig = DirectoryConfig.createDirectoryConfig(child);
                 else
-                    mDirectoryConfig.getObjectContext().putAll(child);
+                    mDirectoryConfig.merge(child);
             }
             mDirectoryConfig.checkValidation();
         }
