@@ -1,5 +1,6 @@
 /*
  * Created on 2005-7-26
+ *
  */
 package uncertain.core;
 
