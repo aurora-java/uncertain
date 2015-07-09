@@ -1,6 +1,6 @@
 /*
  * Created on 2010-8-31 обнГ12:38:30
- * $Id$
+ * $Id: IServiceParticipant.java 1403 2010-09-16 07:01:42Z seacat.zhou@gmail.com $
  */
 package uncertain.event;
 

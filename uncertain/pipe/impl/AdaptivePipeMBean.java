@@ -4,6 +4,8 @@
  */
 package uncertain.pipe.impl;
 
+import uncertain.pipe.base.IFlowable;
+
 public interface AdaptivePipeMBean {
 
     public int getThreadCount();
@@ -35,6 +37,12 @@ public interface AdaptivePipeMBean {
     public int getReleaseCount();
 
     public void setReleaseCount(int releaseCount);
+    
+    public IFlowable getOutput();
+    
+    public String getOutputId();
+    
+    public String getProcessorClass();
     
 
 }

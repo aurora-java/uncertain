@@ -166,6 +166,8 @@ public class ClassRegistry implements IClassLocator, IMBeanRegistrable,
      *         not found
      */
     public IClassLocator getClassLocator(String namespace) {
+        if(namespace==null)
+            return null;
         IClassLocator cl = (IClassLocator) namespace_map.get(namespace);
         return cl;
     }

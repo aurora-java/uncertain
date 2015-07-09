@@ -18,14 +18,16 @@ public interface IPipe extends IEndPoint {
 
     public void setProcessor(IProcessor processor);
 
-    public String getId();
+//    public String getId();
     
     public void start();
     
     public void shutdown();
     
-    public void setOutput(IEndPoint output);
-    
-    public IEndPoint getOutput();
+//    public IEndPoint getOutput();
+/*    
+    public String getOutputId();
 
+    public void setOutputId(String outputId);
+*/
 }

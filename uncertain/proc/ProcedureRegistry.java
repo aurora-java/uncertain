@@ -1,6 +1,6 @@
 /*
  * Created on 2010-4-22 обнГ03:50:07
- * $Id$
+ * $Id: ProcedureRegistry.java 739 2010-04-28 08:07:18Z seacat.zhou@gmail.com $
  */
 package uncertain.proc;
 

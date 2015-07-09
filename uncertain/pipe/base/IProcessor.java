@@ -8,8 +8,8 @@ public interface IProcessor {
     
     public Object process(Object source);
     
-    public void start();
+    //public void start();
     
-    public void stop();
+    //public void stop();
 
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="pipe.config" >
+			<u:description>Pipe config</u:description>
+			<u:implement-types>
+				<u:type typeName="uncertain.pipe.base.IPipeManager" />
+			</u:implement-types>
+		</u:configurable-instance>
+<!--  
+		<u:configurable-instance configFile="cache.config">
+			<u:description>实现INamedCacheFactory接口，提供可配置的cache服务</u:description>
+			<u:required-instances>
+				<u:type typeName="aurora.bm.ICachedDataProvider" />
+			</u:required-instances>
+		</u:configurable-instance>
+-->
+						
+	</u:instances>
+</u:instance-config>

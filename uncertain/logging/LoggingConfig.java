@@ -11,7 +11,7 @@ import uncertain.event.IContextListener;
 import uncertain.event.RuntimeContext;
 import uncertain.ocm.IObjectRegistry;
 
-public class LoggingConfig implements ILoggerProvider, IContextListener, ILogPathSettable {
+public class LoggingConfig implements ILoggerProviderGroup, ILoggerProvider, IContextListener, ILogPathSettable {
 
     /** Internal registry file */
     public static final String LOGGING_REGISTRY_PATH = "uncertain.logging.DefaultRegistry";
@@ -73,7 +73,7 @@ public class LoggingConfig implements ILoggerProvider, IContextListener, ILogPat
         registerTo(mObjectRegistry);
     }
     
-    public void registerTo(IObjectRegistry os ){        
+    public void registerTo(IObjectRegistry os ){       
         ILoggerProvider existing_provider = (ILoggerProvider)os.getInstanceOfType(ILoggerProvider.class);
         if(existing_provider==null){
             os.registerInstance(ILoggerProvider.class, this);
@@ -100,6 +100,11 @@ public class LoggingConfig implements ILoggerProvider, IContextListener, ILogPat
                 ((ILogPathSettable)provider).setLogPath(logPath);
             }
         }
+    }
+
+    @Override
+    public void addLoggerProvider(ILoggerProvider another) {
+        mLoggerProviderGroup.addLoggerProvider(another);
     }
     
     /*

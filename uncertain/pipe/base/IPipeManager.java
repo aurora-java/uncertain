@@ -6,11 +6,13 @@ package uncertain.pipe.base;
 
 
 public interface IPipeManager {
+    
+    public IFlowable getElement( String id );
 
-    public IPipe getPipe(String id);
+    public IPipe getPipe( String id);
 
     public IPipe createPipe(String id);
 
-    public void startAll();
+    //public void startAll();
 
 }

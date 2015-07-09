@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import uncertain.core.ILifeCycle;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.pipe.base.IEndPoint;
 import uncertain.pipe.base.IFilter;
+import uncertain.pipe.base.IFlowable;
 import uncertain.pipe.base.IPipe;
 import uncertain.pipe.base.IProcessor;
 import uncertain.pipe.base.Returnable;
@@ -21,13 +23,12 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
 
     public static final int INIT_THREAD_ARRAY_SIZE = 50;
 
-    List<IFilter> filters;
+    String filters;
+    List<IFilter> filterList;
     IProcessor processor;
-    IEndPoint  output;
+    IFlowable output;
     String id;
-    
     List<WorkerThread> workerThreadList;
-
     BlockingQueue<Object> taskQueue;
     ThreadGroup workerThreadGroup;
     AdaptivePipeWatcherThread watcherThread;
@@ -55,19 +56,23 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     /** auto release working threads after idleTime (in ms) */
     int idleTime = 1000;
 
+    String processorClass;
+
+    String outputId;
+
     /** If this pipe is overheat, which means task queue grow too long */
     boolean overheat = false;
 
     boolean running = false;
     boolean shutdownInProcess = false;
-    
-    public AdaptivePipe(){
+
+    public AdaptivePipe() {
         taskQueue = new LinkedBlockingQueue<Object>();
-        filters = new LinkedList<IFilter>();
+        filterList = new LinkedList<IFilter>();
         workerThreadList = new ArrayList<WorkerThread>(INIT_THREAD_ARRAY_SIZE);
     }
-    
-    public AdaptivePipe(String id){
+
+    public AdaptivePipe(String id) {
         this();
         this.id = id;
     }
@@ -79,11 +84,11 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     }
 
     public void addFilter(IFilter filter) {
-        filters.add(filter);
+        filterList.add(filter);
     }
 
     public boolean removeFilter(IFilter filter) {
-        return filters.remove(filter);
+        return filterList.remove(filter);
     }
 
     @Override
@@ -91,7 +96,7 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
         if (data == null)
             throw new NullPointerException();
         if (overheat)
-            throw new IllegalStateException("queue "+getId()+" has reached max size");
+            throw new IllegalStateException("queue " + getId() + " has reached max size");
         try {
             taskQueue.put(data);
         } catch (InterruptedException ex) {
@@ -121,6 +126,7 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
         this.processor = processor;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -141,9 +147,9 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     }
 
     protected void createWorkerThread(int id) {
-        WorkerThread thread = new WorkerThread(this.workerThreadGroup,
-                getThreadName(id), this);
+        WorkerThread thread = new WorkerThread(this.workerThreadGroup, getThreadName(id), this);
         thread.start();
+        onThreadStart(thread);
         workerThreadList.add(thread);
     }
 
@@ -167,17 +173,18 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     public void start() {
         if (running)
             throw new IllegalStateException("Already started");
-        if (processor == null)
-            throw new IllegalStateException("End point not set");
         running = true;
         shutdownInProcess = false;
-        processor.start();
-        workerThreadGroup = new ThreadGroup(id + "Workers");
-        for (int i = 0; i < minThreads; i++) {
-            createWorkerThread(i);
+        if (processor != null) {
+            if (processor instanceof ILifeCycle)
+                ((ILifeCycle) processor).startup();
+            workerThreadGroup = new ThreadGroup(id + "Workers");
+            for (int i = 0; i < minThreads; i++) {
+                createWorkerThread(i);
+            }
+            watcherThread = new AdaptivePipeWatcherThread(this);
+            watcherThread.start();
         }
-        watcherThread = new AdaptivePipeWatcherThread(this);
-        watcherThread.start();
 
     }
 
@@ -185,13 +192,31 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
         shutdownInProcess = true;
         watcherThread.interrupt();
         workerThreadGroup.interrupt();
-        processor.stop();
+        Thread[] thread_array = new Thread[workerThreadGroup.activeCount()];
+        workerThreadGroup.enumerate(thread_array);
+        for (Thread thread : thread_array)
+            onThreadStop(thread);
+        if (processor instanceof ILifeCycle)
+            ((ILifeCycle) processor).shutdown();
         clearUp();
     }
 
     private void clearUp() {
         workerThreadList.clear();
         taskQueue.clear();
+    }
+
+    /**
+     * For subclass to process thread specific settings
+     * 
+     * @param thread
+     */
+    public void onThreadStart(Thread thread) {
+
+    }
+
+    public void onThreadStop(Thread thread) {
+
     }
 
     /*
@@ -263,15 +288,45 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     public void setReleaseCount(int releaseCount) {
         this.releaseCount = releaseCount;
     }
-    
+
     @Override
-    public void setOutput(IEndPoint output){
+    public void setOutput(IFlowable output) {
         this.output = output;
     }
-    
+
     @Override
-    public IEndPoint getOutput(){
+    public IFlowable getOutput() {
         return output;
+    }
+
+    public String getProcessorClass() {
+        return processorClass;
+    }
+
+    public void setProcessorClass(String processorClass) {
+        this.processorClass = processorClass;
+    }
+
+    @Override
+    public String getOutputId() {
+        return outputId;
+    }
+
+    @Override
+    public void setOutputId(String outputId) {
+        this.outputId = outputId;
+    }
+
+    public String getFilters() {
+        return filters;
+    }
+
+    public void setFilters(String filters) {
+        this.filters = filters;
+    }
+
+    public List<WorkerThread> getThreadList() {
+        return this.workerThreadList;
     }
 
 }

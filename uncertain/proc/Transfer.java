@@ -1,6 +1,6 @@
 /*
  * Created on 2010-5-19 обнГ02:12:07
- * $Id$
+ * $Id: Transfer.java 876 2010-05-20 05:05:22Z seacat.zhou@gmail.com $
  */
 package uncertain.proc;
 

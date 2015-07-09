@@ -1,6 +1,6 @@
 /*
  * Created on 2010-12-16 обнГ02:07:40
- * $Id$
+ * $Id: CompositeMapTagCreator.java 2424 2011-04-20 09:06:07Z seacat.zhou@gmail.com $
  */
 package uncertain.util.template;
 

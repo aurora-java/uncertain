@@ -4,7 +4,7 @@
  */
 package uncertain.pipe.base;
 
-public interface IEndPoint {
+public interface IEndPoint extends IFlowable {
     
     public void addData(Object data);
     
