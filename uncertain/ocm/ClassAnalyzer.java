@@ -7,8 +7,9 @@ package uncertain.ocm;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Creates object mapping rule by analyzing class structure.
@@ -19,8 +20,8 @@ import java.util.Iterator;
  */
 public class ClassAnalyzer {
 	
-	HashMap		field_map;
-	HashMap		method_map;
+	Map		field_map;
+	Map		method_map;
 	OCManager   oc_manager;
 	
 	public static class MethodPair{
@@ -48,8 +49,8 @@ public class ClassAnalyzer {
 	 * Constructor for ClassAnalyzer.
 	 */
 	public ClassAnalyzer(OCManager _oc_manager) {
-		method_map = new HashMap();
-		field_map = new HashMap();
+		method_map = new ConcurrentHashMap();
+		field_map = new ConcurrentHashMap();
 		this.oc_manager = _oc_manager;
 	}
 	

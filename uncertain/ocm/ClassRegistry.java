@@ -3,13 +3,13 @@
  */
 package uncertain.ocm;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -36,22 +36,24 @@ public class ClassRegistry implements IClassLocator, IMBeanRegistrable,
         ClassRegistryMBean {
 
     // namespace -> IClassLocator
-    HashMap namespace_map;
+    Map		namespace_map;
     // element name -> IClassLocator
-    HashMap element_map;
+    Map		element_map;
     // ElementIdentifier -> List<Class> , for attached feature
-    HashMap feature_map;
+    Map		feature_map;
 
     public ClassRegistry() {
-        namespace_map = new HashMap();
-        element_map = new HashMap();
-        feature_map = new HashMap();
+        namespace_map = new ConcurrentHashMap();
+        element_map = new ConcurrentHashMap();
+        feature_map = new ConcurrentHashMap();
     }
 
     /**
      * Associate a namespace with an IClassLocator
      */
     public void register(String namespace, IClassLocator cl) {
+        if(namespace==null||cl==null)
+            return;
         namespace_map.put(namespace, cl);
     }
 
@@ -72,7 +74,8 @@ public class ClassRegistry implements IClassLocator, IMBeanRegistrable,
     }
 
     public void addClassMapping(ClassMapping m) {
-        element_map.put(m.getElementName(), m);
+        if(m.getElementName()!=null)
+        	element_map.put(m.getElementName(), m);
     }
 
     public void addClassMapping(String element_name, Class cls) {

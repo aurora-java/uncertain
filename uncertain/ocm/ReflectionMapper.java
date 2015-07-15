@@ -4,9 +4,9 @@
  */
 package uncertain.ocm;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import uncertain.composite.CompositeMap;
 
@@ -19,14 +19,14 @@ public class ReflectionMapper implements IObjectMapper {
 	ClassAnalyzer   class_analyzer;
 	
 	// Class -> MappingRule
-	HashMap			rule_map;
+	Map			     rule_map;
 	
 	/**
 	 * Constructor for DefaultMapper.
 	 */
 	public ReflectionMapper( OCManager _oc_manager) {
 		this.oc_manager = _oc_manager;
-		rule_map = new HashMap(500);
+		rule_map = new ConcurrentHashMap(500);
 		class_analyzer = new ClassAnalyzer(_oc_manager);
 	}
 	

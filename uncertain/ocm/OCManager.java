@@ -5,15 +5,14 @@
 package uncertain.ocm;
 
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import uncertain.composite.CharCaseProcessor;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
-import uncertain.composite.CompositeMapParser;
 import uncertain.datatype.DataTypeRegistry;
 import uncertain.logging.DefaultLogger;
 import uncertain.logging.ILogger;
@@ -27,7 +26,7 @@ public class OCManager implements IMappingHandle {
     public static final String LOGGING_TOPIC = "uncertain.ocm";
     
     // Class name -> Class mapping
-    HashMap				classMap;
+    Map				classMap;
     
     // get class name from CompositeMap
     ClassRegistry		classRegistry;
@@ -77,7 +76,7 @@ public class OCManager implements IMappingHandle {
 	}
 
     private void _init(){
-        classMap = new HashMap(1000);
+        classMap = new ConcurrentHashMap(1000);
         default_mapper = new ReflectionMapper(this);
         classRegistry   = new ClassRegistry();
         datatype_home = DataTypeRegistry.getInstance();

@@ -3,13 +3,12 @@
  */
 package uncertain.ocm;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,11 +58,11 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
      * Default constructor
      */
     public ObjectRegistryImpl() {
-        instance_map = new HashMap();
-        constructor_map = new HashMap();
-        parameter_map = new HashMap();
-        constructor_list_map = new HashMap();
-        singleton_instance_map = new HashMap();
+        instance_map = new ConcurrentHashMap();
+        constructor_map = new ConcurrentHashMap();
+        parameter_map = new ConcurrentHashMap();
+        constructor_list_map = new ConcurrentHashMap();
+        singleton_instance_map = new ConcurrentHashMap();
         logger = Logger.getLogger(LOGGING_SPACE);
     }
     
@@ -72,9 +71,9 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
      * @param p parent ObjectSpace
      */
     public ObjectRegistryImpl(ObjectRegistryImpl p){
-        instance_map = new HashMap();
-        constructor_map = new HashMap();
-        parameter_map = new HashMap();
+        instance_map = new ConcurrentHashMap();
+        constructor_map = new ConcurrentHashMap();
+        parameter_map = new ConcurrentHashMap();
         setParent(p);
         logger = p.logger;
     }
@@ -111,6 +110,8 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
      * @param instance of specified type
      */
     public void registerInstanceOnce( Class type, Object instance){
+        if(type==null||instance==null)
+            return;
         if(instance!=null)
             if(!type.isAssignableFrom(instance.getClass()) && !type.isPrimitive() )
                 throw new IllegalArgumentException("type "+type.getName() +" isn't compatible with "+instance.getClass().getName());
@@ -294,7 +295,8 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
             Object instance = singleton_instance_map.get(type);
             if(instance==null){
                 instance = createInstanceInternal(type);
-                singleton_instance_map.put(type, instance);
+                if(instance!=null)
+                	singleton_instance_map.put(type, instance);
                 //System.out.println("adding "+type.getName()+" -> "+instance);
             }
             /*

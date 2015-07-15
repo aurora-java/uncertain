@@ -8,8 +8,8 @@ package uncertain.ocm;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import uncertain.composite.CompositeMap;
 
@@ -25,10 +25,10 @@ public class MappingRule {
 
 	// ObjectAccessor from attribute	
 	ObjectAccessor[]	for_attrib;
-	HashMap				for_attrib_map;
+	Map    				for_attrib_map;
 	
 	// element_name -> ObjectAccessor 
-	HashMap			    for_element_map;
+	Map    			    for_element_map;
 	
 	// all mapping fields
 	//HashMap				all_mapping;
@@ -41,7 +41,7 @@ public class MappingRule {
 		this.target_class = _target_class;
 		this.oc_manager = _oc_manager;
 		//all_mapping    = new HashMap();
-		for_attrib_map = new HashMap();				
+		for_attrib_map = new ConcurrentHashMap();				
 	}
 	
 	public ObjectAccessor wrapAccessor( ObjectAccessor oac){
@@ -60,7 +60,7 @@ public class MappingRule {
 	public void addMapping( String name, ObjectAccessor oa, boolean from_attribute){
 		oa.setOCManager(oc_manager);
 		if( oa instanceof CollectionMappable || oa instanceof ContainerAccessor || !from_attribute){
-			if(for_element_map == null) for_element_map = new HashMap();
+			if(for_element_map == null) for_element_map = new ConcurrentHashMap();
 			for_element_map.put(name, oa);
 		}
 		else
