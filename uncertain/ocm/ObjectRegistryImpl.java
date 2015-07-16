@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -51,6 +53,9 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
     // Logger instance
     Logger	logger;    
     
+    // instance creation listener list
+    List<IObjectCreationListener>	ocListenerList;
+    
     
     ObjectRegistryImpl	parent = null;
     
@@ -64,6 +69,7 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
         constructor_list_map = new ConcurrentHashMap();
         singleton_instance_map = new ConcurrentHashMap();
         logger = Logger.getLogger(LOGGING_SPACE);
+        ocListenerList = new LinkedList<IObjectCreationListener>();
     }
     
     /**
@@ -263,7 +269,12 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
         if(c==null) return null;
         Object[] params = (Object[])parameter_map.get(type);
         try {
-			return c.newInstance(params);
+        	Object instance = c.newInstance(params);
+            fireCreationEvent(instance);
+            if( instance instanceof IObjectCreationListener){
+            	ocListenerList.add((IObjectCreationListener)instance);
+            }
+            return instance;
 		} catch (Exception e) {
 			StringBuffer msg=new StringBuffer("Constructor:");
 			msg.append(c);
@@ -358,6 +369,12 @@ public class ObjectRegistryImpl implements IObjectCreator, IObjectRegistry, IMBe
             InstanceAlreadyExistsException, MBeanRegistrationException,
             NotCompliantMBeanException {
         new ObjectRegistryImplWrapper(this).registerMBean(register, name_provider);
+    }
+    
+    protected void fireCreationEvent( Object instance ){
+    	for(IObjectCreationListener listener: ocListenerList){
+    		listener.onInstanceCreate(instance);
+    	}
     }
 
 }
