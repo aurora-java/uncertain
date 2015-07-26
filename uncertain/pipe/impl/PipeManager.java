@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import uncertain.composite.CompositeMap;
 import uncertain.core.ILifeCycle;
 import uncertain.core.UncertainEngine;
 import uncertain.exception.GeneralException;
@@ -17,7 +18,6 @@ import uncertain.mbean.MBeanRegister;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectCreator;
 import uncertain.pipe.base.IDispatcher;
-import uncertain.pipe.base.IEndPoint;
 import uncertain.pipe.base.IFilter;
 import uncertain.pipe.base.IFlowable;
 import uncertain.pipe.base.IPipe;
@@ -130,6 +130,8 @@ public class PipeManager extends AbstractLocatableObject implements IPipeManager
                         if (processor == null)
                             throw new GeneralException("uncertain.exception.instance_dependency_not_meet",
                                     new Object[] { apipe.getProcessorClass() }, apipe);
+                        CompositeMap config = apipe.getConfig();
+                        this.engine.getOcManager().populateObject( config, processor);
                         apipe.setProcessor(processor);
                     } catch (Exception ex) {
                         ex.printStackTrace();

@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import uncertain.composite.CompositeMap;
 import uncertain.core.ILifeCycle;
 import uncertain.ocm.AbstractLocatableObject;
-import uncertain.pipe.base.IEndPoint;
 import uncertain.pipe.base.IFilter;
 import uncertain.pipe.base.IFlowable;
 import uncertain.pipe.base.IPipe;
@@ -32,6 +32,8 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     BlockingQueue<Object> taskQueue;
     ThreadGroup workerThreadGroup;
     AdaptivePipeWatcherThread watcherThread;
+    
+    CompositeMap	config;
 
     /**
      * Max task limit. if task count in queue exceed this value, add() will fail
@@ -328,5 +330,17 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     public List<WorkerThread> getThreadList() {
         return this.workerThreadList;
     }
+
+	@Override
+	public void beginConfigure(CompositeMap config) {
+		super.beginConfigure(config);
+		this.config = config;
+	}
+	
+	public CompositeMap getConfig(){
+		return config;
+	}
+    
+    
 
 }
