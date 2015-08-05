@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="data-distributor.config">
+			<u:description>IDataDistributor implementation for scalable cached data synchronizing</u:description>
+			<u:implement-types>
+				<u:type typeName="uncertain.data.IDataDistributor"/>
+			</u:implement-types>
+		</u:configurable-instance>
+
+	</u:instances>
+
+</u:instance-config>

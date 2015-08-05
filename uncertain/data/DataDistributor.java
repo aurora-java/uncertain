@@ -1,22 +1,39 @@
 package uncertain.data;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DataDistributor implements IDataDistributor {
+import uncertain.ocm.IObjectCreationListener;
+import uncertain.util.reflect.AnnotatedMethodMap;
+import uncertain.util.reflect.IAnnotationExtractor;
+
+public class DataDistributor implements IDataDistributor, IObjectCreationListener {
+	
+	public static class WatchExtractor implements IAnnotationExtractor{
+
+		public String getValue( Annotation annotation ){
+			Watch watch = (Watch)annotation;
+			String key = watch.key();
+			return key;
+		};
+		
+	}
+	
+	static final WatchExtractor EXTRACTOR = new WatchExtractor();
 	
 	/**
 	 * property name ->  Collection<SetterInvoker>
 	 */
 	Map<String,Collection<SetterInvoker>>	setters;
-	SetterMethodMap							methodMap;
+	AnnotatedMethodMap							methodMap;
 	
 	public DataDistributor(){
 		setters = new ConcurrentHashMap<String,Collection<SetterInvoker>>();
-		methodMap = new SetterMethodMap();
+		methodMap = new AnnotatedMethodMap(EXTRACTOR);
 	}
 
 	@Override
@@ -40,9 +57,20 @@ public class DataDistributor implements IDataDistributor {
 	@Override
 	public void registerInstance( Object instance ){
 		Map<String,Method> map = methodMap.getSetterMethods(instance);
+		if(map==null)
+			return;
 		for(Map.Entry<String,Method> entry : map.entrySet()){
 			addMethod(instance, entry.getKey(), entry.getValue());
 		}
+	}
+
+	@Override
+	public void onInstanceCreate(Object instance) {
+		registerInstance( instance );
+	}
+	
+	public AnnotatedMethodMap getMethodMap(){
+		return this.methodMap;
 	}
 
 

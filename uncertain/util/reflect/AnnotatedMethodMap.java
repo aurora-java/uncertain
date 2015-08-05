@@ -1,19 +1,23 @@
-package uncertain.data;
+package uncertain.util.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import uncertain.util.reflect.AnnotationFilter;
-import uncertain.util.reflect.IMethodAcceptor;
+import uncertain.data.Watch;
 
-public class SetterMethodMap {
+public class AnnotatedMethodMap {
 	
 	/**
 	 * class name -> { property name -> setter method }
 	 */
 	Map<String,Map<String,Method>> setterMethodMap;
+	
+	static final Map<String,Method> EMPTY_MAP = new HashMap<String,Method>(1);
+	
+	IAnnotationExtractor	extractor;
 	
 	public class MethodAcceptor implements IMethodAcceptor {
 
@@ -24,8 +28,9 @@ public class SetterMethodMap {
 		}
 		
 		public void accept( Annotation annotation, Method method){
-			Watch watch = (Watch)annotation;
-			String key = watch.key();
+			String key = extractor.getValue(annotation);
+			if(key==null)
+				return;
 			if(methodMap.containsKey(key))
 				throw new IllegalArgumentException("Duplicate key "+key+" for method "+method.getName());
 			methodMap.put(key,method);
@@ -37,7 +42,8 @@ public class SetterMethodMap {
 		
 	}
 	
-	public SetterMethodMap(){
+	public AnnotatedMethodMap(IAnnotationExtractor extractor){
+		this.extractor = extractor;
 		setterMethodMap = new ConcurrentHashMap<String,Map<String,Method>>();
 	}
 	
@@ -56,12 +62,19 @@ public class SetterMethodMap {
 			return;
 		MethodAcceptor ma = new MethodAcceptor();
 		AnnotationFilter.findMethod(cls, Watch.class, ma);
+		if(ma.getMap().size()==0){
+			setterMethodMap.put(name, EMPTY_MAP);
+			return;
+		}
 		setterMethodMap.put(name, ma.getMap());
 	}
 	
 	public Map<String,Method> getSetterMethods( Class cls ){
 		analyze(cls);
-		return setterMethodMap.get(cls.getName());
+		Map<String,Method> map = setterMethodMap.get(cls.getName());
+		if(EMPTY_MAP==map)
+			return null;
+		return map;
 	}
 	
 	public Map<String,Method> getSetterMethods( Object instance ){
