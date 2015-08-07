@@ -99,6 +99,10 @@ public class BuiltinExceptionFactory {
     public static GeneralException createInstanceStartError( Object instance, String config_file, Throwable cause ){
         return new GeneralException("uncertain.exception.engine.instance_start_error", new Object[]{instance, config_file}, cause );
     }
+
+    public static ConfigurationFileException createResourceNotFoundException(ILocatable locatable, String resource_type, String name){
+        return new ConfigurationFileException("uncertain.exception.resource_not_found", new Object[]{resource_type,name}, null, locatable);
+    }
     
     
 }
