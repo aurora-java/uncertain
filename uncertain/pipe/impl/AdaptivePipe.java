@@ -65,7 +65,7 @@ public class AdaptivePipe extends AbstractLocatableObject implements IPipe, Adap
     /** If this pipe is overheat, which means task queue grow too long */
     boolean overheat = false;
 
-    boolean running = false;
+    protected boolean running = false;
     boolean shutdownInProcess = false;
 
     public AdaptivePipe() {
